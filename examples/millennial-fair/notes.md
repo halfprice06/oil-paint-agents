@@ -1,0 +1,8 @@
+# The Gate Opens at the Millennial Fair
+
+**Artist statement.** Leene Square in late-afternoon gold: bell tower, striped tents and bunting, a crowd dissolving into broken colour, and at its heart the time gate tearing open between Lucca's brass-and-steel telepods, a violet-white vortex that lifts Marle while Crono runs toward her, hair flaring. I wanted the warm dappled gaiety of Renoir's Moulin de la Galette interrupted by one cold, luminous event.
+
+**Self-assessment (round 2).** Works: overall design and festival atmosphere; warm ground against the cold gate; the larger gate with a bright core and broken-colour arms rim-lighting Marle, Lucca and the nearest hats; Marle larger and mid-lift with flying ponytail and glowing pendant; Crono's flame-like spiked hair on a smaller head, bandana, blue tunic, green sleeves, ascot, katana, lifted heel; telepods now brass drums with glowing coils and pipes. Round 2 also varied the crowd (width, lean, pointing arms, a child on shoulders), thinned the back crowd and cut the foreground-right figures to two, and added larger leaf and sky strokes.
+Still gives it away: crowd and foreground figures still share one construction recipe and read doll-like at 2x; Crono's limbs retain faint tube/stripe modelling and a stiff stride; Marle's arms are thin and her pose a little puppet-like; telepods are still boxy; ground cobble strokes and sky dashes remain somewhat regular; the gate vortex is flatter than real luminous paint.
+
+Strokes (~17.9k): drawing 56, sky+balloons 2.6k, block-in 0.9k, background (town, trees, tents, tower, bell, bunting) 3.3k, ground 2.5k, crowd 2.8k, gate 1.2k, stage+telepods 1.5k, front crowd 0.8k, Marle 0.47k, Lucca 0.64k, Crono 0.92k, accents 0.35k.
