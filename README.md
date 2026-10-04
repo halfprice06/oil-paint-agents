@@ -10,6 +10,8 @@ those strokes into paint on linen.
 | ![Jug and Two Apples](examples/jug-and-two-apples/final.png) | ![Late Light, Breaking Sea](examples/late-light-breaking-sea/final.png) | ![Pond Under the Poplars](examples/pond-under-the-poplars/final.png) |
 | *Jug and Two Apples*, 826 strokes | *Late Light, Breaking Sea*, 2128 strokes | *Pond Under the Poplars*, 1308 strokes |
 
+Also: [*The Gate Over Guardia Meadow*](examples/gate-over-guardia-meadow/final.png), an impressionist Chrono Trigger homage in 12,308 strokes.
+
 Each example folder has the pass files, the value study, the painter's notes, a 1x render and
 a 3x render (`final_3x.jpg`).
 

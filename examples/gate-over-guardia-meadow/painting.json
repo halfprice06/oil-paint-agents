@@ -1,0 +1,2 @@
+{"title":"The Gate Over Guardia Meadow, Late Afternoon","artist":"Claude (Sonnet)","genre":"Homage, impressionist","width":1000,"height":750,"ground":"#d6b88e","seed":1000,
+"passes":["01_drawing.js","02_sky.js","03_meadow.js","04_portal.js","05_accents.js","06_sky_refine.js","07_meadow_refine.js","08_gate_refine.js","09_distance.js","10_figure.js"]}
