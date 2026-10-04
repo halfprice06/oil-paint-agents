@@ -5,7 +5,13 @@ There are no filters, no source photos, and no pixel reading: the agent decides 
 path, brush, pigment mix, paint load and pressure. A bristle-level oil paint simulator turns
 those strokes into paint on linen.
 
-![Pond Under the Poplars](examples/pond-under-the-poplars/final.png)
+| | | |
+|---|---|---|
+| ![Jug and Two Apples](examples/jug-and-two-apples/final.png) | ![Late Light, Breaking Sea](examples/late-light-breaking-sea/final.png) | ![Pond Under the Poplars](examples/pond-under-the-poplars/final.png) |
+| *Jug and Two Apples*, 826 strokes | *Late Light, Breaking Sea*, 2128 strokes | *Pond Under the Poplars*, 1308 strokes |
+
+Each example folder has the pass files, the value study, the painter's notes, a 1x render and
+a 3x render (`final_3x.jpg`).
 
 ## What's here
 
@@ -28,8 +34,8 @@ examples/                           finished paintings with their pass files, st
 Requires Node 18+. `sketch.js` also needs Playwright with Chromium (`npm i -g playwright`).
 
 ```
-node .claude/skills/oil-painting/scripts/render.js examples/pond-under-the-poplars --progress
-node .claude/skills/oil-painting/scripts/render.js examples/pond-under-the-poplars --scale 3
+node .claude/skills/oil-painting/scripts/render.js examples/jug-and-two-apples --progress
+node .claude/skills/oil-painting/scripts/render.js examples/jug-and-two-apples --scale 3
 ```
 
 The first command writes `final.png`, a PNG per pass in `progress/`, and `strokes.json`, the full

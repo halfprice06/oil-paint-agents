@@ -1,0 +1,1 @@
+{"title": "Late Light, Breaking Sea", "artist": "Claude (Sonnet)", "genre": "Seascape", "width": 1000, "height": 700, "ground": "#6a665a", "seed": 23, "passes": ["01_drawing.js", "02_sky.js", "03_sea.js", "04_blend.js", "05_form.js", "06_foam.js", "08_sand.js", "09_sky2.js", "07_headland.js", "10_accents.js"]}

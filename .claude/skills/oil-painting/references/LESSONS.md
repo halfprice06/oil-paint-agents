@@ -78,6 +78,9 @@ over several rounds of engine work and painter critique.
 - **Critique rounds work.** A second agent (or you) looking at the render and naming the three
   worst problems, in plain painter's terms, improved every painting. Two to four rounds is
   typical.
+- **Critique can make it worse.** A later round sometimes loses what worked (a seascape's wave lost
+  its curl; a cloth added to a still life read as a plate). Back up every round, compare them
+  side by side, and ship the best, not the latest. Dropping a weak pass is often the best edit.
 - **Mixing notes:**
   - Ultramarine with burnt umber goes brown; Payne's grey with white gives cleaner greys.
   - Viridian is neon on its own; yellow ochre is strong.
