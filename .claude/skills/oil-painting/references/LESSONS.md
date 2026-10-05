@@ -23,6 +23,13 @@ over several rounds of engine work and painter critique.
 7. **Smooth everything.** Too much blending gives a digital smudge. Leave strokes visible and
    ground showing in places, with thin shadows and thick lights.
 
+8. **Painting symbols instead of light.** The deepest failure. A painter agent writes coordinates
+   from concepts ("a hand is a palm plus five fingers", "a cloud is bumps", "a person is a peg")
+   and gets sausage fingers, doll crowds, cotton-ball clouds and confetti ground. More strokes
+   and more resolution don't fix it. Paint value masses, then two or three planes of light and
+   shadow per form, then edges; work from a lit reference (looking, never sampling pixels); and
+   check a crop every few dozen strokes instead of after a whole pass.
+
 ## Engine lessons (oilpaint.js)
 
 - **Bristles as clumps** with their own paint reservoirs give natural run-out, dry-brush and

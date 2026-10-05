@@ -1,0 +1,33 @@
+{
+ "title": "The Gate Opens at the Millennial Fair",
+ "artist": "Claude (Sonnet)",
+ "genre": "Homage, impressionist",
+ "width": 2400,
+ "height": 1600,
+ "ground": "#c8a46c",
+ "seed": 1000,
+ "passes": [
+  "01_drawing.js",
+  "N_02_sky.js",
+  "02c_balloons.js",
+  "03_blockin.js",
+  "04_background.js",
+  "N_04b_background_refine.js",
+  "05_ground.js",
+  "N_05b_ground_refine.js",
+  "N_06_crowd.js",
+  "06b_gate.js",
+  "07_stage.js",
+  "N_07d_stage_refine.js",
+  "08_gate_light.js",
+  "N_08b_gate_refine.js",
+  "N_07c_telepods.js",
+  "N_07b_frontcrowd.js",
+  "N_08c_crowd_refine.js",
+  "N_09_marle.js",
+  "N_10_lucca.js",
+  "N_11_crono.js",
+  "12_accents.js",
+  "N_13_finish.js"
+ ]
+}
