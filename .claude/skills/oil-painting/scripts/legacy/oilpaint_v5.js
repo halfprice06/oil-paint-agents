@@ -16,20 +16,6 @@
  * v5 adds: brush:'soft' (a dry badger/mop blender that melts wet colour without striations),
  * taper:[start,end] (feathered stroke ends, with a gentle default for short touches), and
  * edge:0..1 (sides of the stroke feather into the paint below). v4 is kept as oilpaint_v4.js.
- *
- * v6 is about what a single stroke looks like up close (v5 is kept as oilpaint_v5.js):
- *  - dirty brushes: each brush (type + size) keeps a residue of the colours it carried and picked
- *    up, which streaks the start of its next stroke and fades as fresh paint takes over.
- *    clean:true on a stroke, or wipe(), cleans it. dirty:0..3 scales it (default 1, modest).
- *  - load over the stroke: a buttery blob where the brush lands, a thinning body, and a dry-brush
- *    tail that catches only the peaks of the weave / the relief below; capacity grows with brush
- *    size, so long strokes run out. Paint piles into ragged peaks where a loaded brush lifts off.
- *  - palette mixes are marbled: streaks of the component pigments that wander along the stroke.
- *    stir:0..1 (1 = fully mixed). color2 double loading has a wandering, interleaved boundary.
- *  - scumble:true: broken, opaque-ish paint dragged over the peaks only. Low-opacity strokes are
- *    glazes: transparent pigments multiply over what is below and pool in its texture.
- *  - relief: ridged stroke edges, landing blobs, lift-off tails, flat sharp-lipped knife planes,
- *    and a gloss map (knife and glaze shiny, scumble and dry-brush matte) so light catches ridges.
  */
 (function (global) {
   'use strict';
@@ -172,10 +158,6 @@
   // ----------------------------------------------------------------- canvas
   const CAP = 110;      // paint volume a fully loaded bristle holds, per unit of its contact area
   const DEPK = 0.38;    // thickness laid down per px of contact by a full bristle
-  const STIR = 0.65;     // default stir of palette mixes (1 = perfectly mixed)
-  const MARBLE = 2.6;   // log-proportion swing of an unstirred mix (stir 0)
-  const RESIDUE = 0.4;  // default share of the previous colours at the start of a stroke
-  const RES_BINS = 12;  // residue is remembered in this many ribbons across the brush
 
   class OilPainting {
     constructor(width, height, opts) {
@@ -191,23 +173,17 @@
       this.W = new Float32Array(N);   // wet (still pickable) thickness
       this.gH = new Float32Array(N);  // canvas weave height 0..1
       this.T = new Float32Array(N);   // surface relief of the top paint layer: bristle grooves, ridges
-      this.Gl = new Float32Array(N);  // gloss of the top paint (0 = matte .. ~1.5 = knife-smooth / glaze)
-      this.Tn = new Float32Array(N);  // fine irregular tooth of the surface (0..1), for broken colour
-      this.residue = new Map();       // dirty brushes: brush type + size bucket -> colours left in it
-      this.dirty = opts.dirty == null ? 1 : opts.dirty;
       this.seed = opts.seed == null ? 7 : opts.seed;
       this.groundColor = parseColor(opts.ground || '#e9e2d3');
       this.light = opts.light || [-0.55, -0.65, 0.78];
       this.impasto = opts.impasto == null ? 1 : opts.impasto;
       this.strokeIndex = 0;
       this.log = [];
-      this._mn = makeNoise((opts.seed == null ? 7 : opts.seed) + 101);   // marbling / pulse noise
       this._buildGround();
     }
 
     _buildGround() {
-      const { w, h } = this, noise = makeNoise(this.seed + 11), noise2 = makeNoise(this.seed + 23), noise3 = makeNoise(this.seed + 37);
-      const tf = 0.32 / this.scale;
+      const { w, h } = this, noise = makeNoise(this.seed + 11), noise2 = makeNoise(this.seed + 23);
       const period = 3.6;
       const g = this.groundColor;
       for (let y = 0; y < h; y++) {
@@ -224,7 +200,6 @@
           v += (noise2(x * 0.5, y * 0.5) - 0.5) * 0.25;
           const i = y * w + x;
           this.gH[i] = clamp(v, 0, 1);
-          this.Tn[i] = clamp(0.5 + (noise3(x * tf, y * tf) - 0.5) * 1.6 + (noise3(x * tf * 2.7 + 50, y * tf * 2.7) - 0.5) * 0.7, 0, 1);
           this.R[i] = g[0]; this.G[i] = g[1]; this.B[i] = g[2];
         }
       }
@@ -233,15 +208,12 @@
     /** Let everything on the canvas dry: later strokes no longer lift or blend into it. */
     dry() { this.W.fill(0); this.log.push({ dry: 1 }); }
 
-    /** The painter cleans all brushes (and the knife): no residue of earlier colours. */
-    wipe() { this.residue.clear(); this.log.push({ wipe: 1 }); }
-
     /**
      * stroke(spec)
      *  points:  [[x,y,pressure?], ...]  path in canvas pixels; pressure 0..1 (default tapered 1)
      *  color:   '#hex' | pigment name | [[pigment, parts], ...]
      *  color2:  optional second color loaded on one side of the brush (double loading)
-     *  brush:   'flat' | 'round' | 'filbert' | 'fan' | 'knife' | 'soft'   (default 'flat')
+     *  brush:   'flat' | 'round' | 'filbert' | 'fan' | 'knife'    (default 'flat')
      *  size:    brush width in px (default 20)
      *  load:    0..1.5 how much paint is on the brush (default 1). Low = dry brush.
      *  opacity: 0..1 (default 1). Low = transparent glaze over what is below.
@@ -254,11 +226,6 @@
      *  edge:    0..1 softness of the stroke's sides: paint thins towards them and they melt into
      *           wet paint below (default 0 = bristle-crisp sides)
      *  soft:    true with load 0 (or brush:'soft'): a soft dry blender, see _softBlend
-     *  v6:
-     *  clean:   true = the brush was wiped before this stroke (no residue of earlier colours)
-     *  dirty:   0..3 scales the residue for this stroke (default 1; 0 = like clean for this stroke)
-     *  stir:    0..1 how well a palette mix was stirred (default 0.6; 1 = uniform, 0.2 = marbled)
-     *  scumble: true = drag broken, mostly opaque paint over the peaks of the surface only
      */
     stroke(spec) {
       const s = spec;
@@ -270,18 +237,14 @@
 
       const brush = s.brush || 'flat';
       const sc = this.scale, sqs = Math.sqrt(sc);
-      const sizeU = Math.max(1, s.size || 20);
-      const size = sizeU * sc;
+      const size = Math.max(1, s.size || 20) * sc;
       const capS = CAP * sc;
       const load = clamp(s.load == null ? 1 : s.load, 0, 1.5);
       const opacity = clamp(s.opacity == null ? 1 : s.opacity, 0, 1);
       const thin = clamp(s.thin || 0, 0, 1);
-      const isKnife = brush === 'knife';
-      const scumble = !!s.scumble && load > 0;
-      const stir = s.stir == null ? STIR : clamp(+s.stir || 0, 0, 1);
       const base = parseColor(s.color);
-      // palette mixes are never perfectly stirred: keep the components so each bristle can carry
-      // a different, wandering proportion (marbled streaks of the separate pigments)
+      // palette mixes are never perfectly stirred: keep the components so each
+      // bristle can carry a slightly different proportion (streaks of unmixed pigment)
       let comps = null;
       if (Array.isArray(s.color) && typeof s.color[0] !== 'number') {
         comps = s.color.map((it) => (Array.isArray(it) ? it : [it, 1]))
@@ -289,15 +252,9 @@
           .map((it) => ({ col: parseColor(it[0]), S: scatterOf(it[0]), w: it[1] == null ? 1 : it[1] }));
         if (comps.length < 2) comps = null;
       }
-      const streak = isKnife ? 0.35 : 1;
+      const streak = s.brush === 'knife' ? 0.35 : 1;
       const base2 = s.color2 != null ? parseColor(s.color2) : null;
-      // how transparent the paint is (for glazes): opaque, scattering pigments veil, transparent ones stain
-      // (named pigments from the table; a hex colour is judged by its lightness: light paint scatters)
-      const hidingOf = (spec, col) => { const k = pigmentKey(spec); return k && (SCATTER[k] != null || k === 'white' || k === 'black') ? scatterOf(spec) : 0.25 + 0.7 * (0.3 * col[0] + 0.59 * col[1] + 0.11 * col[2]); };
-      let scat;
-      if (comps) { let ws = 0, ss = 0; s.color.forEach((it) => { const sp = Array.isArray(it) ? it[0] : it, wv = Array.isArray(it) && it[1] != null ? it[1] : 1; if (wv > 0) { ws += wv; ss += wv * hidingOf(sp, parseColor(sp)); } }); scat = ss / ws; }
-      else scat = hidingOf(s.color, base);
-      const stain = clamp(1.1 - scat * 1.15, 0, 1) * clamp((1 - opacity) * 2.5, 0, 1);
+      const isKnife = brush === 'knife';
 
       // ---- path
       let pts = s.points.map((p) => [p[0] * sc, p[1] * sc, p.length > 2 && p[2] != null ? p[2] : null]);
@@ -317,31 +274,6 @@
       if (brush === 'soft' || (s.soft && load === 0)) { this._softBlend(s, path, total, size, opacity, rng, autoPressure, env); return; }
       const edgeSoft = clamp(s.edge || 0, 0, 1);
 
-      // ---- dirty brush: what the previous strokes left in this brush
-      const rkey = brush + ':' + Math.round(Math.log2(sizeU) * 2);
-      if (s.clean) this.residue.delete(rkey);
-      const dirtyK = s.dirty == null ? this.dirty : clamp(+s.dirty || 0, 0, 3);
-      const resid = load > 0 && dirtyK > 0 ? this.residue.get(rkey) : null;
-
-      // ---- how far the load goes: bigger brushes hold more, medium makes it go further
-      const reach = (70 + 15 * sizeU) * (1 + 0.5 * thin);          // painting px a full load lasts
-      const capF = clamp(reach / 420, 0.22, 4) * (isKnife ? 2.5 : 1);   // a knife spreads its lump of paint a long way
-      const mn = this._mn;
-      // knots along the stroke where each bristle's fresh colour is evaluated (marbling, double load)
-      const knotD = Math.max(size * 0.45, 4 * sc);
-      const nK = Math.min(48, Math.max(2, Math.ceil(total / knotD) + 1));
-      const kStep = total / (nK - 1);
-      const amp = MARBLE * Math.pow(1 - stir, 1.3) * (isKnife ? 0.75 : 1);
-      const uF = clamp(2 + sizeU / 6, 2, 8);                      // marble cells across the brush
-      const dS = Math.max(size * (2.5 + 2 * rng()), 10 * sc);     // ...and their length along it
-      const crisp = 1 + 1.8 * (1 - stir);                          // unstirred streaks have sharper borders
-      const mo = comps ? comps.map(() => [rng() * 400, rng() * 400]) : null;
-      const vo = [rng() * 400, rng() * 400], bo = rng() * 400;
-      // per-component Kubelka-Munk terms, so marbled mixes are cheap to evaluate
-      let ksS = null;
-      if (comps) ksS = comps.map((cp) => { const r = []; for (let k = 0; k < 3; k++) { const R = clamp(toLin(cp.col[k]), 0.002, 0.998); r.push((1 - R) * (1 - R) / (2 * R)); } return r; });
-      const noiseUD = (ox, oy, u, d) => { const v = (mn(ox + (u + 0.5) * uF + 1.2 * (mn(oy * 1.3, d / (dS * 1.5)) - 0.5), oy + d / dS) - 0.5) * 2.6 * crisp; return v > 1.2 ? 1.2 : v < -1.2 ? -1.2 : v; };
-
       // ---- bristles (each one is really a clump of hairs)
       const spacing = (isKnife ? 1.1 : brush === 'fan' ? 3.2 : 1.7) * sqs;
       const nb = clamp(Math.round(size / spacing), 3, Math.round((isKnife ? 220 : 110) * sqs));
@@ -351,16 +283,12 @@
       const knots = 3 + Math.floor(nb / 7);
       const ribbon = () => { const v = []; for (let k = 0; k <= knots; k++) v.push(rng() * 2 - 1);
         return (u) => { const t = (u + 0.5) * knots, k = Math.min(knots - 1, Math.floor(t)), f = t - k, e = f * f * (3 - 2 * f); return v[k] + (v[k + 1] - v[k]) * e; }; };
-      const valNoise = ribbon(), warmNoise = ribbon(), loadNoise = ribbon(), endA = ribbon(), endB = ribbon(), resNoise = ribbon(), glossNoise = ribbon();
+      const compNoise = comps ? comps.map(() => ribbon()) : null;
+      const valNoise = ribbon(), warmNoise = ribbon(), loadNoise = ribbon(), endA = ribbon(), endB = ribbon();
       const gKnots = 2 + Math.floor(nb / 4);
       const grooveNoise = (() => { const v = []; for (let k = 0; k <= gKnots; k++) v.push(rng() - 0.5);
         return (u) => { const t = (u + 0.5) * gKnots, k = Math.min(gKnots - 1, Math.floor(t)), f = t - k, e = f * f * (3 - 2 * f); return v[k] + (v[k + 1] - v[k]) * e; }; })();
       const ragged = clamp(total / (size * 2.5), 0.35, 1); // short touches land almost whole
-      // double loading: the boundary between the two colours wanders and blurs as the hairs shuffle
-      const c2wob = 0.07 + 0.06 * rng(), c2grow = size * (3 + 3 * rng());
-      // gloss of this paint: oil-rich knife paint and glazes shine, scumbles and dry brush are matte
-      const gloss0 = (isKnife ? 1.35 : 0.95) * (scumble ? 0.5 : 1) * (1 + 0.15 * thin) * (opacity < 0.999 ? 1 + 0.35 * (1 - opacity) : 1) * (0.9 + 0.2 * rng());
-      const tmpK = [0, 0, 0];
       for (let i = 0; i < nb; i++) {
         let u = (i + 0.5) / nb - 0.5;
         if (!isKnife) u += (rng() - 0.5) * 0.7 / nb;
@@ -370,39 +298,20 @@
         else if (brush === 'fan') prof = 0.5 + 0.5 * rng();
         const r = isKnife ? 1.0 : clamp((size / nb) * (brush === 'fan' ? 0.4 : 1.45), 0.6, 4 * sqs) * (0.9 + 0.2 * rng());
         const area = Math.PI * r * r;
-        let lv = isKnife ? 0.97 + 0.06 * rng() : clamp(1 + 0.4 * loadNoise(u) + (rng() - 0.5) * 0.45, 0.3, 1.7);
-        if (stain > 0) lv = 1 + (lv - 1) * (1 - 0.6 * stain);   // a glaze is brushed out evenly
-        // fresh colour of this bristle at each knot along the stroke
-        const fk = new Float32Array(nK * 3);
-        const jw = comps ? comps.map(() => (rng() - 0.5) * 0.1 * streak) : null;
-        const j0 = valNoise(u) * 0.05 * streak + (rng() - 0.5) * 0.015 * streak, wm = warmNoise(u) * 0.025 * streak;
-        const c2j = (rng() - 0.5) * 0.12 + (rng() < 0.12 ? (rng() - 0.5) * 0.5 : 0);
-        for (let kn = 0; kn < nK; kn++) {
-          const d = kn * kStep;
-          let c0, c1, c2;
-          if (comps) {
-            let Ks0 = 0, Ks1 = 0, Ks2 = 0, Ss = 0;
-            for (let c = 0; c < comps.length; c++) {
-              const cp = comps[c];
-              const wgt = cp.w * Math.exp(amp * streak * noiseUD(mo[c][0], mo[c][1], u, d) + jw[c]) * cp.S;
-              Ks0 += wgt * ksS[c][0]; Ks1 += wgt * ksS[c][1]; Ks2 += wgt * ksS[c][2]; Ss += wgt;
-            }
-            const km = (K) => { const q = K / Math.max(Ss, 1e-6); return clamp(toSrgb(1 + q - Math.sqrt(q * q + 2 * q)), 0, 1); };
-            c0 = km(Ks0); c1 = km(Ks1); c2 = km(Ks2);
-          } else { c0 = base[0]; c1 = base[1]; c2 = base[2]; }
-          // uneven pigment dispersion: value and temperature drift in ribbons that wander along the stroke
-          const jd = (mn(vo[0] + (u + 0.5) * uF * 1.5, vo[1] + d / (dS * 0.8)) - 0.5) * 0.06 * streak;
-          const j = j0 + jd;
-          c0 = clamp(c0 * (1 + j + wm), 0, 1); c1 = clamp(c1 * (1 + j), 0, 1); c2 = clamp(c2 * (1 + j - wm), 0, 1);
-          if (base2) {
-            const bnd = (mn(bo, d / (size * 2)) - 0.5) * 2 * c2wob;
-            const wid = 0.07 + 0.3 * Math.min(1, d / c2grow);
-            let t = (u - bnd + c2j * Math.min(1, 0.3 + d / c2grow)) / wid + 0.5;
-            t = t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
-            tmpK[0] = c0; tmpK[1] = c1; tmpK[2] = c2;
-            if (t > 0) { const m = mixRGB(tmpK, base2, t); c0 = m[0]; c1 = m[1]; c2 = m[2]; }
-          }
-          fk[kn * 3] = c0; fk[kn * 3 + 1] = c1; fk[kn * 3 + 2] = c2;
+        const lv = isKnife ? 0.97 + 0.06 * rng() : clamp(1 + 0.32 * loadNoise(u) + (rng() - 0.5) * 0.35, 0.35, 1.6);
+        let col = base;
+        if (comps) {
+          col = kmMix(comps.map((cp, c) => ({ col: cp.col, S: cp.S,
+            w: cp.w * Math.exp(0.6 * streak * compNoise[c](u) + (rng() - 0.5) * 0.08 * streak) })));
+        }
+        if (base2) {
+          const t = clamp((u + 0.5 - 0.5) * 3 + 0.5 + (rng() - 0.5) * 0.3, 0, 1); // left->right blend
+          col = mixRGB(base, base2, t);
+        }
+        col = col.slice();
+        { // uneven pigment dispersion: value and temperature drift in ribbons across the brush
+          const j = valNoise(u) * 0.05 * streak + (rng() - 0.5) * 0.015 * streak, wm = warmNoise(u) * 0.025 * streak;
+          col[0] = clamp(col[0] * (1 + j + wm), 0, 1); col[1] = clamp(col[1] * (1 + j), 0, 1); col[2] = clamp(col[2] * (1 + j - wm), 0, 1);
         }
         const edge = Math.abs(u) > 0.4 && !isKnife;
         // edge softness: paint thins towards the sides (smooth, with a little per-bristle jitter)
@@ -413,28 +322,10 @@
         }
         let ts0 = 0, ts1 = 0;
         if (env && !isKnife) { const q = (2 * u) * (2 * u); ts0 = env.lenA * 0.5 * q; ts1 = env.lenB * 0.75 * q; }
-        const cap = area * capS * capF;
-        // residue of earlier strokes in this part of the brush: some ribbons dirtier than others,
-        // a big jump in value means the painter would have wiped the brush, so less of it
-        let rc = null, rk0 = 0, rfl = 1;
-        if (resid) {
-          const bi = Math.min(RES_BINS - 1, Math.max(0, Math.floor((u + 0.5) * RES_BINS)));
-          rc = [resid.cols[bi * 3], resid.cols[bi * 3 + 1], resid.cols[bi * 3 + 2]];
-          const lr = 0.3 * rc[0] + 0.59 * rc[1] + 0.11 * rc[2], lf = 0.3 * fk[0] + 0.59 * fk[1] + 0.11 * fk[2];
-          const rb = 0.5 + 0.5 * resNoise(u);
-          rk0 = RESIDUE * dirtyK * resid.amt * (0.08 + 2.6 * rb * rb * rb) / (1 + 0.8 * Math.abs(lr - lf)) * (isKnife ? 0.35 : 1);
-          if (rk0 > 0.75) rk0 = 0.75;
-          rfl = (size * (0.7 + 1.8 * rng() * rng()) + 4 * sc) / (0.6 + 0.4 * Math.min(load, 1.2));
-        }
-        let er = isKnife ? clamp((Math.abs(u) - 0.38) / 0.12, 0, 1) : clamp((Math.abs(u) - 0.34) / 0.14, 0, 1); er = er * er * (3 - 2 * er);
         bristles.push({
-          u, prof, r, area, ef, ts0, ts1, cap, fk, er,
-          L: cap * load * lv * (edge ? 0.75 : 1),   // paint amount held
-          ecol: [fk[0], fk[1], fk[2]], ecOk: false, pick: [0, 0, 0], pk: 0, rc, rk0, rfl, lnc: [0, 0, 0],
-          gl: gloss0 * (0.85 + 0.3 * (0.5 + 0.5 * glossNoise(u))) * (0.85 + 0.3 * rng()),
-          tail: isKnife ? 0.9 + 0.2 * rng() : 0.3 + 1.4 * rng() ** 2,
-          nick: isKnife && rng() < 0.03 ? -(0.15 + 0.25 * rng()) : 0,
-          gph: rng() * 400, gfl: size * (0.4 + 0.8 * rng()) + 3 * sc, gm: -1, lump: 0,   // groove depth wanders along the stroke
+          u, prof, r, area, ef, ts0, ts1,
+          L: capS * load * lv * area * (edge ? 0.75 : 1),   // paint amount held
+          col,
           wobA: isKnife ? 0 : (rng() - 0.5) * (edge ? 1.3 : 0.6) * sc, wobF: 0.01 + rng() * 0.04, wobP: rng() * 6.28,
           gv: 0.4 * grooveNoise(u) + 1.0 * (rng() - 0.5),   // groove depth: a few broad furrows plus fine hair marks
           bowV: 0, bowC: [0, 0, 0], side: br_side(u), lx: 0, ly: 0, touched: false,
@@ -449,9 +340,9 @@
         }
       }
 
-      const rate = DEPK * (isKnife ? 1.3 : 1) * (1 - thin * 0.4) * (scumble ? 0.55 : 1);
-      const pickRate = (isKnife ? 0.3 : 0.035 + thin * 0.03) / sc * (scumble ? 0.3 : 1);
-      const W = this.W, A = this.A, R = this.R, G = this.G, B = this.B, gH = this.gH, Gl = this.Gl, Tn = this.Tn;
+      const rate = DEPK * (isKnife ? 1.3 : 1) * (1 - thin * 0.4);
+      const pickRate = (isKnife ? 0.3 : 0.035 + thin * 0.03) / sc;
+      const W = this.W, A = this.A, R = this.R, G = this.G, B = this.B, gH = this.gH;
       const w = this.w, h = this.h;
       const fixedN = s.angle != null ? [Math.cos(s.angle), Math.sin(s.angle)] : null;
       const tmp = [0, 0, 0], cur3 = [0, 0, 0];
@@ -462,24 +353,8 @@
       const gFreq = 2 * Math.PI / gPeriod, gPh = rng() * 6.28;
       const gAmp = isKnife ? 0 : (load > 0 ? 0.45 + 0.4 * Math.min(load, 1) : 0.4) * (1 - thin * 0.7);
       // viscous transport: how much wet paint a bristle shoves along, and how fast it lets go
-      const plow = scumble ? 0 : (isKnife ? 0.16 : 0.045) * (1 - thin * 0.6) * (load > 0 ? 1 : 0.2) / sc;
+      const plow = (isKnife ? 0.16 : 0.045) * (1 - thin * 0.6) * (load > 0 ? 1 : 0.2) / sc;
       const release = (isKnife ? 0.05 : 0.09) / sc;
-      // where the brush lands, paint squeezes out in a buttery blob; where a loaded brush lifts off,
-      // the paint left on the hairs pulls up into ragged peaks; loaded strokes have ridged sides
-      // (short touches don't build a blob and a lift-off ridge of their own: they'd read as pills)
-      const shortK = clamp((total / size - 1.2) / 3, 0.25, 1);
-      const body = clamp(load - 0.25, 0, 1) * (1 - 0.7 * thin) * (scumble ? 0 : 1) * (opacity < 0.999 ? opacity : 1);
-      const blobAmt = (isKnife ? 0.35 : 0.85) * body * shortK, blobLen = size * (0.15 + 0.1 * rng()) + 1.5 * sc;
-      const blobT = (isKnife ? 0.5 : 0.75) * body * shortK;
-      const liftAmt = (isKnife ? 0.5 : 0.7) * body * shortK, liftLen = size * 0.3 + 2 * sc, tailT = (isKnife ? 0.9 : 0.8) * body;
-      const edgeT = (isKnife ? 1.3 : 0.55) * clamp(load, 0, 1.2) * (1 - 0.6 * thin) * (scumble ? 0 : 1) * (opacity < 0.999 ? opacity : 1);
-      // the hand never presses evenly: slow pulses in how much paint comes off
-      const pulseAmp = isKnife ? 0.08 : 0.22, pulseLen = size * (1.2 + rng()), pO = rng() * 400;
-      // the body of the paint is lumpy: slow swells in thickness and relief (knife: chatter ridges across)
-      const lumpT = (isKnife ? 0.3 : 0.22) * (0.3 + 0.7 * body), lumpD = size * (isKnife ? 0.1 : 0.5) + 3 * sc, lumpU = isKnife ? 0.6 : uF * 1.3, lO = rng() * 400;
-      // glaze: transparent film strength per unit of paint laid
-      const glazeK = stain > 0 ? 0.5 * stain * clamp(opacity * 2.2, 0.15, 1) : 0;
-      let kLev = 0, kSum = 0, kN = 0;
       const depositBow = (br, x, y, amt) => {
         const xi = Math.floor(x), yi = Math.floor(y);
         const rad = Math.max(1, Math.round(br.r));
@@ -499,8 +374,6 @@
           mixInto(cur, br.bowC, cover);
           R[i] = cur[0]; G[i] = cur[1]; B[i] = cur[2];
           A[i] += v; W[i] = wetNow + v;
-          // the shoved paint stands up as a little ridge
-          T[i] += (0.35 - T[i]) * (cover < 0.5 ? cover : 0.5);
         }
       };
 
@@ -523,11 +396,10 @@
         else if (brush === 'fan') width = size * (0.8 + 0.2 * pr);
         else width = size * (0.85 + 0.15 * pr);
         const stepLen = P.step;
-        const pulse = 1 + pulseAmp * (mn(pO, P.d / pulseLen) - 0.5) * 2;
-        // a knife levels the paint to its plane: it lays more in the hollows than on the bumps
-        if (isKnife) { kLev = kN > 0 ? kSum / kN : kLev; kSum = 0; kN = 0; }
-        let kf = P.d / kStep; if (kf > nK - 1) kf = nK - 1;
-        const k0 = kf | 0, k1 = k0 < nK - 1 ? k0 + 1 : k0, kfr = kf - k0;
+        const halfW = width * 0.5;
+        // paint piles up where the brush lifts off
+        const lift = clamp(1 - (total - P.d) / (size * 0.6), 0, 1) * (1 - clamp(1 - P.d / size, 0, 1));
+        const wob2 = 0.5 * Math.sin(P.d * 0.07 + gPh);
 
         for (let bi = 0; bi < nb; bi++) {
           const br = bristles[bi];
@@ -549,41 +421,9 @@
           const c = pr * br.prof;
           if (c <= 0.01) continue;
           const dk = ev * br.ef;   // deposit factor at this point of the stroke / across its width
-          const lfrac = br.L / br.cap;
-          const ff = lfrac < 1 ? lfrac : 1;
-          // the colour this bristle lays here: fresh (marbled) paint, plus what it picked up,
-          // plus residue of earlier strokes near the start
-          // (re-evaluated every few steps: it drifts slowly; pick-ups update it in between)
-          const ec = br.ecol;
-          if ((k & 3) === 0 || !br.ecOk) {
-            const fk = br.fk, o0 = k0 * 3, o1 = k1 * 3;
-            ec[0] = fk[o0] + (fk[o1] - fk[o0]) * kfr; ec[1] = fk[o0 + 1] + (fk[o1 + 1] - fk[o0 + 1]) * kfr; ec[2] = fk[o0 + 2] + (fk[o1 + 2] - fk[o0 + 2]) * kfr;
-            if (br.pk > 0.001) mixInto(ec, br.pick, br.pk);
-            if (br.rk0 > 0.002) { const rk = br.rk0 * Math.exp(-(P.d - br.s0) / br.rfl); if (rk > 0.002) mixInto(ec, br.rc, rk); else br.rk0 = 0; }
-            br.ecOk = true;
-          }
-          if (glazeK > 0) { br.lnc[0] = Math.log(ec[0] > 0.004 ? ec[0] : 0.004); br.lnc[1] = Math.log(ec[1] > 0.004 ? ec[1] : 0.004); br.lnc[2] = Math.log(ec[2] > 0.004 ? ec[2] : 0.004); }
-          // load over the stroke: landing blob, pulses, lift-off peaks, ridged sides
-          const dd = P.d - br.s0;
-          const bl = blobAmt > 0 && dd < blobLen * 4 ? Math.exp(-dd / blobLen) : 0;
-          const lzr = total - br.s1 - P.d;
-          const lz = liftAmt > 0 && lzr < liftLen ? 1 - lzr / liftLen : 0;
-          if ((k & 3) === 0 || br.gm < 0) { br.lump = mn(lO + (br.u + 0.5) * lumpU, P.d / lumpD) - 0.5; br.gm = 0.25 + 1.5 * mn(br.gph, P.d / br.gfl); }
-          const lump = br.lump;
-          const boost = (1 + blobAmt * bl * (0.5 + 0.5 * ff)) * pulse * (1 + liftAmt * lz * ff) * (1 + 0.35 * lump * body) * (isKnife ? 1 + 0.5 * br.er : 1);
-          const tvx = blobT * bl + edgeT * br.er * (0.4 + 0.6 * ff) * pr + tailT * lz * br.tail * ff + br.nick + lumpT * lump * 2;
-          const gmod = br.gm;
-          const glb = br.gl * (0.55 + 0.45 * ff);
-          // dry-brush threshold: low paint + light pressure only touches the high points of the surface
-          let thr, ramp;
-          if (scumble) { thr = 0.93 - 0.3 * pr - 0.1 * ff; ramp = 0.2; }
-          else {
-            const lf = lfrac < 1.2 ? lfrac : 1.2;
-            thr = 1.15 - (pr * 0.35 + (1.6 * lf - 0.5 * lf * lf) * (ev < 1 ? 0.35 + 0.65 * ev : 1));
-            ramp = 0.16 + 0.29 * Math.min(1, lfrac * 1.6);
-          }
-          if (isKnife) thr = thr - 0.85;   // (contact = 0.85 - thr - surf) a knife low on paint scrapes the peaks bare and fills the hollows
-          const iramp = 1 / ramp;
+          const lfrac = br.L / (br.area * capS);
+          // dry-brush threshold: low paint + light pressure only touches the weave peaks
+          const thr = 0.95 - (pr * 0.6 + Math.min(lfrac, 1.2) * 0.9 * (ev < 1 ? 0.35 + 0.65 * ev : 1));
           const rr = br.r, x0 = Math.floor(bx - rr - 0.5), x1 = Math.ceil(bx + rr + 0.5);
           const y0 = Math.floor(by - rr - 0.5), y1 = Math.ceil(by + rr + 0.5);
           for (let yy = y0; yy <= y1; yy++) {
@@ -598,17 +438,15 @@
               if (wt > 1) wt = 1;
               const i = yy * w + xx;
               const cw = c * wt * stepLen;
-              // --- contact: low paint / light pressure only touches the high points of the surface:
-              // the weave where the paint is thin, the relief and tooth of the paint where it is thick
+              // --- contact: low paint / light pressure only touches the high points of the surface
               const a0 = A[i];
-              const ea = Math.exp(-2.2 * a0);
-              const surf = gH[i] * ea + (1 - ea) * (0.55 + 0.8 * T[i] + 0.16 * (Tn[i] - 0.5) + 0.4 * (gH[i] - 0.5) * ea);
-              let f = (isKnife ? -surf - thr : surf - thr) * iramp + 0.5;
+              const surf = gH[i] * Math.exp(-2.2 * a0) + 0.55 * (1 - Math.exp(-2.2 * a0));
+              let f = (surf - thr) / 0.45 + 0.5;
               if (f <= 0) continue;
               if (f > 1) f = 1;
               // --- shove wet paint along (bow wave): it leaves this pixel and travels with the bristle
               let wet = W[i];
-              if (wet > 0.01 && plow > 0) {
+              if (wet > 0.01) {
                 let pv = wet * plow * cw * f * (0.4 + 0.6 * pr) * (0.3 + 0.7 * dk);
                 if (pv > wet * 0.45) pv = wet * 0.45;
                 const bt = pv / (br.bowV + pv + 1e-9);
@@ -621,86 +459,37 @@
                 let pk = wet * pickRate * cw * f;
                 if (pk > wet * 0.5) pk = wet * 0.5;
                 tmp[0] = R[i]; tmp[1] = G[i]; tmp[2] = B[i];
-                if (br.L < br.cap * 0.01) {
-                  br.pick[0] = tmp[0]; br.pick[1] = tmp[1]; br.pick[2] = tmp[2]; br.pk = 1;
-                  ec[0] = tmp[0]; ec[1] = tmp[1]; ec[2] = tmp[2];
-                } else {
-                  const q = pk / (pk + br.area * (1.5 + 2.5 * (lfrac < 1 ? lfrac : 1)) + 1e-6);
-                  const npk = br.pk + (1 - br.pk) * q, qq = q / npk;
-                  br.pick[0] += (tmp[0] - br.pick[0]) * qq; br.pick[1] += (tmp[1] - br.pick[1]) * qq; br.pick[2] += (tmp[2] - br.pick[2]) * qq;
-                  br.pk = npk;
-                  mixInto(ec, tmp, q);
-                }
+                if (br.L < br.area * capS * 0.01) { br.col[0] = tmp[0]; br.col[1] = tmp[1]; br.col[2] = tmp[2]; }
+                else mixInto(br.col, tmp, pk / (pk + br.area * (1.5 + 2.5 * Math.min(1, br.L / (br.area * capS))) + 1e-6));
                 br.L += pk; W[i] = wet - pk; A[i] = A[i] - pk > 0 ? A[i] - pk : 0;
               }
               const a = A[i];
-              const full = br.L / br.cap;
-              // a full brush lays a lot; a nearly dry one still lays opaque paint where it touches
-              // (dry brush is broken, not faint); a knife lays an even sheet until it is empty
-              const gF = isKnife ? (full > 0.25 ? 1 : full * 4) ** 0.3 * (full > 1 ? full ** 0.3 : 1)
-                : full > 0.3 ? Math.pow(full > 1.5 ? 1.5 : full, 0.6) : 0.4856 * Math.pow(full / 0.3, 0.25);
-              let dep = full > 0 ? gF * rate * cw * f * thick * dk * boost : 0;
-              if (isKnife) { kSum += a; kN++; if (kLev > 0) { let lv = 1 + 1.5 * (kLev - a); dep *= lv < 0.2 ? 0.2 : lv > 3 ? 3 : lv; } }
+              const full = br.L / (br.area * capS);
+              let dep = full > 0 ? Math.pow(full > 1.5 ? 1.5 : full, 0.6) * rate * cw * f * thick * dk : 0;
               if (dep > br.L) dep = br.L;
               if (dep <= 1e-6) continue;
               const wetNow = W[i], dryA = a - wetNow;
+              // transparent paint (low opacity) only tints what is below it: a glaze
               // only the top film of wet paint competes with the new stroke; the rest of the
               // mixing happens through what the bristles pick up
-              const dC = isKnife ? dep * 3 : dep;   // a knife lays a solid sheet, not a film
-              let cover = opacity * dC / (dC + 0.5 * (wetNow < 0.7 ? wetNow : 0.7) + 0.14 * (1 - Math.exp(-2 * dryA)) + 1e-4);
-              if (scumble) cover *= 0.85;
+              const cover = opacity * dep / (dep + 0.5 * (wetNow < 0.7 ? wetNow : 0.7) + 0.14 * (1 - Math.exp(-2 * dryA)) + 1e-4);
+              const bc = br.col;
+              tmp[0] = bc[0]; tmp[1] = bc[1]; tmp[2] = bc[2];
               const cur = cur3; cur[0] = R[i]; cur[1] = G[i]; cur[2] = B[i];
-              if (glazeK > 0) {
-                // transparent paint: a coloured film that filters what is below, thicker (darker)
-                // where it pools in the grooves and the weave; opaque pigment in it still veils
-                let pool = 1 - 0.9 * T[i] + 0.6 * (0.5 - gH[i]) * ea; if (pool < 0.5) pool = 0.5; else if (pool > 1.7) pool = 1.7;
-                const gk = dep * glazeK * pool;
-                cur[0] *= Math.exp(gk * br.lnc[0]); cur[1] *= Math.exp(gk * br.lnc[1]); cur[2] *= Math.exp(gk * br.lnc[2]);
-                mixInto(cur, ec, cover * (1 - 0.85 * stain));
-              } else mixInto(cur, ec, cover);
+              mixInto(cur, tmp, cover);
               R[i] = cur[0]; G[i] = cur[1]; B[i] = cur[2];
               const add = dep * (opacity < 0.999 ? 0.35 + 0.65 * opacity : 1);
               A[i] = a + add; W[i] = wetNow + add;
-              // relief: fine bristle grooves along the stroke, ridges at its edges, blob and lift-off
-              const tv = gAmp * 0.55 * br.gv * gmod * (1.4 - 0.5 * Math.min(1, full)) + tvx;
+              // relief: fine bristle grooves along the stroke, ridges at its edges and where it lifts
+              const tv = gAmp * 0.55 * br.gv * (1.4 - 0.5 * Math.min(1, full));
               let tk = cover * 1.6 * opacity * wt * wt * (dk < 1 ? dk : 1); if (tk > 1) tk = 1;
-              if (scumble) tk *= 0.3; else if (isKnife) { tk *= 2; if (tk > 1) tk = 1; }
               T[i] += (tv - T[i]) * tk;
-              let tg = cover * 1.6 * wt * (dk < 1 ? dk : 1); if (tg > 1) tg = 1;
-              Gl[i] += (glb - Gl[i]) * tg;
               br.L -= dep;
             }
           }
         }
       }
       // whatever is still in the bow wave stays on the brush when it lifts
-
-      // ---- the brush keeps some of what it carried and picked up for its next stroke
-      const old = this.residue.get(rkey);
-      const cols = new Float32Array(RES_BINS * 3), cnt = new Float32Array(RES_BINS);
-      const fin = [0, 0, 0];
-      for (const br of bristles) {
-        const bi = Math.min(RES_BINS - 1, Math.max(0, Math.floor((br.u + 0.5) * RES_BINS)));
-        const o = (nK - 1) * 3;
-        fin[0] = br.fk[o]; fin[1] = br.fk[o + 1]; fin[2] = br.fk[o + 2];
-        if (br.pk > 0.001) mixInto(fin, br.pick, br.pk);
-        else if (load === 0) continue;   // a blender hair that touched nothing holds nothing
-        if (!(fin[0] >= 0 && fin[1] >= 0 && fin[2] >= 0)) continue;
-        cols[bi * 3] += fin[0]; cols[bi * 3 + 1] += fin[1]; cols[bi * 3 + 2] += fin[2]; cnt[bi]++;
-      }
-      let any = false;
-      for (let b = 0; b < RES_BINS; b++) if (cnt[b] > 0) { any = true; cols[b * 3] /= cnt[b]; cols[b * 3 + 1] /= cnt[b]; cols[b * 3 + 2] /= cnt[b]; }
-      if (any) {
-        for (let b = 0; b < RES_BINS; b++) if (cnt[b] === 0) {   // fill gaps from the nearest filled ribbon
-          let nbI = -1;
-          for (let dlt = 1; dlt < RES_BINS && nbI < 0; dlt++) { if (b - dlt >= 0 && cnt[b - dlt] > 0) nbI = b - dlt; else if (b + dlt < RES_BINS && cnt[b + dlt] > 0) nbI = b + dlt; }
-          cols[b * 3] = cols[nbI * 3]; cols[b * 3 + 1] = cols[nbI * 3 + 1]; cols[b * 3 + 2] = cols[nbI * 3 + 2];
-        }
-        if (old) for (let k = 0; k < RES_BINS * 3; k++) cols[k] = old.cols[k] * 0.3 + cols[k] * 0.7;
-        // a blender carries what it picked up; a thin wash leaves little in the brush
-        const amt = load > 0 ? clamp(0.55 + 0.45 * Math.min(load, 1), 0, 1) * (1 - 0.4 * thin) : 0.7;
-        this.residue.set(rkey, { cols, amt });
-      }
     }
 
     /**
@@ -861,11 +650,11 @@
       if (!this._H || this._H.length !== N) { this._H = new Float32Array(N); this._H2 = new Float32Array(N); this._Hb = new Float32Array(N); }
       const H = this._H, H2 = this._H2, Hb = this._Hb;
       const sc = this.scale;
-      const hs = 0.9 * this.impasto * sc;   // (v6: thick paint has flatter tops, so ridges and edges read)
+      const hs = 0.8 * this.impasto * sc;
       // height: paint thickness, with the canvas weave telegraphing through thin and medium paint
       for (let i = 0; i < N; i++) {
         const a = A[i];
-        H[i] = hs * a / (1 + 0.3 * a) + gH[i] * (0.45 * Math.exp(-3 * a) + 0.12 * Math.exp(-0.8 * a));
+        H[i] = hs * a / (1 + 0.18 * a) + gH[i] * (0.45 * Math.exp(-3 * a) + 0.12 * Math.exp(-0.8 * a));
       }
       const blur121 = (src, dst, passes) => {
         for (let pass = 0; pass < passes; pass++) {
@@ -895,7 +684,7 @@
       const ll = Math.hypot(lx, ly, lz); lx /= ll; ly /= ll; lz /= ll;
       let hx = lx, hy = ly, hz = lz + 1; const hl = Math.hypot(hx, hy, hz); hx /= hl; hy /= hl; hz /= hl;
       const g = this.groundColor;
-      const cavK = 0.35 / sc, ridgeK = 1.4 / sc, Gl = this.Gl, Tn = this.Tn;
+      const cavK = 0.35 / sc;
       for (let y = 0; y < h; y++) {
         const ym = (y > 0 ? y - 1 : y) * w, yc = y * w, yp = (y < h - 1 ? y + 1 : y) * w;
         for (let x = 0; x < w; x++) {
@@ -909,15 +698,9 @@
           const a = A[i];
           const alpha = 1 - Math.exp(-4.5 * a);
           const ndh = Math.max(0, nx * hx + ny * hy + nz * hz);
-          // oil gloss: sharp glints on ridges facing the light, a faint broad sheen elsewhere.
-          // The gloss map is uneven (knife and glaze shine, scumble and dry brush are matte) and
-          // crests of the relief catch the light more than the hollows.
-          const gl = Gl[i];
-          let rb = 1 + (H[i] - Hb[i]) * ridgeK; if (rb < 0.6) rb = 0.6; else if (rb > 1.6) rb = 1.6;
-          // micro-roughness breaks the glints into speckles (smooth knife paint and glazes less so)
-          let mr = 0.35 + 1.5 * (Tn[i] - 0.25) + 0.25 * (gl - 0.9); if (mr < 0.15) mr = 0.15; else if (mr > 1.6) mr = 1.6;
+          // oil gloss: sharp glints on ridges facing the light, a faint broad sheen elsewhere
           const gloss = Math.min(1, a * 0.9);
-          const spec = (Math.pow(ndh, 30 + 40 * gl) * 0.24 * rb * mr + Math.pow(ndh, 10) * 0.025) * gl * gloss;
+          const spec = (Math.pow(ndh, 60) * 0.22 + Math.pow(ndh, 10) * 0.025) * gloss;
           const gw = 0.93 + 0.07 * gH[i];
           const m = shade * cav;
           const r = (g[0] * gw * (1 - alpha) + R[i] * alpha) * m + spec;
@@ -934,7 +717,7 @@
     replay(log, from, to) {
       for (let k = from || 0; k < (to == null ? log.length : to); k++) {
         const e = log[k];
-        if (e.dry) this.dry(); else if (e.wipe) this.wipe(); else this.stroke(e);
+        if (e.dry) this.dry(); else this.stroke(e);
       }
     }
   }
@@ -1035,7 +818,7 @@
     }
   }
 
-  const api = { OilPainting, PIGMENTS, parseColor, mixRGB, rgbToHex, hexToRgb, mulberry32, VERSION: 'v6' };
+  const api = { OilPainting, PIGMENTS, parseColor, mixRGB, rgbToHex, hexToRgb, mulberry32, VERSION: 'v5' };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
-  global.OilPaint = api;
+  global.OilPaintV5 = api;
 })(typeof window !== 'undefined' ? window : globalThis);

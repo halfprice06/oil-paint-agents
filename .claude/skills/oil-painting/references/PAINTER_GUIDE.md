@@ -32,9 +32,12 @@ Outputs `final.png` (or `detail.png` for a crop), `progress/<pass>.png`, and `st
 your image-reading tool after every pass and correct what you see.
 
 Engine versions: a stroke log replays exactly only on the engine that painted it. A painting folder
-with an `ENGINE` file containing `v4` (or `v3`, `v2`) is rendered with that older engine, which
-does not have `brush: 'soft'`, `taper` or `edge`. New paintings need no `ENGINE` file (current
-engine, v5). Don't add v5 options to a v4 painting's passes; that painting stays on v4.
+with an `ENGINE` file containing `v5` (or `v4`, `v3`, `v2`) is rendered with that older engine.
+v4 and older do not have `brush: 'soft'`, `taper` or `edge`; v5 and older do not have `clean`,
+`dirty`, `stir`, `scumble` or `p.wipe()`. New paintings need no `ENGINE` file (current engine, v6).
+Don't add newer options to an older painting's passes; that painting stays on its engine.
+`--engine v6` (or `--engine current`) re-renders an old painting's unchanged passes on the current
+engine, e.g. with `--out final_v6.png` to compare.
 
 ## The brush API (variable `p` inside each pass file)
 
@@ -52,7 +55,12 @@ p.stroke({
                                    // otherwise the brush face stays square to the direction of travel
   thin:    0..1,                   // more medium: flatter, smoother, thinner paint
   taper:   0..1 | [start, end],    // feathered ends: fraction of the stroke over which paint fades in/out
-  edge:    0..1                    // soft sides: paint thins towards the stroke's edges (default 0)
+  edge:    0..1,                   // soft sides: paint thins towards the stroke's edges (default 0)
+  clean:   true,                   // v6: the brush was wiped first: no residue of earlier colours
+  dirty:   0..3,                   // v6: scale the residue for this stroke (default 1, 0 = none)
+  stir:    0..1,                   // v6: how well a palette mix was stirred (default 0.65; 1 = uniform,
+                                   //     0.2 = marbled streaks of the separate pigments)
+  scumble: true                    // v6: drag broken paint over the peaks of the surface only
 });
 // load: 0 is a clean, dry blending brush: it carries no paint of its own, it picks up the wet
 // paint it touches and drags it along, softening and melting edges (colour is ignored).
@@ -64,6 +72,7 @@ p.stroke({points: [...], brush: 'filbert', size: 30, load: 0, color: 'titanium_w
 p.stroke({points: [...], brush: 'soft', size: 50, opacity: 0.8});   // (or load: 0, soft: true)
 p.dab({x, y, color, size, brush, angle, load, pressure})  // a single short touch
 p.dry()                 // the painting dries: later strokes no longer pick up / blend with it
+p.wipe()                // v6: clean every brush and the knife (rag and solvent)
 p.random(), p.rand(a, b)   // seeded randomness (use these, not Math.random, for reproducibility)
 p.mix([['cadmium_red',1],['titanium_white',2]])  // -> '#hex', premix on the palette
 p.width, p.height, p.pigments
@@ -82,7 +91,9 @@ white strongly, so a little goes a long way. Mix the way a painter would.
 ## How the paint behaves (use it)
 
 - A loaded brush lays thick paint that fades and breaks up as it runs out along the stroke.
-  Long strokes end dry and scratchy; reload (start a new stroke) for solid colour.
+  Long strokes end dry and scratchy; reload (start a new stroke) for solid colour. In v6 a loaded brush
+  starts breaking up after roughly 25-40 of its widths (an 8 px brush after ~250 px, a 20 px one
+  after ~550 px; more with `load` 1.3 or `thin` medium) and is dry soon after.
 - The brush shoves wet paint: dragging through wet paint pushes a little ridge of it to the stroke's
   edges and leaves a lip where the brush lifts. Knife strokes push much more.
 - Wet paint blends: a stroke dragged through wet paint picks up that colour and smears it.
@@ -114,6 +125,40 @@ white strongly, so a little goes a long way. Mix the way a painter would.
   `taper: 0` gives v4's blunt ends (crisp architectural or knife-like marks).
 - **edge.** `edge: 0.5-0.8` makes the stroke's sides thin out so they sink into wet paint below:
   soft modelling strokes on skin, cloud masses, out-of-focus backgrounds. Keep 0 for crisp marks.
+
+## Paint up close (engine v6)
+
+What a stroke looks like in a 2x or 3x crop. The engine does most of it; these are the levers.
+
+- **Dirty brushes.** Every brush (type + size) keeps a little of the colour it last carried and
+  picked up from the canvas. The next stroke with that brush starts with streaks of it, fading as
+  fresh paint takes over. This is what makes neighbouring strokes feel related. Use `clean: true`
+  when you would really wipe the brush: going from a dark to a pure light, a clean accent, a sky
+  after foliage. `p.wipe()` cleans every brush (start of a session). `dirty: 2` for a deliberately
+  dirty, broken stroke; `dirty: 0` for one clean stroke without forgetting the residue.
+- **Load over the stroke.** A loaded stroke lands with a buttery blob, thins out, and as the brush
+  runs low it breaks into dry brush that catches only the weave and the ridges of the paint below.
+  A loaded brush lifting off leaves ragged peaks. To keep a long line solid, use several strokes
+  or `load` 1.2+; to get the broken dry tail on purpose, make the stroke long or the load low.
+- **Marbled mixes.** Palette mixes streak as ribbons of their component pigments that wander along
+  the stroke. `stir: 0.2-0.4` for lively, half-mixed paint (Impressionist broken colour, fur, foliage,
+  flesh in the lights); `stir: 1` for flat, uniform passages (a clean sky band, a hard shadow shape).
+  Hex colours and `p.mix()` results don't marble. `color2` double loading now has a wavering,
+  interleaved boundary that blurs as the stroke goes on: use it for a petal, a fold, a wave crest.
+- **Scumble.** `scumble: true` with `load` 0.4-0.8 drags opaque light paint over a dark dried
+  layer so that it only touches the peaks: broken, airy colour (haze, light on rough stone, mist over
+  water). `load` 0.2-0.4 without `scumble` gives classic dry brush. Both need texture below:
+  scumble over dried, brushy paint or bare canvas, not over a smooth wet layer.
+- **Glaze.** `opacity` 0.15-0.5 with a transparent pigment (alizarin, ultramarine, phthalos,
+  sap green, burnt umber, quinacridone, prussian, dioxazine), usually `thin: 0.5`, over dried
+  paint: the colour multiplies over what is below, pools darker in its brush grooves (so the
+  underlayer's texture shows through) and is glossy. Opaque, light colours at low opacity are veils
+  instead (mist, haze). Glaze after `p.dry()`.
+- **Knife.** `brush: 'knife'` lays flat, sharp-edged, glossy planes with raised lips at the sides
+  and a ridge where it lifts; with low `load` it scrapes the peaks bare and leaves paint in the
+  hollows. Use it for a few decisive lights and accents, not for everything.
+- **Gloss.** Thick fresh paint, knife paint and glazes shine; scumbles and dry-brush are matte; crests
+  catch the light. Nothing to set; it shows at 2x and up.
 
 ## Working method (as a painter would)
 
