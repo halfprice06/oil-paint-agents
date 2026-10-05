@@ -132,7 +132,8 @@ What a stroke looks like in a 2x or 3x crop. The engine does most of it; these a
 
 - **Dirty brushes.** Every brush (type + size) keeps a little of the colour it last carried and
   picked up from the canvas. The next stroke with that brush starts with streaks of it, fading as
-  fresh paint takes over. This is what makes neighbouring strokes feel related. Use `clean: true`
+  fresh paint takes over (less of it after a big jump in value or hue, where a painter would at
+  least wipe the brush on a rag). This is what makes neighbouring strokes feel related. Use `clean: true`
   when you would really wipe the brush: going from a dark to a pure light, a clean accent, a sky
   after foliage. `p.wipe()` cleans every brush (start of a session). `dirty: 2` for a deliberately
   dirty, broken stroke; `dirty: 0` for one clean stroke without forgetting the residue.

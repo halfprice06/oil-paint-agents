@@ -174,7 +174,7 @@
   const DEPK = 0.38;    // thickness laid down per px of contact by a full bristle
   const STIR = 0.65;     // default stir of palette mixes (1 = perfectly mixed)
   const MARBLE = 2.6;   // log-proportion swing of an unstirred mix (stir 0)
-  const RESIDUE = 0.4;  // default share of the previous colours at the start of a stroke
+  const RESIDUE = 0.34; // default share of the previous colours at the start of a stroke
   const RES_BINS = 12;  // residue is remembered in this many ribbons across the brush
 
   class OilPainting {
@@ -292,8 +292,9 @@
       const streak = isKnife ? 0.35 : 1;
       const base2 = s.color2 != null ? parseColor(s.color2) : null;
       // how transparent the paint is (for glazes): opaque, scattering pigments veil, transparent ones stain
-      // (named pigments from the table; a hex colour is judged by its lightness: light paint scatters)
-      const hidingOf = (spec, col) => { const k = pigmentKey(spec); return k && (SCATTER[k] != null || k === 'white' || k === 'black') ? scatterOf(spec) : 0.25 + 0.7 * (0.3 * col[0] + 0.59 * col[1] + 0.11 * col[2]); };
+      // (named pigments from the table; a hex colour of unknown pigments is treated as mostly opaque,
+      // a veil as in v5, with only dark hex colours staining a little)
+      const hidingOf = (spec, col) => { const k = pigmentKey(spec); return k && (SCATTER[k] != null || k === 'white' || k === 'black') ? scatterOf(spec) : 1 - 0.5 * clamp(1 - 2.2 * (0.3 * col[0] + 0.59 * col[1] + 0.11 * col[2]), 0, 1); };
       let scat;
       if (comps) { let ws = 0, ss = 0; s.color.forEach((it) => { const sp = Array.isArray(it) ? it[0] : it, wv = Array.isArray(it) && it[1] != null ? it[1] : 1; if (wv > 0) { ws += wv; ss += wv * hidingOf(sp, parseColor(sp)); } }); scat = ss / ws; }
       else scat = hidingOf(s.color, base);
@@ -421,8 +422,9 @@
           const bi = Math.min(RES_BINS - 1, Math.max(0, Math.floor((u + 0.5) * RES_BINS)));
           rc = [resid.cols[bi * 3], resid.cols[bi * 3 + 1], resid.cols[bi * 3 + 2]];
           const lr = 0.3 * rc[0] + 0.59 * rc[1] + 0.11 * rc[2], lf = 0.3 * fk[0] + 0.59 * fk[1] + 0.11 * fk[2];
+          const dL = Math.abs(lr - lf), dC = Math.max(0, Math.hypot(rc[0] - fk[0], rc[1] - fk[1], rc[2] - fk[2]) - dL);
           const rb = 0.5 + 0.5 * resNoise(u);
-          rk0 = RESIDUE * dirtyK * resid.amt * (0.08 + 2.6 * rb * rb * rb) / (1 + 0.8 * Math.abs(lr - lf)) * (isKnife ? 0.35 : 1);
+          rk0 = RESIDUE * dirtyK * resid.amt * (0.08 + 2.6 * rb * rb * rb) / (1 + 0.8 * dL + 1.6 * dC) * (isKnife ? 0.35 : 1);   // a painter wipes before a big jump in value or hue
           if (rk0 > 0.75) rk0 = 0.75;
           rfl = (size * (0.7 + 1.8 * rng() * rng()) + 4 * sc) / (0.6 + 0.4 * Math.min(load, 1.2));
         }
