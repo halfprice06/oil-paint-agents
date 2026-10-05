@@ -1,6 +1,6 @@
 ---
 name: oil-painting
-description: Paint a realistic oil painting one brushstroke at a time in JavaScript with a bristle-level oil paint simulator (no filters, no source images). Use when asked to make an oil painting, a painterly image made of brushstrokes, or to run painter agents.
+description: Paint a realistic oil painting one brushstroke at a time in JavaScript with a bristle-level oil paint simulator (no filters; references are for looking, never sampling). Use when asked to make an oil painting, a painterly image made of brushstrokes, or to run painter agents.
 ---
 
 # Oil painting, stroke by stroke
@@ -10,7 +10,8 @@ You make a painting by writing JavaScript pass files that place brushstrokes. Th
 carries its own paint, runs dry, picks up wet paint already on the canvas, and skips across
 the weave. The paint piles into ridges, and the surface is lit as impasto.
 
-There is no image input and no way to read pixels back. Every mark is a stroke you choose.
+The engine takes no image input. You may look at references (your own lit study, photos, master
+paintings), but every mark is a stroke you choose: no sampling colours or tracing from them.
 
 ## Read first
 
@@ -52,7 +53,8 @@ paint surface from 2x crops. Keep backups of pass files before big rewrites.
 
 ## Rules
 
-- No filters, no pixel reading, no source photos. Use `p.random()` and `p.rand()`, never
+- No filters and no pixel sampling or programmatic tracing of any image. Looking at references is
+  encouraged (see STUDIO_METHOD.md section 4). Use `p.random()` and `p.rand()`, never
   `Math.random`, so the painting replays exactly.
 - Don't loop over an image or grid to place strokes. Loops are fine for a group of marks when
   their position, size, angle and colour vary with intent.

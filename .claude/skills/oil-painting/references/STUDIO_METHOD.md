@@ -69,3 +69,31 @@ After each pass, render and compare with your colour study:
 
 Keep backups: copy your pass files into `src/` before big rewrites. Write `notes.md` with an
 `**Artist statement.**` line and an honest self-assessment.
+
+## 4. Paint light you see, not things you know (v5 method)
+
+The deepest failure so far: the painter writes coordinates from concepts ("a hand is a palm plus
+five fingers", "a cloud is bumps", "a person is a peg") and never looks at a lit subject. The
+result is sausage fingers, doll crowds, cotton-ball clouds and confetti ground, and more strokes
+or more resolution make it worse. Work like a painter in front of a model instead.
+
+1. **Build a lit reference before any paint.** Make `reference.svg` (or several, one per key
+   area) at canvas size: every form drawn as its planes of light and shadow with gradients, cast
+   shadows, reflected light, and soft vs hard edges marked. For figures, first draw a gesture
+   sketch (a line of action, then head, ribcage and pelvis masses, then limbs), and only then the
+   light planes. You may also look at real references (photos, game art, master paintings) with
+   your image tool. Looking is fine; **sampling pixel colours or tracing programmatically is not**:
+   every stroke's position, shape and colour stays your decision.
+2. **Paint by looking, in tight loops.** Work one area at a time. After every few dozen strokes,
+   render a crop (`--crop`, or `--scale 2 --crop`) and compare it side by side with the same crop
+   of your reference (`convert ref.png -crop ...`). Fix what differs before moving on. For figures
+   and other focal details, develop them in a scratch folder on a simple matching background so
+   each check renders in seconds, then paste the finished pass into the painting.
+3. **Masses, then planes, then edges, never parts.** Big value shapes first. Each form gets two
+   or three planes (light, shadow, maybe reflected light) as a few strokes that follow the form.
+   A hand is a mitten with a light side and a shadow side; a cloud is a lit top and a cool belly;
+   ground is broad perspective planes plus cast shadows. Small marks only at the focal point.
+4. **Melt edges with the v5 tools.** `brush:'soft'` (dry badger blender) for turning edges, skin,
+   skies and cloud edges; `taper:[0.3,0.6]` for marks that should feather out; `edge:0.5–0.8` for
+   strokes that sink into wet paint below. Keep a few razor edges at the focal point. All of this
+   happens before `p.dry()`.
