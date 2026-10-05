@@ -142,3 +142,6 @@ for(let i=0;i<26;i++){const x=R(1420,2080),y=R(1040,1200);const dg=Math.hypot(x-
 for(let i=0;i<8;i++)S(R(188,194),R(480,780),R(40,100),1.57,K('#fff4c8',.02),R(5,8),{load:1.3,thin:.3,opacity:.85,taper:[.2,.5]});
 // bunting flags catch the light: a few bright touches
 for(let i=0;i<10;i++){const t=R(0,1);const x=lerp(0,880,t),y=lerp(260,560,t)+60*Math.sin(Math.PI*t)*1.0*1.0;F([[x,y+10,.9]],K(pick(['#fff4c8','#ffe27a','#ffffff']),.02),6,{load:1.3,thin:.25});}
+// the lit shoulder of the tower's roof ridge and the tent's sunward flank pick up one last warm touch; a few cool glints where the gate light grazes brass
+for(let i=0;i<5;i++){const t=R(.1,.8);F([[lerp(386,392,t)-3,lerp(92,340,t),.6],[lerp(386,392,t)-3,lerp(92,340,t)+R(20,40),.8]],K('#ffd896',.02),R(4,7),{load:1.3,thin:.25,taper:[.2,.5],opacity:.8});}
+for(let i=0;i<6;i++){const pc=R(0,1)<.5?1475:1982;S(pc+(pc<1700?60:-60)+R(-4,4),R(800,950),R(14,30),1.57,K('#d4f4ff',.02),R(3,5),{load:1.3,thin:.25,taper:[.2,.5],opacity:.8});}

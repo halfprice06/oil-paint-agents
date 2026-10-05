@@ -134,37 +134,82 @@ function figure(x,yb,h,o){
   // sun on the shoulder and the sunward sleeve
   F([[x-sw*.95+lean,Y(.80),.6],[x-sw*1.0+lean*.6,Y(.72),.8],[x-sw*1.05,Y(.6),.4]],H(LITC(P.lit,.55)),h*.014,{load:1.25,thin:.25,opacity:.85});
 }
-// BALLOONS: each a small lit sphere, strings as wobbling single strokes
-const BAL=[[1050,100,'#e8742a',26],[1262,186,'#d93a30',26],[1480,122,'#e03a30',24],[880,134,'#e8c030',26],[742,216,'#c8a860',24],[1100,182,'#6a9ae0',22],[962,320,'#d94a58',27],[602,172,'#7a5ab0',22],[1090,236,'#8fd0e8',24],[1372,292,'#3a60c0',23],[800,432,'#3a60c0',23],[880,352,'#70c0a0',22],[1110,452,'#d93a30',27],[1372,478,'#e8c030',22],[1190,300,'#e87898',22]];
-for(const [x,y,c,r] of BAL){
-  const L=R(80,130);const pts=[[x,y+r*.95,.6]];for(let i=1;i<=4;i++)pts.push([x+R(-8,8)*i/2+i*2,y+r+L*i/4,.6]);
-  F(pts,K('#6a5a62',.03),2.2,{load:.9,thin:.3,opacity:.6});
-  F([[x,y,.9]],K(c,.03),r*2.2,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.28,y+r*.3,.9]],K(SHC(c,.55),.03),r*1.45,{brush:'round',load:1,thin:.3,opacity:.8});
-  F([[x-r*.28,y-r*.3,.9]],K(LITC(c,.35),.03),r*1.15,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.42,y+r*.5,.7],[x+r*.2,y+r*.7,.7]],K(Tn(c,'#fff0d0',.25),.03),r*.28,{load:1,thin:.3,opacity:.7}); // reflected light in the shade
-  F([[x-r*.42,y-r*.45,.9]],K('#fffaf0',.01),r*.4,{brush:'round',load:1.3,thin:.25});
-  F([[x-1,y+r*.98,.7],[x+2,y+r*1.12,.7]],K(SHC(c,.3),.03),r*.28,{load:1,thin:.3});
-  SB([[x-r*.7,y-r*.1],[x-r*.2,y+r*.4],[x+r*.4,y+r*.6]],r*.8,.3);
+// TREES and TENTS, second and third layers. Foliage is built from big lobes (masses) each with a lit crown (upper left) and a cool
+// shadowed lee; broken leaf-clump marks of varied size and shape on top, bright only where the mass faces the sun.
+// Tents: every gore is a slightly convex panel (lit on its sunward side, darker on the other), seams, sag folds, a violet shade glaze on the lee half.
+const TR=[[1730,-10],[2410,-10],[2410,440],[2300,466],[2200,432],[2130,470],[2020,424],[1930,452],[1880,364],[1790,330],[1760,220],[1715,100]];
+const BT=[[1130,745],[1118,650],[1186,600],[1218,505],[1330,470],[1400,412],[1500,440],[1600,402],[1720,420],[1830,410],[1900,482],[2002,522],[2040,622],[2062,745]];
+const FC2=[[0,'#16303a'],[.18,'#234c4a'],[.38,'#3b6c44'],[.58,'#689a40'],[.78,'#a2bd52'],[.92,'#d4d870'],[1,'#eee89a']];
+function foliage2(poly,lobes,o){o=o||{};
+  const [x0,y0,x1,y1]=bbox(poly);
+  const mark=(x,y,size,L,ang,lenf,op)=>{const c=R(0,1)<.12?K(G(FC2,clamp(L+R(-.1,.25),0,1)),.06):R(0,1)<.14?K(mixh(G(FC2,L),'#3a6a7a',.45),.04):K(G(FC2,L),.045);
+    const len=size*lenf*R(.8,1.4);S(x,y,len,ang,c,size,{load:R(.9,1.15),thin:.35,edge:R(.2,.5),taper:[.2,.45],bend:R(-.4,.4)*len,opacity:op===undefined?1:op});};
+  for(const [cx,cy,r,Lb] of lobes){
+    const Ls=(x,y)=>{const u=(x-cx)/r,v=(y-cy)/r;return clamp(Lb+.34*(-(u*.6+v*.8))+R(-.06,.06),0,1);};
+    const pt=(rr)=>{for(let g=0;g<10;g++){const a=R(0,TAU),d=Math.sqrt(R(0,1))*r*rr;const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d;if(inPoly(poly,x,y))return [x,y];}return null;};
+    // A: broad masses, tangential, shade crescent first
+    for(let k=0;k<Math.max(3,Math.round(r/18));k++){const q=pt(.95);if(!q)continue;const L=Ls(q[0],q[1])*.9;mark(q[0],q[1],r*R(.26,.4),L,Math.atan2(q[1]-cy,q[0]-cx)+1.57+R(-.5,.5),R(1.2,2),.9);}
+    // B: mid clumps
+    for(let k=0;k<Math.max(6,Math.round(r/6));k++){const q=pt(.95);if(!q)continue;mark(q[0],q[1],r*R(.14,.24),Ls(q[0],q[1]),R(0,TAU),R(1,1.9));}
+    // C: small clumps, denser on the lit side
+    for(let k=0;k<Math.max(10,Math.round(r/3));k++){const q=pt(.98);if(!q)continue;const L=Ls(q[0],q[1]);if(L<.35&&R(0,1)<.5)continue;mark(q[0],q[1],r*R(.07,.13)+3,L,R(0,TAU),R(1,2.2));}
+    // D: sunlit touches only on the crown
+    for(let k=0;k<Math.max(4,Math.round(r/8));k++){const a=R(3.1,5.2),d=r*R(.35,.9);const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d;if(!inPoly(poly,x,y))continue;mark(x,y,r*R(.05,.1)+3,clamp(Lb*.4+.62+R(0,.25),0,1),R(-.5,.5)+1.57*R(0,1),R(1,1.8),.92);}
+    // E: dark accents tucked under clumps on the lee
+    for(let k=0;k<Math.max(3,Math.round(r/14));k++){const a=R(.2,2.8),d=r*R(.4,.95);const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d;if(!inPoly(poly,x,y))continue;mark(x,y,r*R(.06,.12)+3,clamp(Lb*.3+R(0,.12),0,1),R(0,TAU),R(1,2),.85);}
+  }
+  // ragged silhouette: leaf clumps overlapping the edge, lit on the upper-left
+  for(let i=0;i<poly.length;i++){const a=poly[i],b=poly[(i+1)%poly.length];const Ln=Math.hypot(b[0]-a[0],b[1]-a[1]);if(a[1]>y1-20&&b[1]>y1-20&&o.skipBottom)continue;
+    for(let k=0;k<Ln/(o.edgeStep||26);k++){const u=R(0,1);const x=lerp(a[0],b[0],u),y=lerp(a[1],b[1],u);if(x<-5||x>2405||y<-5)continue;let best=lobes[0],bd=1e9;for(const l of lobes){const d=Math.hypot(l[0]-x,l[1]-y)-l[2];if(d<bd){bd=d;best=l;}}
+      const [cx,cy,r,Lb]=best;const L=clamp(Lb+.34*(-(((x-cx)/r)*.6+((y-cy)/r)*.8))+R(-.1,.1),0,1);mark(x+R(-6,6),y+R(-6,6),R(10,22),L,R(0,TAU),R(1,1.8));}}
+  // soft unifying touches, only on the shade side and between masses, so a few edges melt (lost and found)
+  for(const [cx,cy,r,Lb] of lobes){if(R(0,1)<.7){const a=R(.3,2.4);SB([[cx+Math.cos(a)*r*.5,cy+Math.sin(a)*r*.5],[cx+Math.cos(a+.6)*r*.55,cy+Math.sin(a+.6)*r*.55],[cx+Math.cos(a+1.2)*r*.5,cy+Math.sin(a+1.2)*r*.5]],clamp(r*.5,24,70),.3);}}
 }
-// second layer: each balloon is a slightly tall translucent form: lit crescent on the sun side, core shade, a bounce of sky light low on the
-// shade side, a curved window-light highlight, a pinched knot and a short dark tie; colours kept related to the balloon's own hue.
-for(const [x,y,c,r] of BAL){
-  const sx=x,sy=y;
-  // lit crescent following the upper-left rim
-  arc(sx-r*.05,sy-r*.04,r*.62,R(3.3,3.6),R(4.7,5.1),K(LITC(c,.4),.03),r*.55,{load:1.15,thin:.3,edge:.5,taper:[.25,.45]});
-  // core shadow crescent on the lee, then the sky-blue / warm bounce just inside the lower rim
-  arc(sx+r*.08,sy+r*.06,r*.66,R(-.2,.2),R(1.6,2.0),K(SHC(c,.6),.03),r*.4,{load:1,thin:.35,edge:.5,taper:[.25,.45],opacity:.85});
-  arc(sx+r*.04,sy+r*.04,r*.8,R(.5,.8),R(1.5,1.9),K(Tn(c,pick(['#9ec4ee','#f4d8a8','#c8b8e8']),.45),.03),r*.2,{load:1,thin:.3,edge:.5,taper:[.3,.5],opacity:.7});
-  // transmitted glow at the lit edge: thin, bright, broken
-  arc(sx,sy,r*.9,R(3.5,3.8),R(4.5,4.9),K(LITC(c,.6),.02),r*.1,{load:1.2,thin:.25,taper:[.3,.5],opacity:.75});
-  // window highlight: a short curved soft-edged stroke, then a hot touch
-  F([[sx-r*.5,sy-r*.28,.5],[sx-r*.4,sy-r*.45,.9],[sx-r*.2,sy-r*.55,.5]],K('#fffaf0',.01),r*.2,{load:1.3,thin:.25,edge:.4,taper:[.3,.5]});
-  F([[sx-r*.46,sy-r*.42,.9]],K('#ffffff',.005),r*.11,{brush:'round',load:1.3,thin:.25});
-  // knot and tie
-  F([[sx-r*.1,sy+r*.92,.7],[sx+r*.1,sy+r*1.06,.8]],K(SHC(c,.45),.03),r*.26,{load:1,thin:.3,taper:[.1,.3]});
-  SB([[sx-r*.6,sy+r*.1],[sx-r*.3,sy+r*.5],[sx+r*.2,sy+r*.7]],r*.8,.18);
+const LB=(row,x)=>clamp(.62-row*.12-(x-1700)/1400*.08,.2,.8);
+const TRL=[[1790,50,110,LB(0,1790)+.1],[1930,30,130,LB(0,1930)+.1],[2080,40,130,LB(0,2080)+.1],[2230,30,130,LB(0,2230)+.1],[2370,60,120,LB(0,2370)+.1],
+ [1790,170,95,LB(1,1790)],[1930,150,130,LB(1,1930)],[2090,160,120,LB(1,2090)],[2230,165,130,LB(1,2230)],[2370,200,110,LB(1,2370)],
+ [1850,290,100,LB(2,1850)],[1990,280,115,LB(2,1990)],[2130,290,105,LB(2,2130)],[2270,300,115,LB(2,2270)],[2380,330,90,LB(2,2380)],
+ [1960,395,75,LB(3,1960)],[2070,405,72,LB(3,2070)],[2180,415,72,LB(3,2180)],[2300,430,70,LB(3,2300)]];
+foliage2(TR,TRL);
+// small gaps of sky showing through, irregular, edged with leaves
+for(let i=0;i<9;i++){const x=R(1800,2350),y=R(250,440);if(inPoly(TR,x,y)){S(x,y,R(22,42),R(-.5,.5),K(G([[0,'#5e94d0'],[1,'#8cb8e0']],R(0,1)),.03),R(10,18),{load:1,thin:.4,edge:.5,taper:[.3,.4]});for(let k=0;k<4;k++)S(x+R(-18,18),y+R(-10,12),R(14,24),R(0,TAU),K(G(FC2,R(.3,.8)),.05),R(8,13),{load:1,thin:.35,taper:[.2,.4]});}}
+const BTL=[[1180,690,60,.3],[1180,580,70,.38],[1270,520,72,.42],[1350,560,75,.34],[1400,480,62,.5],[1250,640,70,.28],[1340,650,70,.26],[1200,500,50,.4],
+ [1470,470,74,.5],[1560,440,72,.52],[1660,430,80,.52],[1780,440,80,.5],[1880,480,76,.44],[1960,540,68,.38],[2020,610,62,.3],[2030,690,52,.26],[1500,540,50,.3],[1900,590,60,.28],[1700,500,50,.34]];
+foliage2(BT,BTL,{edgeStep:20});
+// light of the gate spills a cool cyan-white onto the nearest leaves
+for(let i=0;i<60;i++){const a=R(Math.PI*.9,Math.PI*2.1),d=R(285,410);const x=1760+Math.cos(a)*d,y=790+Math.sin(a)*d*.95;if(!inPoly(BT,x,y)&&!inPoly(TR,x,y))continue;
+  S(x,y,R(14,34),a+1.57+R(-.5,.5),K(pick(['#b8ecf6','#d4f4fc','#a8d8f0']),.03),R(7,14),{load:R(.7,1.1),thin:.35,edge:.5,taper:[.3,.5],opacity:R(.35,.75)});}
+// ---------- tents ----------
+function tent2(ax,ay,L,Rg,by,n,cA,cB,shadeFrom,fmax,o){o=o||{};
+  const gw=(Rg-L)/n;
+  for(let i=0;i<n;i++){const t=(i+.5)/n,bx=lerp(L,Rg,t);const base=i%2?cB:cA;
+    const sh=clamp((t-shadeFrom)/(1-shadeFrom+.001),0,1)*.9+(t>shadeFrom?.1:0);
+    const lit=t<shadeFrom?clamp((shadeFrom-t)/shadeFrom,0,1):0;
+    const isW=(base===cB);const cLit=mixh(base,'#fff0d0',(isW?.25:.1)+lit*.2),cMid=mixh(base,isW?'#9a8cb4':'#5a2a4a',sh*(isW?.5:.42));
+    for(const [f0,f1] of [[0,.36],[.3,.66],[.6,fmax]]){if(f0>=fmax)continue;
+      const x0=lerp(ax,bx,f0),y0=lerp(ay,by,f0),x1=lerp(ax,bx,f1),y1=lerp(ay,by,f1);const w=Math.max(6,gw*(f0+f1)/2*.95);const nx=-(y1-y0),ny=x1-x0;const nl=Math.hypot(nx,ny);const ox=nx/nl*w*.2,oy=ny/nl*w*.2;
+      // convex panel: sunward half lighter, the other half darker, then a core between
+      F([[x0-ox,y0-oy,.6],[(x0+x1)/2-ox,(y0+y1)/2-oy,.9],[x1-ox,y1-oy,.6]],K(sh>.05?mixh(cMid,'#d8c8e0',.12):cLit,.035),w*.5,{load:1.1,thin:.35,edge:.35,taper:[.12,.25],opacity:.92});
+      F([[x0+ox,y0+oy,.6],[(x0+x1)/2+ox,(y0+y1)/2+oy,.9],[x1+ox,y1+oy,.6]],K(mixh(sh>.05?cMid:base,'#4a3060',.22+sh*.25),.035),w*.42,{load:1.05,thin:.35,edge:.4,taper:[.12,.25],opacity:.88});}
+    // a touch of cream sheen on the sunward panels near the apex
+    if(t<shadeFrom&&R(0,1)<.6){const f0=R(.04,.2),f1=f0+R(.15,.3);const x0=lerp(ax,bx,f0),y0=lerp(ay,by,f0),x1=lerp(ax,bx,f1),y1=lerp(ay,by,f1);F([[x0,y0,.6],[x1,y1,.8]],K('#fff6e0',.02),Math.max(4,gw*f0*.28),{load:1.25,thin:.3,taper:[.2,.5],opacity:.8});}
+    // seam: a darker broken line between panels
+    const sx=lerp(L,Rg,i/n);for(const [f0,f1] of [[.06+R(0,.05),.4],[.46,Math.min(fmax,.8)]]){const x0=lerp(ax,sx,f0),y0=lerp(ay,by,f0),x1=lerp(ax,sx,f1),y1=lerp(ay,by,f1);F([[x0,y0,.6],[x1,y1,.7]],K(mixh(base===cA?cA:cB,'#3a2448',.5),.03),R(2.5,4.2),{load:.95,thin:.35,taper:[.25,.4],opacity:R(.3,.55)});}
+  }
+  // violet shade glaze over the lee half (transparent, so the stripes stay visible)
+  for(let k=0;k<16;k++){const f0=R(.1,.5),f1=Math.min(fmax,f0+R(.3,.5));const t=R(shadeFrom,1);const bx=lerp(L,Rg,t);const x0=lerp(ax,bx,f0),y0=lerp(ay,by,f0),x1=lerp(ax,bx,f1),y1=lerp(ay,by,f1);
+    F([[x0,y0,.6],[(x0+x1)/2,(y0+y1)/2,.9],[x1,y1,.6]],K('#4a3a78',.04),gw*R(.7,1.4)*(f0+f1)/2,{load:.5,thin:.7,edge:.8,opacity:R(.2,.35),taper:[.3,.5]});}
+  // sag folds: a few long shallow creases crossing several gores (dark under, a faint light above), never tiny smiles
+  for(let k=0;k<(o.folds||3);k++){const f=R(.45,fmax-.05);const i0=R(0,n/2),span=R(4,n*.6);const xa=lerp(L,Rg,i0/n),xb=lerp(L,Rg,Math.min(n,i0+span)/n);const pa=[lerp(ax,xa,f),lerp(ay,by,f)],pb=[lerp(ax,xb,f),lerp(ay,by,f)];
+    const sag=R(8,16);const pm=[(pa[0]+pb[0])/2,(pa[1]+pb[1])/2+sag];const t=(i0+span/2)/n;const dk=t>shadeFrom;
+    F([[pa[0],pa[1]+2,.4],[(pa[0]+pm[0])/2,(pa[1]+pm[1])/2+3,.8],[pm[0],pm[1]+2,.9],[(pb[0]+pm[0])/2,(pb[1]+pm[1])/2+3,.8],[pb[0],pb[1]+2,.4]],K(dk?'#4a3058':'#8a4a50',.04),R(6,10),{load:.8,thin:.5,edge:.6,taper:[.3,.4],opacity:R(.22,.4)});
+    F([[pa[0],pa[1]-6,.4],[pm[0],pm[1]-6,.8],[pb[0],pb[1]-6,.4]],K(dk?'#b8a8d0':'#fff0d8',.03),R(3,6),{load:1,thin:.3,edge:.6,taper:[.3,.4],opacity:R(.2,.4)});}
 }
-// string: a faint light edge along each string where the sun catches it, and a slack curl at the tie
-for(const [x,y,c,r] of BAL){const L=R(60,110);const pts=[[x+1.5,y+r*1.1,.5]];for(let i=1;i<=3;i++)pts.push([x+1.5+R(-4,4)*i/2+i*1.6,y+r*1.1+L*i/3,.5]);
-  F(pts,K('#e8dcd0',.03),1.4,{load:.9,thin:.3,opacity:.35,taper:[.1,.5]});}
+tent2(880,540,664,1098,848,17,'#e04838','#f8ecd8',.52,.7,{folds:3});
+// apex: lit cap and the shade side of the finial
+F([[872,552,.7],[879,562,.8],[884,580,.6]],K('#ffe8c8',.02),9,{load:1.2,thin:.3,taper:[.2,.4],opacity:.9});
+tent2(2200,575,2022,2410,850,11,'#f4ead0','#7e84c4',.5,.98,{folds:4});
+F([[2192,588,.7],[2198,600,.8],[2203,616,.6]],K('#fffbe8',.02),9,{load:1.2,thin:.3,taper:[.2,.4],opacity:.9});
+// soften a few of the gores so the cone turns, then the stripes are restated lightly at the lit edge
+for(const [ax,ay,bx,by] of [[880,540,800,740],[880,540,960,740],[880,560,720,720],[880,560,1040,720],[2200,575,2100,840],[2200,575,2300,840]])SB([[ax,ay+30],[(ax+bx)/2,(ay+by)/2],[bx,by]],50,.25);
+p.dry();

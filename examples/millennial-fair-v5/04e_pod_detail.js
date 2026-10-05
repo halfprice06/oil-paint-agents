@@ -134,37 +134,19 @@ function figure(x,yb,h,o){
   // sun on the shoulder and the sunward sleeve
   F([[x-sw*.95+lean,Y(.80),.6],[x-sw*1.0+lean*.6,Y(.72),.8],[x-sw*1.05,Y(.6),.4]],H(LITC(P.lit,.55)),h*.014,{load:1.25,thin:.25,opacity:.85});
 }
-// BALLOONS: each a small lit sphere, strings as wobbling single strokes
-const BAL=[[1050,100,'#e8742a',26],[1262,186,'#d93a30',26],[1480,122,'#e03a30',24],[880,134,'#e8c030',26],[742,216,'#c8a860',24],[1100,182,'#6a9ae0',22],[962,320,'#d94a58',27],[602,172,'#7a5ab0',22],[1090,236,'#8fd0e8',24],[1372,292,'#3a60c0',23],[800,432,'#3a60c0',23],[880,352,'#70c0a0',22],[1110,452,'#d93a30',27],[1372,478,'#e8c030',22],[1190,300,'#e87898',22]];
-for(const [x,y,c,r] of BAL){
-  const L=R(80,130);const pts=[[x,y+r*.95,.6]];for(let i=1;i<=4;i++)pts.push([x+R(-8,8)*i/2+i*2,y+r+L*i/4,.6]);
-  F(pts,K('#6a5a62',.03),2.2,{load:.9,thin:.3,opacity:.6});
-  F([[x,y,.9]],K(c,.03),r*2.2,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.28,y+r*.3,.9]],K(SHC(c,.55),.03),r*1.45,{brush:'round',load:1,thin:.3,opacity:.8});
-  F([[x-r*.28,y-r*.3,.9]],K(LITC(c,.35),.03),r*1.15,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.42,y+r*.5,.7],[x+r*.2,y+r*.7,.7]],K(Tn(c,'#fff0d0',.25),.03),r*.28,{load:1,thin:.3,opacity:.7}); // reflected light in the shade
-  F([[x-r*.42,y-r*.45,.9]],K('#fffaf0',.01),r*.4,{brush:'round',load:1.3,thin:.25});
-  F([[x-1,y+r*.98,.7],[x+2,y+r*1.12,.7]],K(SHC(c,.3),.03),r*.28,{load:1,thin:.3});
-  SB([[x-r*.7,y-r*.1],[x-r*.2,y+r*.4],[x+r*.4,y+r*.6]],r*.8,.3);
+// TELEPODS, dry layer: glints and the last accents that make the metal read as metal. The dome gets an edge-on highlight and a curved reflection of the gate's blue,
+// the brass rings a few hot crests and dark gaps that break the regularity, the drum a bright top edge and cool rim light on the gate side.
+function pod3(cx,gs){
+  for(let k=0;k<14;k++){const y=R(808,958);const x=cx+R(-76,-20);S(x,y+3,R(14,34),R(-.04,.04),K(pick(['#fffbd0','#fff0b0','#ffe890']),.015),R(2.5,4.5),{load:1.35,thin:.25,opacity:R(.6,.95),taper:[.25,.45]});}
+  for(let k=0;k<10;k++){const y=R(808,958);const x=cx+R(30,74);S(x,y+3,R(12,28),R(-.04,.04),K(pick(['#3a2210','#4a2e14']),.03),R(3,6),{load:1,thin:.3,opacity:R(.4,.65),taper:[.25,.45]});}
+  for(let k=0;k<8;k++){const y=R(808,958);const x=cx+gs*R(66,78);S(x,y,R(14,30),1.57+R(-.15,.15),K(pick(['#cdf2ff','#a8e4ff']),.02),R(2.5,4),{load:1.2,thin:.3,opacity:R(.5,.85),taper:[.25,.45]});}
+  // dome: long thin soft reflections following the curve, a bright edge on the sunward rim, a crisp hot spot
+  for(let k=0;k<4;k++){const a=R(3.6,5.0);const pts=[];for(let i=0;i<4;i++){const aa=a+i*.15;pts.push([cx+Math.cos(aa)*102*.7,772+Math.sin(aa)*74*.7,.8]);}F(pts,K(pick(['#c8dcf4','#b4cef0']),.02),R(3,5),{load:1.1,thin:.3,opacity:R(.4,.7),taper:[.3,.5]});}
+  for(let k=0;k<3;k++){const a=R(3.2,3.8);F([[cx+Math.cos(a)*100,772+Math.sin(a)*72,.7],[cx+Math.cos(a+.2)*98,772+Math.sin(a+.2)*71,.7]],K('#f0f6fc',.01),R(3.5,5),{load:1.3,thin:.25,opacity:.85,taper:[.2,.4]});}
+  F([[cx-50,742,.6],[cx-36,736,.8],[cx-24,735,.5]],K('#ffffff',.005),R(5,7),{load:1.4,thin:.25,taper:[.3,.5]});
+  // antenna light and its small glow
+  F([[cx-14,659,.9]],K('#ff8a70',.02),R(14,18),{brush:'round',load:.5,thin:.6,opacity:.35});
+  F([[cx-14,659,.9]],K('#ffd0c0',.02),5,{brush:'round',load:1.3,thin:.3});
 }
-// second layer: each balloon is a slightly tall translucent form: lit crescent on the sun side, core shade, a bounce of sky light low on the
-// shade side, a curved window-light highlight, a pinched knot and a short dark tie; colours kept related to the balloon's own hue.
-for(const [x,y,c,r] of BAL){
-  const sx=x,sy=y;
-  // lit crescent following the upper-left rim
-  arc(sx-r*.05,sy-r*.04,r*.62,R(3.3,3.6),R(4.7,5.1),K(LITC(c,.4),.03),r*.55,{load:1.15,thin:.3,edge:.5,taper:[.25,.45]});
-  // core shadow crescent on the lee, then the sky-blue / warm bounce just inside the lower rim
-  arc(sx+r*.08,sy+r*.06,r*.66,R(-.2,.2),R(1.6,2.0),K(SHC(c,.6),.03),r*.4,{load:1,thin:.35,edge:.5,taper:[.25,.45],opacity:.85});
-  arc(sx+r*.04,sy+r*.04,r*.8,R(.5,.8),R(1.5,1.9),K(Tn(c,pick(['#9ec4ee','#f4d8a8','#c8b8e8']),.45),.03),r*.2,{load:1,thin:.3,edge:.5,taper:[.3,.5],opacity:.7});
-  // transmitted glow at the lit edge: thin, bright, broken
-  arc(sx,sy,r*.9,R(3.5,3.8),R(4.5,4.9),K(LITC(c,.6),.02),r*.1,{load:1.2,thin:.25,taper:[.3,.5],opacity:.75});
-  // window highlight: a short curved soft-edged stroke, then a hot touch
-  F([[sx-r*.5,sy-r*.28,.5],[sx-r*.4,sy-r*.45,.9],[sx-r*.2,sy-r*.55,.5]],K('#fffaf0',.01),r*.2,{load:1.3,thin:.25,edge:.4,taper:[.3,.5]});
-  F([[sx-r*.46,sy-r*.42,.9]],K('#ffffff',.005),r*.11,{brush:'round',load:1.3,thin:.25});
-  // knot and tie
-  F([[sx-r*.1,sy+r*.92,.7],[sx+r*.1,sy+r*1.06,.8]],K(SHC(c,.45),.03),r*.26,{load:1,thin:.3,taper:[.1,.3]});
-  SB([[sx-r*.6,sy+r*.1],[sx-r*.3,sy+r*.5],[sx+r*.2,sy+r*.7]],r*.8,.18);
-}
-// string: a faint light edge along each string where the sun catches it, and a slack curl at the tie
-for(const [x,y,c,r] of BAL){const L=R(60,110);const pts=[[x+1.5,y+r*1.1,.5]];for(let i=1;i<=3;i++)pts.push([x+1.5+R(-4,4)*i/2+i*1.6,y+r*1.1+L*i/3,.5]);
-  F(pts,K('#e8dcd0',.03),1.4,{load:.9,thin:.3,opacity:.35,taper:[.1,.5]});}
+pod3(1475,1);pod3(1982,-1);
+p.dry();

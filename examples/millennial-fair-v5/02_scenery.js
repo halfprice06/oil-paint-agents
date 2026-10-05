@@ -154,7 +154,7 @@ function foliage(poly,o){
   }
 }
 // far hills & town on the horizon
-for(const [x,y,w,col] of [[40,730,170,'#7fae94'],[120,760,130,'#6f9a88'],[690,770,150,'#86b092'],[760,780,120,'#7aa68c'],[2360,690,110,'#7c92c8'],[2330,720,90,'#8a9fd0']]){
+for(const [x,y,w,col] of [[40,730,170,'#a4bcb8'],[120,760,130,'#9ab4b0'],[690,770,150,'#aac0bc'],[760,780,120,'#a0b8b4'],[2360,690,110,'#a4b4d0'],[2330,720,90,'#aebad4']]){
   for(let k=0;k<5;k++)S(x+R(-w/2,w/2),y+R(-18,18),R(w*.5,w),R(-.05,.05),K(col,.04),R(28,44),{load:.9,thin:.5,edge:.5,taper:[.3,.4]});
   SB([[x-w/2,y-20],[x,y-28],[x+w/2,y-14]],44,.4);}
 // big tree upper right
@@ -164,36 +164,6 @@ for(let i=0;i<9;i++){const x=R(1800,2350),y=R(250,440);if(inPoly(TR,x,y))S(x,y,R
 // back tree behind the gate (cooler, darker, lit only on the upper left)
 const BT=[[1130,745],[1118,650],[1186,600],[1218,505],[1330,470],[1400,412],[1500,440],[1600,402],[1720,420],[1830,410],[1900,482],[2002,522],[2040,622],[2062,745]];
 foliage(BT,{light:(x,y)=>clamp(.72-(x-1130)/1100*.25-(y-410)/330*.55,0,1),base:56,tiers:[{r:70,dens:1.1,cap:3,touch:0},{r:36,dens:.8,cap:2,touch:0}]});
-// ===== tower =====
-const WOOD=[[0,'#4e3040'],[.3,'#7a4e3a'],[.6,'#b27a46'],[1,'#d9a35e']];
-// roof: a hipped pyramid; lit left face, violet-brown shade face, ridge between; strokes run down the slopes
-cover([[360,92],[150,322],[404,322]],38,(x,y)=>K(G(WOOD,clamp(.62+(360-x)/260*.25-(y-92)/230*.1,0,1)),.045),{ang:2.3,angJ:.07,len:3.2,dens:4,o:{load:1,thin:.4}});
-cover([[362,92],[404,322],[612,322]],38,(x,y)=>K(G(WOOD,clamp(.12+(y-92)/230*.12+R(-.03,.03),0,1)),.045),{ang:.76,angJ:.07,len:3.2,dens:4,o:{load:.95,thin:.45}});
-for(let i=0;i<14;i++){const t=R(.12,.92);const lx=lerp(360,150,t),ly=lerp(92,322,t);S(lx+R(10,70),ly,R(40,90),R(-.4,-.15),K(G(WOOD,R(.7,1)),.04),R(8,12),{load:1.1,thin:.3,taper:[.2,.4],opacity:.8});}
-for(let i=0;i<10;i++){const t=R(.12,.92);const rx=lerp(362,612,t),ry=lerp(92,322,t);S(rx-R(10,70),ry,R(40,90),R(.15,.4),K(G(WOOD,R(0,.3)),.04),R(8,12),{load:1,thin:.3,taper:[.2,.4],opacity:.8});}
-F([[360,92,.7],[380,200,.9],[404,320,.7]],K('#e8b878',.03),9,{load:1.15,thin:.3,taper:[.1,.3]}); // sunlit ridge
-SB([[372,110],[392,210],[404,310]],40,.35);
-S(255,322,230,.02,K('#3a2430',.03),18,{load:1,thin:.4,edge:.4}); // eave shadow
-// upper house, planks: lit left, shaded right
-cover([[200,330],[540,330],[540,470],[200,470]],26,(x,y)=>K(G(WOOD,clamp(.95-(x-200)/340*.95-.0,0,1)*.9+.05),.045),{ang:1.57,angJ:.06,len:2.6,dens:4,o:{thin:.4}});
-cover([[300,392],[376,392],[376,496],[300,496]],14,(x,y)=>K(G([[0,'#d99b2a'],[1,'#fff0a0']],R(.2,1)),.03),{ang:1.57,angJ:.08,len:2,o:{load:1.1}});
-cover([[292,384],[384,384],[384,392],[292,392]],8,()=>K('#352418',.03),{ang:0,len:3});
-S(338,500,120,0,K('#46301f',.04),16,{load:.9,edge:.4});
-// stone shaft in three planes: sunlit front, half-tone, shadowed right face
-const ST=[[0,'#6a5060'],[.35,'#9a7a62'],[.7,'#dcc080'],[1,'#f1dc9c']];
-cover([[185,470],[355,470],[355,800],[185,800]],26,(x,y)=>K(G(ST,clamp(.88-(y-470)/330*.3-(x-185)/170*.22+R(-.14,.14),0,1)),.05),{ang:0,angJ:.07,len:2.3,dens:2.4,o:{thin:.4}});
-cover([[355,470],[452,470],[452,800],[355,800]],26,(x,y)=>K(G(ST,clamp(.55-(y-470)/330*.15+R(-.08,.08),0,1)),.045),{ang:0,angJ:.07,len:2.2,dens:2.4,o:{thin:.4}});
-cover([[452,470],[546,470],[546,800],[452,800]],26,(x,y)=>K(G(ST,clamp(.1+(y-470)/330*.08+R(-.06,.06),0,1)),.045),{ang:0,angJ:.07,len:2.2,dens:2.4,o:{thin:.45}});
-// cast shadow from the roof/house onto the shaft top, sunlit rim on the left corner
-S(300,486,250,.03,K('#6a5058',.04),26,{load:.9,thin:.4,edge:.5,opacity:.8});
-for(let i=0;i<6;i++)S(190+R(-2,2),R(520,780),R(60,140),1.57,K('#fff0b4',.03),R(7,11),{load:1.2,thin:.3,taper:[.2,.4],opacity:.8});
-// stone courses: a few paler and darker blocks, not a pattern
-for(let i=0;i<60;i++){const face=R(0,1);const x=face<.5?R(195,345):face<.78?R(365,445):R(462,536);const y=R(480,790);const lit=face<.5?.15:face<.78?.0:-.1;
-  S(x,y,R(26,60),R(-.04,.04),K(G(ST,clamp((face<.5?.8:face<.78?.5:.12)+R(-.25,.25)+lit,0,1)),.04),R(12,20),{load:1,thin:.35,edge:.3,opacity:.85});}
-for(const [x,y,w,h] of [[180,470,175,330],[355,470,97,330],[452,470,94,330]])SB([[x+w/2,y+20],[x+w/2,y+h*.5],[x+w/2,y+h-20]],50,.3);
-SB([[352,480],[354,640],[352,790]],34,.55); SB([[450,480],[452,640],[450,790]],34,.5); // soften the turning edges
-// tower shaft: long clean strokes down each face so the silhouette holds
-for(const [x,c] of [[200,'#e9cd8a'],[270,'#dcc080'],[330,'#cfae78'],[395,'#b88a64'],[430,'#a47c64'],[480,'#6d5058'],[525,'#5e4452']])S(x+R(-4,4),R(630,650),R(300,330),1.57,K(c,.03),22,{load:1,thin:.4,edge:.3,opacity:.85});
 // ===== tents =====
 function tent(ax,ay,L,Rg,by,cA,cB,shadeFrom,n){ // gores radiate from the apex to the base line
   for(let i=0;i<n;i++){const t=(i+.5)/n;const bx=lerp(L,Rg,t),b=lerp(ay+10,by,.0)+0;const ang=Math.atan2(by-ay,bx-ax);
@@ -215,11 +185,4 @@ F([[2200,545,.7],[2230,538,.9],[2262,546,.7],[2275,540,.4]],K('#e8b830',.03),11,
 WL(1190,650,1190,1000,K('#6a4a32',.03),7,{load:1});
 F([[1190,655,.8],[1230,648,.9],[1275,662,.8],[1300,656,.5]],K('#d03a30',.03),13,{load:1,thin:.4,taper:[.1,.5]});
 F([[1190,690,.8],[1225,686,.9],[1262,698,.6]],K('#e8c030',.03),11,{load:1,thin:.4,taper:[.1,.5]});
-// ===== bunting =====
-function bunt(x0,y0,x1,y1,sag,n,cols,w){const B=t=>[(1-t)*(1-t)*x0+2*t*(1-t)*(x0+x1)/2+t*t*x1,(1-t)*(1-t)*y0+2*t*(1-t)*((y0+y1)/2+sag*2)+t*t*y1];
-  for(let i=0;i<8;i++){const a=B(i/8),b=B((i+1)/8);F([[a[0],a[1],.6],[(a[0]+b[0])/2,(a[1]+b[1])/2+R(-1,1),.7],[b[0],b[1],.6]],K('#4a3636',.03),R(3,4.5),{load:1,thin:.3,taper:[.05,.05]});}
-  for(let i=0;i<n;i++){const t=(i+.5+R(-.12,.12))/n,q=B(t),q2=B(Math.min(1,t+.01));const ang=Math.atan2(q2[1]-q[1],q2[0]-q[0]);const c=cols[i%cols.length];
-    F([[q[0],q[1]+3,.8],[q[0]+R(-2,2),q[1]+w*.6,.9],[q[0]+R(-1,1),q[1]+w*1.05,.5]],K(c,.03),w*.8,{load:1,thin:.4,taper:[.05,.4]});}}
-bunt(0,260,880,560,60,24,['#d84a3a','#f0d040','#4a8ad8','#f6ecd0','#58a858'],24);
-bunt(1920,420,2400,640,30,12,['#d84a3a','#f0d040','#4a8ad8','#f6ecd0'],24);
 p.dry();

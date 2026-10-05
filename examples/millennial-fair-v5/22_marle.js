@@ -84,92 +84,197 @@ function GRT(ax,ws,stops,o){o=o||{};const lv=o.lv||LV;const N=24;const S=[];
   let u=clamp(.5-.5*off+(o.bias||0)+R(-.05,.05),0,1);const f=u*(stops.length-1);const i=Math.min(stops.length-2,Math.floor(f));return J(mixL(stops[i],stops[i+1],f-i),o.jit);};}
 // paint a tube: planes light->shadow across the width, strokes along the axis
 function LIMB(ax,ws,stops,o){o=o||{};return fill(TUBE(ax,ws),Object.assign({ang:AXF(ax),col:GRT(ax,ws,stops,o)},o));}
-// ===== MARLE pulled backward into the air before the gate vortex. Ref origin canvas (1520,520), ref px = 2x =====
-OX=1520;OY=520;SC=.5;SZ=.8;
+// ===== kit: helpers added in r6 on top of lib3d =====
+// smooth value noise for direction fields so strokes do not read as parallel hatching
+const _nz=[];for(let i=0;i<64;i++)_nz.push(R(0,1));
+function vnoise(x,y){const xi=Math.floor(x),yi=Math.floor(y);const xf=x-xi,yf=y-yi;const h=(a,b)=>_nz[((a*7+b*13)%64+64)%64];
+ const s=t=>t*t*(3-2*t);const a=h(xi,yi),b=h(xi+1,yi),c=h(xi,yi+1),d=h(xi+1,yi+1);return lerp(lerp(a,b,s(xf)),lerp(c,d,s(xf)),s(yf));}
+// wrap an angle field with smooth noise (amp in radians, scale in px)
+const NZF=(f,amp,sc)=>(x,y)=>f(x,y)+amp*(vnoise(x/(sc||18),y/(sc||18))-.5)*2;
+// set the REF->canvas mapping: ref image (rx,ry) -> crop origin (cx,cy) at refScale, then scaled by k about F
+function MAP(cx,cy,refScale,Fx,Fy,k,dx,dy){SC=k/refScale;OX=Fx+k*(cx-Fx)+(dx||0);OY=Fy+k*(cy-Fy)+(dy||0);GX=(typeof __GX!=='undefined'?__GX:0);GY=(typeof __GY!=='undefined'?__GY:0);}
+// cool rim light along a REF path
+const RIMC=[['cerulean',.5],['titanium_white',1],['cobalt_violet',.35]];
+const RIMW=[['titanium_white',1],['naples_yellow',.5],['cadmium_yellow',.1]];
+const RIM=(ctl,size,op,col)=>PATH(ctl,col||RIMC,size*.8,{op:(op===undefined?.7:op)*.8,taper:[.35,.6],thin:.5});
+// fold: dark soft crease with a lighter lip beside it. ctl in REF coords, dark/light = colour mixes
+function FOLD(ctl,size,dark,light,op,off){off=off||[2,-2];const c2=ctl.map(q=>[q[0]+off[0],q[1]+off[1]]);
+ PATH(ctl,dark,size,{op:op===undefined?.6:op,taper:[.25,.7],thin:.5});PATH(c2,light,size*.45,{op:(op===undefined?.6:op)*.5,taper:[.35,.7],thin:.5});}
+// finger: small tapered stroke from a base along a bent path (REF coords)
+const FNG=(ctl,size,col,op)=>PATH(ctl,col,size,{op:op===undefined?.95:op,taper:[.1,.55],thin:.35});
+// glowing source in canvas coords: stacked translucent discs, brightening toward the centre, melted into a smooth falloff, then a hot core
+function GLOW(x,y,r,core,halo,o){o=o||{};x-=GX;y-=GY;halo=halo||[['cerulean',.5],['titanium_white',1],['cobalt_violet',.1]];
+ const rings=[[7,.16,0],[5.4,.16,.2],[4.1,.18,.4],[3.1,.2,.6],[2.2,.24,.8],[1.5,.3,1]];
+ for(const [m,op,w] of rings){const col=mixL(halo,[['titanium_white',3]],w);
+  p.stroke({points:[[x-m*r*.15,y,.9],[x+m*r*.15,y,.9]],brush:'round',size:m*r*2,color:col,load:1,opacity:op*(o.k||1),edge:.95,taper:[.3,.3],thin:.9});}
+ p.stroke({points:[[x-r*3,y-r,.8],[x+r*3,y+r,.8]],brush:'soft',size:r*7,opacity:.5});
+ p.stroke({points:[[x-r*2,y+r,.8],[x+r*2,y-r,.8]],brush:'soft',size:r*5,opacity:.4});
+ p.dab({x:x,y:y,size:r*1.2,color:core||[['titanium_white',3]],brush:'round',load:1.3,pressure:.95});}
+// sparse second layer of short strokes crossing the first, to break up hatching and add colour
+const GLZ=(ctl,col,ang,o)=>fill(ctl,Object.assign({size:5,len:12,cover:.6,ang:NZF(ang,.5,16),col:col,op:.38,thin:.75,wob:2,blend:.8,bop:.4,o:{edge:.7}},o||{}));
+// a cast/form shadow shape: strong, cool, edges melted so it can be lost on one side
+const SHD=(ctl,col,ang,o)=>fill(ctl,Object.assign({size:6,len:16,cover:1,ang:NZF(ang,.35,18),col:col,op:.78,thin:.6,wob:1.5,blend:1.1,bop:.5,o:{edge:.6}},o||{}));
+// broken colour: a share of strokes in every fill carry a touch of a warm or a cool accent, so planes shimmer instead of sitting flat
+const _COOL={cerulean:1,cobalt_blue:1,ultramarine:1,prussian_blue:1,phthalo_blue:1,viridian:1,paynes_grey:1,cobalt_violet:1,dioxazine_purple:1,manganese_blue:1};
+const BRK=(f,k)=>(x,y)=>{const c=f(x,y);const r=R(0,1);k=k||.12;if(r>=.44)return c;
+ let tot=0,cool=0;for(const [n,w] of c){if(n==='titanium_white'||n==='zinc_white')continue;tot+=w;if(_COOL[n])cool+=w;}
+ const isCool=tot>0&&cool/tot>.5;
+ if(r<.22)return mixL(c,isCool?[['quinacridone_rose',.3],['cobalt_violet',.2],['titanium_white',.3]]:[['cadmium_orange',.25],['naples_yellow',.35],['quinacridone_rose',.08]],k);
+ return mixL(c,isCool?[['cerulean',.3],['titanium_white',.4],['cobalt_violet',.05]]:[['cobalt_violet',.3],['cerulean',.2],['ultramarine',.1]],k);};
+let NOBRK=false;
+const _fill=fill;
+// every large form gets a base layer, then a sparser, finer second layer crossing it at about 55-65 degrees (set nox:1 to skip)
+fill=function(ctl,o){if(!o||!o.col)return _fill(ctl,o);if(NOBRK)return _fill(ctl,o);
+ const o2=Object.assign({},o,{col:BRK(o.col,o.brk)});const n=_fill(ctl,o2);
+ if(!o.nox&&!o.sharp&&(o.size||14)>=3.6){const poly=ctl.map(q=>T(q[0],q[1]));
+  if(polyArea(poly)>1200){const rot=o.xl||(1.0+R(-.2,.2));const ang0=o.ang||ANG(90);const sz=(o.size||14);
+   _fill(ctl,Object.assign({},o2,{size:sz*.7,len:(o.len||sz*2.6)*.75,cover:(o.cover||1)*.55,ang:(x,y)=>ang0(x,y)+rot,op:.42,thin:.7,blend:0,col:BRK(o.col,.16),o:Object.assign({},o.o||{},{edge:.5})}));}}
+ return n;};
+// ===== MARLE (r6 rebuild): pulled backward into the vortex, pose3d fall_back; shapes in the 3x ref crop (origin canvas 1530,520) =====
+MAP(1530,520,3,1750,700,1.0,0,0);SZ=1;
 const G3=(A,B,a,b,c,d)=>GR(A,B,[a,b,c,d||c]);
-const JS_L=[['titanium_white',2.4],['naples_yellow',.14],['cerulean',.06]];
-const JS_M=[['titanium_white',1.6],['cerulean',.3],['cobalt_blue',.12]];
-const JS_H=[['titanium_white',1],['cobalt_blue',.4],['cobalt_violet',.25],['cerulean',.1]];
-const JS_S=[['cobalt_violet',.6],['ultramarine',.3],['cobalt_blue',.3],['titanium_white',.55]];
-const JS_C=[['ultramarine',.55],['cobalt_violet',.45],['dioxazine_purple',.1],['titanium_white',.3]];
-const SK_L=[['titanium_white',1.6],['flesh_tint',.6],['naples_yellow',.2],['quinacridone_rose',.04]];
-const SK_M=[['titanium_white',1],['flesh_tint',.8],['yellow_ochre',.1],['quinacridone_rose',.06]];
-const SK_S=[['flesh_tint',.7],['burnt_sienna',.2],['cobalt_violet',.25],['titanium_white',.6],['quinacridone_rose',.08]];
-const HR_L=[['naples_yellow',.7],['titanium_white',.7],['cadmium_orange',.12],['quinacridone_rose',.05]];
-const HR_M=[['naples_yellow',.5],['cadmium_orange',.35],['yellow_ochre',.2],['titanium_white',.4],['quinacridone_rose',.1]];
-const HR_S=[['burnt_sienna',.6],['cadmium_orange',.35],['alizarin_crimson',.12],['cobalt_violet',.2]];
-const GD_L=[['cadmium_yellow',1],['titanium_white',.45],['naples_yellow',.3]];
+const G3s=(A,B,a,b,c,d)=>GR(A,B,[a,b,c,d||c],.05);
+const LVM=[-.7,-.45];
+const JS_H=[['titanium_white',3.2],['naples_yellow',.12],['cerulean',.04]];
+const JS_L=[['titanium_white',2.8],['cerulean',.1],['naples_yellow',.05]];
+const JS_M=[['titanium_white',2.7],['cerulean',.15],['cobalt_blue',.05]];
+const JS_T=[['titanium_white',1.9],['cobalt_blue',.25],['cobalt_violet',.22],['cerulean',.06]];
+const JS_S=[['cobalt_violet',.5],['ultramarine',.22],['cobalt_blue',.2],['titanium_white',.9]];
+const JS_C=[['ultramarine',.45],['cobalt_violet',.4],['dioxazine_purple',.08],['titanium_white',.55]];
+const SK_H=[['titanium_white',1.5],['flesh_tint',.6],['naples_yellow',.25],['quinacridone_rose',.04]];
+const SK_L=[['titanium_white',1.2],['flesh_tint',.8],['naples_yellow',.2],['quinacridone_rose',.05]];
+const SK_M=[['titanium_white',.8],['flesh_tint',.9],['yellow_ochre',.08],['cadmium_orange',.05],['quinacridone_rose',.08]];
+const SK_S=[['flesh_tint',.7],['burnt_sienna',.25],['cobalt_violet',.2],['titanium_white',.45],['quinacridone_rose',.08]];
+const HR_H=[['naples_yellow',.7],['titanium_white',1],['cadmium_orange',.1],['quinacridone_rose',.05]];
+const HR_L=[['naples_yellow',.7],['titanium_white',.6],['cadmium_orange',.2],['quinacridone_rose',.05]];
+const HR_M=[['naples_yellow',.4],['cadmium_orange',.4],['yellow_ochre',.2],['titanium_white',.3],['quinacridone_rose',.12]];
+const HR_S=[['burnt_sienna',.6],['cadmium_orange',.35],['alizarin_crimson',.12],['cobalt_violet',.25]];
+const GD_L=[['cadmium_yellow',1],['titanium_white',.5],['naples_yellow',.3]];
 const GD_M=[['cadmium_yellow',.8],['yellow_ochre',.5],['cadmium_orange',.1]];
-const GD_S=[['yellow_ochre',.8],['burnt_sienna',.4],['cobalt_violet',.15],['cadmium_yellow',.2]];
+const GD_S=[['yellow_ochre',.8],['burnt_sienna',.4],['cobalt_violet',.2],['cadmium_yellow',.2]];
 const SH_L=[['naples_yellow',.7],['titanium_white',1],['raw_sienna',.1]];
 const SH_M=[['naples_yellow',.6],['titanium_white',.6],['raw_sienna',.3],['yellow_ochre',.2]];
-const SH_S=[['raw_sienna',.5],['cobalt_violet',.3],['titanium_white',.4],['burnt_umber',.1]];
-const LVM=[-.7,-.45]; // sun from the upper left
-// ---------- ponytail streaming toward the vortex ----------
-LIMB([[386,176],[450,170],[530,140],[610,90],[680,48],[712,30]],[26,40,36,26,14,4],[HR_L,HR_M,HR_S],{size:10,len:40,lv:LVM,blend:.5,o:{taper:[.1,.8]}});
-for(const [a,b,c] of [[[400,190],[520,150],[640,66]],[[398,200],[500,176],[600,110]],[[396,185],[480,160],[560,118]]])PATH([a,b,c,[b[0]+90,b[1]-50]],HR_L,5,{taper:[.1,.9],op:.8});
-PATH([[400,206],[500,196],[600,140],[680,78]],HR_S,6,{taper:[.1,.9],op:.7});
-// ---------- bent near leg ----------
-LIMB([[500,382],[580,342]],[92,66],[JS_L,JS_M,JS_H,JS_S],{size:11,len:36,lv:LVM,blend:.6});
-LIMB([[580,342],[690,430],[742,470]],[62,42,34],[JS_L,JS_M,JS_H,JS_S,JS_C],{size:10,len:34,lv:LVM,blend:.6,bias:.08});
-fill([[722,452],[770,470],[778,500],[738,502],[702,472]],{size:8,len:22,ang:ANG(25),col:G3([700,450],[780,500],SH_L,SH_M,SH_S),blend:.5});
-// knee cap highlight
-DB(582,336,12,JS_L,{load:1.2});
-// ---------- straight far leg trailing toward the gate ----------
-LIMB([[462,408],[548,515],[655,662]],[86,64,40],[JS_L,JS_M,JS_H,JS_S,JS_C],{size:11,len:38,lv:LVM,blend:.7,bias:.08});
-fill([[630,640],[668,640],[702,672],[730,700],[736,716],[706,724],[664,692],[640,666]],{size:8,len:24,ang:ANG(40),col:G3([630,640],[736,716],SH_L,SH_M,SH_S),blend:.5});
-// ---------- hips and torso ----------
-fill([[392,380],[436,350],[500,350],[546,392],[540,422],[490,446],[440,440],[410,420]],{size:12,len:40,ang:ANG(-25),blend:.7,col:G3([395,400],[545,400],JS_L,JS_M,JS_H,JS_S)});
-fill([[345,292],[372,262],[420,238],[455,246],[470,276],[468,310],[430,332],[392,372],[378,350],[352,320]],{size:11,len:36,ang:AXF([[350,300],[420,280],[466,280]]),blend:.8,bsz:1.6,col:G3([345,300],[470,300],JS_L,JS_M,JS_H,JS_S)});
-// light plane on the lit chest, cool shade under the arm and waist
-fill([[352,298],[386,270],[420,262],[404,300],[372,322]],{size:8,len:22,ang:ANG(-35),col:CC(JS_L),op:.8,thin:.5,blend:.4});
-fill([[430,320],[466,300],[468,312],[430,336]],{size:7,len:18,ang:ANG(-20),col:CC(JS_C),op:.6});
-// gold belt
-fill([[408,326],[474,306],[480,322],[438,352],[402,394],[390,378]],{size:7,len:30,ang:ANG(-40),col:G3([392,380],[480,310],GD_L,GD_M,GD_S)});
-// pendant, glowing
-DB(402,284,13,[['titanium_white',1],['cerulean',.4],['cobalt_violet',.1]],{opacity:.7,load:.8});
-DB(402,284,6,[['titanium_white',2],['cerulean',.2]],{load:1.3});
-// ---------- arms: skin, bare shoulders ----------
-LIMB([[445,255],[472,160],[432,76],[414,38]],[31,27,21,17],[SK_L,SK_M,SK_S],{size:8,len:28,lv:LVM,blend:.5});
-LIMB([[360,298],[292,262],[262,226],[272,176]],[31,26,20,16],[SK_L,SK_M,SK_S],{size:8,len:28,lv:LVM,blend:.5});
-fill([[392,14],[422,6],[434,30],[428,58],[410,62],[396,50]],{size:6,len:18,ang:ANG(-70),col:G3([384,30],[440,30],SK_L,SK_M,SK_S),blend:.5});
-fill([[270,144],[284,142],[294,160],[290,180],[272,180],[266,160]],{size:6,len:16,ang:ANG(-80),col:G3([262,160],[298,160],SK_L,SK_M,SK_S),blend:.5});
-// bracelets
-PATH([[412,64],[434,72]],GD_M,7,{});PATH([[262,182],[290,188]],GD_M,7,{});
-// ---------- neck and head ----------
-fill([[360,236],[390,232],[394,264],[364,270]],{size:6,len:16,ang:ANG(80),col:G3([360,250],[394,250],SK_M,SK_S,SK_S)});
-// ---------- head (8x reference: origin canvas (1660,590), 1 ref px = .125 canvas px) ----------
-p.dry();
-{const o0=[OX,OY,SC,SZ];OX=1660;OY=590;SC=.125;SZ=1;
- // hair behind the face and the back of the head
- fill([[100,300],[110,220],[180,140],[300,108],[420,128],[500,200],[524,330],[470,260],[400,205],[200,215],[160,262]],{size:5,len:14,ang:ANG(-15),blend:.4,col:G3([100,200],[520,200],HR_L,HR_M,HR_S)});
- // face: lit warm left cheek, soft cool shade on the right, nothing dark at the jaw
- fill([[165,252],[200,188],[300,168],[420,192],[456,262],[432,346],[372,410],[300,452],[246,414],[190,340]].map(q=>[310+(q[0]-310)*.88,q[1]]),{size:4,len:11,ang:ANG(75),blend:.8,bop:.5,col:G3([165,300],[456,300],SK_L,SK_M,SK_M,SK_S)});
- // forehead light, cheek warmth, chin light
- fill([[210,200],[300,182],[390,200],[380,240],[290,226],[220,240]],{size:3,len:9,ang:ANG(-5),col:CC(SK_L),op:.75,thin:.5});
- // brow shadow band and eye sockets (cool, soft), then tiny eyes
- fill([[200,240],[300,226],[400,222],[420,262],[300,262],[210,268]],{size:3,len:9,ang:ANG(-5),col:CC(mixL(SK_S,[['cobalt_violet',.4],['titanium_white',.4]],.4)),op:.5,thin:.55,blend:.6,bop:.45});
- DB(240,266,3,[['ultramarine',.6],['cerulean',.4],['burnt_umber',.35]],{pressure:.9});
- DB(372,254,3,[['ultramarine',.6],['cerulean',.4],['burnt_umber',.35]],{pressure:.9});
- PATH([[214,244],[250,236],[276,240]],[['burnt_sienna',.7],['yellow_ochre',.4],['cobalt_violet',.2]],1.6,{op:.8});
- PATH([[344,230],[378,226],[408,236]],[['burnt_sienna',.7],['yellow_ochre',.4],['cobalt_violet',.2]],1.6,{op:.8});
- // nose: light bridge, small warm shadow under the tip
- PATH([[308,262],[304,318],[300,346]],SK_L,3,{op:.7});
- DB(310,362,3.2,mixL(SK_S,[['quinacridone_rose',.2]],.3),{opacity:.55});
- // mouth: one small soft warm touch, lips parted
- DB(300,414,2.6,[['quinacridone_rose',.3],['burnt_sienna',.15],['flesh_tint',.8],['titanium_white',.35]],{pressure:.7,opacity:.8});
- // hair bang over the brow on the light side, ear on the left
- fill([[160,254],[190,190],[250,160],[330,150],[300,190],[220,206],[190,258]],{size:4,len:10,ang:ANG(-25),col:G3([160,200],[330,170],HR_L,HR_M,HR_S),op:.95});
- OX=o0[0];OY=o0[1];SC=o0[2];SZ=o0[3];}
-// ---------- cold gate light rimming the shadow edges, warm sun on the left edges ----------
-PATH([[470,262],[468,310],[432,334]],[['cerulean',.5],['titanium_white',1],['cobalt_violet',.2]],5,{op:.8,taper:[.1,.6]});
-PATH([[700,430],[742,470]],[['cerulean',.5],['titanium_white',1],['cobalt_violet',.2]],5,{op:.7,taper:[.1,.6]});
+const SH_S=[['raw_sienna',.5],['cobalt_violet',.35],['titanium_white',.4],['burnt_umber',.1]];
+const RIMG=[['titanium_white',1.4],['cerulean',.4],['cobalt_violet',.1]];   // gate light
+const RIMS=[['titanium_white',1],['naples_yellow',.6],['cadmium_orange',.06]];  // sun
 
-// ---------- details: folds, knee, cuffs, sun glints on the upper left edges ----------
-PATH([[560,330],[582,350],[600,346]],JS_C,5,{op:.55,taper:[.2,.7]});
-PATH([[690,430],[672,448],[660,444]],JS_S,5,{op:.5,taper:[.2,.7]});
-PATH([[506,470],[540,486],[560,500]],JS_S,6,{op:.5,taper:[.2,.7]});
-PATH([[630,636],[650,650],[664,660]],JS_C,5,{op:.55});
-for(const pts of [[[470,260],[430,242],[392,262]],[[352,300],[372,266]],[[462,410],[510,478]],[[510,372],[566,336]],[[590,332],[690,414]]])PATH(pts,[['naples_yellow',.8],['titanium_white',1.4]],2.4,{op:.45,taper:[.2,.7]});
-// ---------- lost edges on the shadow side ----------
-for(const [pts,sz,op] of [[[[470,262],[470,310],[436,336]],10,.5],[[[546,392],[540,424],[492,448]],10,.5],[[[650,470],[610,560],[640,640]],10,.4],[[[740,470],[700,430],[640,380]],9,.4],[[[472,160],[480,230],[450,262]],8,.4]])SOFT(pts,sz,op);
+// ---------- ponytail: a flame of hair streaming toward the vortex, three layers ----------
+LIMB([[430,398],[510,372],[600,320],[690,262],[742,226]],[56,90,84,58,30,6],[HR_L,HR_M,HR_S],{size:10,len:34,cover:1.1,lv:LVM,blend:.5,wob:1.6,o:{taper:[.1,.8]},ang:NZF(AXF([[430,398],[510,372],[600,320],[742,226]]),.2,18)});
+for(const [a,b,c,d] of [[[440,392],[540,350],[650,282],[736,236]],[[438,404],[520,380],[610,336],[690,290]],[[434,388],[500,356],[580,320],[640,270]]])PATH([a,b,c,d],HR_H,3.4,{taper:[.1,.9],op:.8});
+PATH([[444,414],[540,396],[640,330],[722,268]],HR_S,3.8,{taper:[.1,.9],op:.7});
+for(const [a,b,c] of [[[560,350],[620,330],[690,300]],[[600,320],[650,310],[700,296]]])PATH([a,b,c],HR_M,1.8,{taper:[.2,.9],op:.8});
+// ---------- far leg (stretched to the right): thigh and shin ----------
+LIMB([[712,548],[790,532],[866,512]],[112,96,80],[JS_H,JS_L,JS_M,JS_T,JS_S,JS_C],{bias:-.08,size:7,len:22,cover:1.1,lv:LVM,blend:.6,wob:1.6,ang:NZF(AXF([[712,548],[866,512]]),.28,18)});
+LIMB([[866,512],[960,572],[1050,650]],[80,64,48],[JS_H,JS_L,JS_M,JS_T,JS_S,JS_C],{bias:-.08,size:6,len:20,cover:1.1,lv:LVM,blend:.6,wob:1.6,ang:NZF(AXF([[866,512],[1050,650]]),.28,18)});
+LIMB([[1034,656],[1100,682],[1170,722]],[64,66,46],[SH_L,SH_M,SH_S,SH_S],{size:7,len:22,cover:1.2,lv:LVM,blend:.5,wob:.7,ang:NZF(AXF([[1034,656],[1170,722]]),.15,18)});
+PATH([[1046,650],[1100,676],[1156,704]],[['titanium_white',1.2],['naples_yellow',.4]],2.4,{op:.7,taper:[.15,.6]});
+// ---------- near leg (falling down-right) ----------
+LIMB([[640,596],[704,672],[770,742]],[124,102,88],[JS_H,JS_L,JS_M,JS_T,JS_S,JS_C],{bias:-.08,size:7,len:22,cover:1.1,lv:LVM,blend:.6,wob:1.6,ang:NZF(AXF([[640,596],[770,742]]),.28,18)});
+LIMB([[770,742],[850,850],[930,958]],[88,68,50],[JS_H,JS_L,JS_M,JS_T,JS_S,JS_C],{bias:-.08,size:6,len:20,cover:1.1,lv:LVM,blend:.6,wob:1.6,ang:NZF(AXF([[770,742],[930,958]]),.28,18)});
+LIMB([[908,962],[958,1008],[1000,1046]],[66,70,52],[SH_L,SH_M,SH_S,SH_S],{size:7,len:22,cover:1.2,lv:LVM,blend:.5,wob:.7,ang:NZF(AXF([[908,962],[1000,1046]]),.15,18)});
+PATH([[916,958],[962,1000],[1004,1038]],[['titanium_white',1.2],['naples_yellow',.4]],2.4,{op:.7,taper:[.15,.6]});
+// ---------- pelvis ----------
+fill([[572,585],[650,522],[716,496],[768,504],[792,556],[780,612],[742,652],[690,662],[630,642],[596,612]],{size:7,len:22,cover:1.1,ang:NZF(ANG(-30),.5,20),blend:.7,wob:1.6,col:GR([572,600],[792,560],[JS_H,JS_L,JS_M,JS_T,JS_S])});
+// ---------- torso ----------
+fill([[432,470],[470,420],[540,396],[600,408],[655,448],[694,468],[640,520],[584,562],[556,568],[500,556],[446,545],[430,515]],{size:7,len:22,cover:1.1,ang:NZF(AXF([[450,470],[540,470],[640,480]]),.4,20),blend:.8,bsz:1.6,wob:1.6,col:GR([430,440],[696,520],[JS_H,JS_L,JS_M,JS_T,JS_S])});
+// light plane on the lit upper chest, cool shade under the bust and at the waist
+GLZ([[450,450],[500,418],[560,404],[600,420],[560,452],[500,470],[456,490]],CC(JS_H),ANG(-25),{size:5,len:12,op:.55});
+GLZ([[470,500],[540,500],[600,490],[640,500],[600,540],[540,556],[480,548]],CC(JS_S),ANG(-20),{size:5,len:12,op:.4});
+// bust forms: soft light on top, shadow beneath (a left and a right mound)
+DB(486,476,9,JS_H,{opacity:.5,load:1});DB(488,498,6,JS_S,{opacity:.4,load:1});
+DB(548,422,7,JS_H,{opacity:.45,load:1});
+// real folds: pull lines from the belt and under the arm, a crease across the waist
+FOLD([[560,556],[520,548],[480,540]],4,JS_C,JS_H,.5);
+FOLD([[598,520],[570,492],[540,466]],3.6,JS_S,JS_H,.5);
+FOLD([[640,500],[610,470],[590,440]],3.4,JS_S,JS_H,.45);
+FOLD([[600,566],[640,580],[676,568]],4,JS_C,JS_H,.5);
+// ---------- gold belt ----------
+fill([[556,548],[600,505],[660,458],[696,468],[652,522],[590,592],[570,584]],{size:4.4,len:15,cover:1.2,ang:ANG(-42),blend:.4,col:G3([556,560],[696,470],GD_L,GD_M,GD_S)});
+PATH([[566,556],[606,514],[664,466]],[['naples_yellow',.8],['titanium_white',.9]],2,{op:.7,taper:[.15,.6]});
+PATH([[580,588],[640,530],[690,478]],GD_S,2.2,{op:.6,taper:[.15,.6]});
+// ---------- hip and thigh creases where the body bends ----------
+FOLD([[610,616],[664,600],[716,566]],4.2,JS_C,JS_H,.5);
+FOLD([[722,520],[742,556],[770,590]],4,JS_S,JS_H,.45);
+FOLD([[752,712],[786,728],[800,756]],4,JS_C,JS_H,.55);    // knee, near leg
+FOLD([[840,490],[860,520],[850,552]],4,JS_C,JS_H,.5);     // knee, far leg
+FOLD([[700,630],[740,670],[780,712]],3.2,JS_S,JS_H,.4);
+// kneecap lights
+DB(768,730,5,JS_H,{opacity:.55,load:1});DB(862,502,5,JS_H,{opacity:.55,load:1});
+// ---------- arms (bare skin, sleeveless): screen-left arm out toward the vortex edge ----------
+LIMB([[452,520],[366,492],[286,446]],[62,54,46],[SK_H,SK_L,SK_M,SK_S],{size:5,len:15,cover:1.2,lv:LVM,blend:.5,wob:1.6,ang:NZF(AXF([[452,520],[286,446]]),.25,16)});
+LIMB([[286,446],[232,416],[186,386]],[46,40,32],[SK_H,SK_L,SK_M,SK_S],{size:4.4,len:13,cover:1.2,lv:LVM,blend:.5,wob:1.6,ang:NZF(AXF([[286,446],[186,386]]),.25,16)});
+fill([[190,394],[178,372],[142,346],[122,340],[120,352],[150,378],[180,400]],{size:4,len:10,cover:1.2,ang:ANG(-35),col:G3s([120,350],[190,380],SK_L,SK_M,SK_S),blend:.5});
+FNG([[150,350],[128,342],[112,338]],2.4,SK_L);FNG([[162,358],[138,352],[116,346]],2.4,SK_M);FNG([[176,370],[158,366],[136,360]],2.2,SK_M);FNG([[196,376],[200,360],[196,348]],2.4,SK_S);
+// ---------- raised arm ----------
+LIMB([[560,404],[598,336],[630,274]],[64,54,48],[SK_H,SK_L,SK_M,SK_S],{size:5,len:15,cover:1.2,lv:LVM,blend:.5,wob:1.6,ang:NZF(AXF([[560,404],[630,274]]),.25,16)});
+LIMB([[630,274],[646,202],[656,134]],[48,42,36],[SK_H,SK_L,SK_M,SK_S],{size:4.4,len:13,cover:1.2,lv:LVM,blend:.5,wob:1.6,ang:NZF(AXF([[630,274],[656,134]]),.25,16)});
+fill([[632,128],[638,70],[652,40],[680,34],[692,62],[680,130]],{size:4,len:10,cover:1.2,ang:ANG(-80),col:G3s([632,80],[694,80],SK_L,SK_M,SK_S),blend:.5});
+FNG([[640,72],[638,48],[644,30]],2.4,SK_L);FNG([[654,54],[656,32],[662,16]],2.4,SK_L);FNG([[670,52],[676,32],[684,18]],2.4,SK_M);FNG([[684,64],[694,46],[700,32]],2.2,SK_S);
+FNG([[640,100],[622,90],[612,76]],2.6,SK_M);
+// bracelets, gold with a bright upper edge
+PATH([[630,134],[678,136]],GD_M,3.6,{});PATH([[632,131],[676,133]],GD_L,1.4,{op:.8});
+PATH([[184,396],[212,370]],GD_M,3.6,{});PATH([[190,392],[210,372]],GD_L,1.4,{op:.8});
+// ---------- shoulders: straps of the jumpsuit and a collar ----------
+PATH([[450,466],[470,430],[500,412],[540,398]],JS_H,3,{op:.8,taper:[.1,.5]});
+// ---------- rim light: gate light along the lower/right (gate-facing) edges, sun on upper-left edges ----------
+RIM([[1176,726],[1124,736],[1062,706]],3,.6,RIMG);
+for(const pts of [[[1050,676],[1000,626],[940,578]],[[1010,1062],[950,1056],[912,996]],[[930,962],[860,860],[800,770]],[[780,640],[742,654],[694,664]],[[790,560],[780,612]],[[696,470],[656,520]]])RIM(pts,3.2,.6,RIMG);
+for(const pts of [[[540,396],[600,408]],[[432,470],[470,420]],[[712,500],[790,500],[866,490]],[[286,440],[366,484]],[[560,400],[600,332]],[[640,598],[596,610]],[[700,664],[770,742]]])PATH(pts,RIMS,2.2,{op:.55,taper:[.25,.6]});
+// ---------- neck, jaw: the glow of the pendant falls here ----------
+fill([[404,440],[446,432],[462,470],[430,490],[408,470]],{size:3.6,len:8,cover:1.2,thin:.85,ang:ANG(30),blend:.5,col:G3s([404,450],[462,450],SK_M,SK_S,SK_S)});
+// ---------- pendant: a small intense light with a soft halo on the chest and under the jaw ----------
+{const cx=1530+490/3,cy=520+474/3,gx=cx-GX,gy=cy-GY;
+ // the cloth around it falls into cool shade so the light can glow against it
+ SHD([[448,476],[466,450],[498,442],[530,458],[540,490],[518,516],[484,524],[456,508]],CC([['ultramarine',.6],['cobalt_violet',.5],['dioxazine_purple',.1],['titanium_white',.3]]),ANG(10),{size:4.4,len:10,op:.7,blend:1.6,bop:.5,nobrk:1});
+ for(let i=0;i<7;i++){const an=i/7*TAU+.3;const r0=15;p.stroke({points:[[gx+Math.cos(an)*r0-Math.sin(an)*9,gy+Math.sin(an)*r0+Math.cos(an)*9,.8],[gx+Math.cos(an)*r0+Math.sin(an)*9,gy+Math.sin(an)*r0-Math.cos(an)*9,.8]],brush:'soft',size:26,opacity:.55});}
+ // the light spilling onto the cloth and the underside of the jaw (cyan-white, brightest near the source)
+ GLZ([[470,456],[514,450],[532,484],[506,508],[468,494]],GR([470,470],[532,490],[[['titanium_white',2],['cerulean',.3]],[['titanium_white',1.2],['cerulean',.6],['cobalt_violet',.1]]]),ANG(15),{size:3.6,len:8,op:.6,cover:1.1});
+ GLOW(cx,cy,4,[['titanium_white',3]],[['cerulean',.55],['titanium_white',1],['cobalt_violet',.08]],{k:1.7});
+ // radial scumbles of light around the source
+ for(let i=0;i<9;i++){const an=i/9*TAU+R(-.3,.3);const L1=R(6,14);const x0=gx+Math.cos(an)*3.5,y0=gy+Math.sin(an)*3.5;F([[x0,y0],[x0+Math.cos(an)*L1*.6,y0+Math.sin(an)*L1*.6],[x0+Math.cos(an)*L1,y0+Math.sin(an)*L1]],[['titanium_white',2],['cerulean',.2]],1.2,{opacity:.3+.2*(L1<10?1:0),taper:[.1,.9],thin:.5});}
+ // a lit rim on the nearest jaw edge
+ PATH([[438,462],[462,470],[484,466]],[['titanium_white',1.6],['cerulean',.4],['flesh_tint',.2]],1.6,{op:.55,taper:[.2,.6]});}
+// ---------- lost edges toward the cool vortex ----------
+for(const [pts,sz,op] of [[[[694,470],[640,522],[590,590]],10,.4],[[[792,556],[780,610],[742,654]],10,.4],[[[1050,650],[960,572],[870,520]],8,.35],[[[930,958],[850,850],[770,742]],8,.35],[[[656,134],[646,204],[632,274]],8,.35]])SOFT(pts,sz,op);
+
+// ---------- HEAD (12x ref, origin canvas 1620,630): face tipped back, forehead toward the upper left ----------
+p.dry();
+{MAP(1620,630,12,1750,700,1.0,0,0);NOBRK=true;
+ const FL=[['titanium_white',1.5],['flesh_tint',.7],['naples_yellow',.15],['quinacridone_rose',.04]];
+ const FM=[['titanium_white',1],['flesh_tint',1],['yellow_ochre',.03],['cadmium_orange',.02],['quinacridone_rose',.08]];
+ const FS=[['flesh_tint',.8],['burnt_sienna',.14],['quinacridone_rose',.1],['titanium_white',.5],['yellow_ochre',.03]];
+ const FR=[['flesh_tint',.7],['titanium_white',.7],['cerulean',.15],['cobalt_violet',.1],['quinacridone_rose',.08]];
+ const FC=[['flesh_tint',.7],['burnt_sienna',.3],['quinacridone_rose',.1],['cobalt_violet',.1],['titanium_white',.2]];
+ // hair behind and around the face: the high ponytail's root and the fringe
+ fill([[100,340],[110,240],[180,150],[300,100],[420,92],[520,120],[600,170],[560,160],[420,120],[300,140],[220,200],[190,300],[190,420],[150,440],[110,400]],{size:3.4,len:10,cover:1.3,ang:AXF([[110,380],[130,250],[260,120],[420,100],[560,130]]),blend:.5,wob:1.5,col:G3s([100,300],[600,150],HR_H,HR_L,HR_M,HR_S)});
+ // face oval, tipped back: forehead left, chin lower right
+ const FACE=[[200,290],[230,200],[310,150],[400,130],[500,160],[580,230],[640,320],[650,400],[600,470],[520,512],[430,500],[330,450],[250,390]];
+ fill(FACE,{size:5,len:10,cover:1,ang:NZF(ANG(40),.4,14),wob:.6,thin:.9,blend:1,bop:.35,o:{edge:.6},col:GR([200,300],[650,420],[FL,FM,FM,mixL(FM,FS,.5)],.04)});
+ // forehead light
+ fill([[222,230],[280,176],[340,160],[330,230],[270,300],[220,320]],{size:3.6,len:8,ang:ANG(-60),col:CC(FL),op:.55,thin:.85,o:{edge:.6}});
+ // cheek: warm blush, then the lit cheekbone
+ fill([[440,330],[520,300],[580,360],[560,430],[490,460],[450,400]],{size:3.8,len:8,ang:ANG(35),col:CC([['flesh_tint',.8],['quinacridone_rose',.3],['titanium_white',.4],['cadmium_orange',.05]]),op:.45,thin:.85,o:{edge:.6}});
+ // shaded jaw and chin plane (warm), with the cool pendant light catching the underside
+ fill([[480,470],[560,440],[630,420],[610,470],[540,508],[470,500]],{size:3,len:7,ang:ANG(-25),col:CC(FC),op:.55,thin:.8,o:{edge:.6}});
+ PATH([[500,500],[560,486],[620,450]],[['titanium_white',1.2],['cerulean',.4],['flesh_tint',.3]],2.4,{op:.6,taper:[.2,.6]});
+ // eyes: two wide arcs stacked along the forehead-to-chin axis, dark lashes, wet highlight
+ for(const [x,y,r] of [[330,230,1],[280,372,.9]]){
+  PATH([[x-34*r,y-8],[x,y-26*r],[x+34*r,y-4]],[['burnt_umber',.6],['ultramarine',.2],['burnt_sienna',.3]],1.3,{op:.9,taper:[.2,.3]});
+  DB(x+4,y,2.4*r,[['burnt_umber',.4],['ultramarine',.45],['cerulean',.15],['titanium_white',.1]],{opacity:.95,pressure:.8});
+  DB(x+2,y-3,.7,[['titanium_white',2]],{opacity:.9});}
+ PATH([[300,176],[346,158],[400,170]],[['burnt_sienna',.6],['yellow_ochre',.5],['cadmium_orange',.15],['titanium_white',.2]],1.5,{op:.8,taper:[.3,.5]});
+ PATH([[230,330],[262,320],[300,318]],[['burnt_sienna',.6],['yellow_ochre',.5],['cadmium_orange',.15],['titanium_white',.2]],1.4,{op:.8,taper:[.3,.5]});
+ // nose: light ridge, warm shadow on the far side
+ PATH([[350,270],[400,310],[440,330]],FL,2.4,{op:.6,taper:[.2,.4]});
+ DB(448,336,2,FS,{opacity:.5,pressure:.6});
+ // mouth: parted, a surprised "o": warm rose with a lit lip
+ DB(520,370,3,[['quinacridone_rose',.4],['burnt_sienna',.35],['alizarin_crimson',.1],['titanium_white',.3]],{pressure:.7,opacity:.85});
+ PATH([[500,350],[524,336],[552,348]],[['quinacridone_rose',.3],['flesh_tint',.8],['titanium_white',.7]],1.4,{op:.7,taper:[.2,.4]});
+ PATH([[500,396],[530,402],[556,390]],[['quinacridone_rose',.25],['flesh_tint',.8],['titanium_white',.9]],1.4,{op:.7,taper:[.2,.4]});
+ // ear half hidden under hair
+ DB(580,260,3.2,mixL(FM,FS,.4),{opacity:.8});
+ // hair bang across the forehead and a few loose strands
+ fill([[196,330],[210,240],[260,176],[340,140],[330,176],[270,214],[236,290],[230,350]],{size:3,len:8,ang:AXF([[330,150],[250,200],[210,300]]),col:G3s([196,260],[340,160],HR_H,HR_L,HR_M),op:.95,wob:1.3});
+ PATH([[540,150],[600,130],[680,120]],HR_L,2.4,{op:.8,taper:[.2,.9]});
+ NOBRK=false;
+ }

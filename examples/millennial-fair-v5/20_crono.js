@@ -84,136 +84,187 @@ function GRT(ax,ws,stops,o){o=o||{};const lv=o.lv||LV;const N=24;const S=[];
   let u=clamp(.5-.5*off+(o.bias||0)+R(-.05,.05),0,1);const f=u*(stops.length-1);const i=Math.min(stops.length-2,Math.floor(f));return J(mixL(stops[i],stops[i+1],f-i),o.jit);};}
 // paint a tube: planes light->shadow across the width, strokes along the axis
 function LIMB(ax,ws,stops,o){o=o||{};return fill(TUBE(ax,ws),Object.assign({ang:AXF(ax),col:GRT(ax,ws,stops,o)},o));}
-// ===== CRONO, seen from behind running toward the gate. Ref origin = canvas (420,930), ref px = 2x =====
-OX=420;OY=930;SC=.5;SZ=.55;
-// palettes
-const TAN_L=[['titanium_white',2.2],['raw_sienna',.18],['burnt_sienna',.1],['cobalt_violet',.04]];
-const TAN_M=[['raw_sienna',.6],['titanium_white',1.3],['yellow_ochre',.08],['cobalt_violet',.1]];
-const TAN_S=[['raw_sienna',.45],['burnt_umber',.15],['cobalt_violet',.45],['titanium_white',.9],['ultramarine',.06]];
-const TAN_C=[['burnt_umber',.6],['cobalt_violet',.6],['raw_sienna',.3],['ultramarine',.15],['titanium_white',.2]];
-const BOOT_L=[['burnt_sienna',.8],['burnt_umber',.6],['titanium_white',.28]];
-const BOOT_M=[['burnt_umber',1],['burnt_sienna',.45],['titanium_white',.06]];
-const BOOT_D=[['van_dyke_brown',1],['ultramarine',.3],['burnt_umber',.4]];
-const BL_L=[['cobalt_blue',.35],['cerulean',.2],['titanium_white',2.2],['naples_yellow',.3]];
-const BL_M=[['cobalt_blue',.7],['cerulean',.25],['titanium_white',1.3],['burnt_umber',.05],['cobalt_violet',.1]];
-const BL_H=[['cobalt_blue',.7],['cobalt_violet',.3],['titanium_white',1],['burnt_umber',.05]];
-const BL_S=[['ultramarine',.5],['cobalt_violet',.4],['titanium_white',.55],['cobalt_blue',.2],['burnt_umber',.06]];
-const BL_C=[['ultramarine',.6],['dioxazine_purple',.12],['cobalt_violet',.25],['titanium_white',.2],['burnt_umber',.14]];
-const GN_L=[['sap_green',.8],['cadmium_lemon',.5],['titanium_white',.7],['viridian',.1]];
-const GN_M=[['sap_green',1],['viridian',.35],['cadmium_lemon',.25],['titanium_white',.3]];
-const GN_S=[['viridian',.7],['sap_green',.35],['ultramarine',.3],['burnt_umber',.2]];
-const GN_C=[['viridian',.5],['ultramarine',.35],['burnt_umber',.4],['dioxazine_purple',.1]];
-const SK_L=[['titanium_white',1.5],['flesh_tint',.7],['naples_yellow',.15],['quinacridone_rose',.04]];
-const SK_M=[['titanium_white',.9],['flesh_tint',.85],['yellow_ochre',.08],['quinacridone_rose',.06]];
-const SK_S=[['flesh_tint',.7],['burnt_sienna',.25],['cobalt_violet',.22],['quinacridone_rose',.08],['titanium_white',.5]];
-const HR_L=[['cadmium_red',1.2],['cadmium_orange',1],['titanium_white',.1],['cadmium_yellow',.1]];
-const HR_M=[['cadmium_red',1.3],['cadmium_orange',.35],['alizarin_crimson',.1]];
-const HR_S=[['alizarin_crimson',.9],['cadmium_red',.5],['burnt_umber',.25],['ultramarine',.1]];
-const HR_C=[['alizarin_crimson',.9],['burnt_umber',.55],['ultramarine',.25],['dioxazine_purple',.1]];
-const WH_L=[['titanium_white',2],['naples_yellow',.2]];
-const WH_S=[['titanium_white',1.2],['cobalt_violet',.3],['cerulean',.25],['ultramarine',.06]];
-const OR_L=[['cadmium_orange',1],['cadmium_yellow',.4],['titanium_white',.15]];
-const OR_S=[['cadmium_orange',.8],['cadmium_red',.5],['alizarin_crimson',.2],['cobalt_violet',.1]];
-
-
+// ===== kit: helpers added in r6 on top of lib3d =====
+// smooth value noise for direction fields so strokes do not read as parallel hatching
+const _nz=[];for(let i=0;i<64;i++)_nz.push(R(0,1));
+function vnoise(x,y){const xi=Math.floor(x),yi=Math.floor(y);const xf=x-xi,yf=y-yi;const h=(a,b)=>_nz[((a*7+b*13)%64+64)%64];
+ const s=t=>t*t*(3-2*t);const a=h(xi,yi),b=h(xi+1,yi),c=h(xi,yi+1),d=h(xi+1,yi+1);return lerp(lerp(a,b,s(xf)),lerp(c,d,s(xf)),s(yf));}
+// wrap an angle field with smooth noise (amp in radians, scale in px)
+const NZF=(f,amp,sc)=>(x,y)=>f(x,y)+amp*(vnoise(x/(sc||18),y/(sc||18))-.5)*2;
+// set the REF->canvas mapping: ref image (rx,ry) -> crop origin (cx,cy) at refScale, then scaled by k about F
+function MAP(cx,cy,refScale,Fx,Fy,k,dx,dy){SC=k/refScale;OX=Fx+k*(cx-Fx)+(dx||0);OY=Fy+k*(cy-Fy)+(dy||0);GX=(typeof __GX!=='undefined'?__GX:0);GY=(typeof __GY!=='undefined'?__GY:0);}
+// cool rim light along a REF path
+const RIMC=[['cerulean',.5],['titanium_white',1],['cobalt_violet',.35]];
+const RIMW=[['titanium_white',1],['naples_yellow',.5],['cadmium_yellow',.1]];
+const RIM=(ctl,size,op,col)=>PATH(ctl,col||RIMC,size*.8,{op:(op===undefined?.7:op)*.8,taper:[.35,.6],thin:.5});
+// fold: dark soft crease with a lighter lip beside it. ctl in REF coords, dark/light = colour mixes
+function FOLD(ctl,size,dark,light,op,off){off=off||[2,-2];const c2=ctl.map(q=>[q[0]+off[0],q[1]+off[1]]);
+ PATH(ctl,dark,size,{op:op===undefined?.6:op,taper:[.25,.7],thin:.5});PATH(c2,light,size*.45,{op:(op===undefined?.6:op)*.5,taper:[.35,.7],thin:.5});}
+// finger: small tapered stroke from a base along a bent path (REF coords)
+const FNG=(ctl,size,col,op)=>PATH(ctl,col,size,{op:op===undefined?.95:op,taper:[.1,.55],thin:.35});
+// glowing source in canvas coords: stacked translucent discs, brightening toward the centre, melted into a smooth falloff, then a hot core
+function GLOW(x,y,r,core,halo,o){o=o||{};x-=GX;y-=GY;halo=halo||[['cerulean',.5],['titanium_white',1],['cobalt_violet',.1]];
+ const rings=[[7,.16,0],[5.4,.16,.2],[4.1,.18,.4],[3.1,.2,.6],[2.2,.24,.8],[1.5,.3,1]];
+ for(const [m,op,w] of rings){const col=mixL(halo,[['titanium_white',3]],w);
+  p.stroke({points:[[x-m*r*.15,y,.9],[x+m*r*.15,y,.9]],brush:'round',size:m*r*2,color:col,load:1,opacity:op*(o.k||1),edge:.95,taper:[.3,.3],thin:.9});}
+ p.stroke({points:[[x-r*3,y-r,.8],[x+r*3,y+r,.8]],brush:'soft',size:r*7,opacity:.5});
+ p.stroke({points:[[x-r*2,y+r,.8],[x+r*2,y-r,.8]],brush:'soft',size:r*5,opacity:.4});
+ p.dab({x:x,y:y,size:r*1.2,color:core||[['titanium_white',3]],brush:'round',load:1.3,pressure:.95});}
+// sparse second layer of short strokes crossing the first, to break up hatching and add colour
+const GLZ=(ctl,col,ang,o)=>fill(ctl,Object.assign({size:5,len:12,cover:.6,ang:NZF(ang,.5,16),col:col,op:.38,thin:.75,wob:2,blend:.8,bop:.4,o:{edge:.7}},o||{}));
+// a cast/form shadow shape: strong, cool, edges melted so it can be lost on one side
+const SHD=(ctl,col,ang,o)=>fill(ctl,Object.assign({size:6,len:16,cover:1,ang:NZF(ang,.35,18),col:col,op:.78,thin:.6,wob:1.5,blend:1.1,bop:.5,o:{edge:.6}},o||{}));
+// broken colour: a share of strokes in every fill carry a touch of a warm or a cool accent, so planes shimmer instead of sitting flat
+const _COOL={cerulean:1,cobalt_blue:1,ultramarine:1,prussian_blue:1,phthalo_blue:1,viridian:1,paynes_grey:1,cobalt_violet:1,dioxazine_purple:1,manganese_blue:1};
+const BRK=(f,k)=>(x,y)=>{const c=f(x,y);const r=R(0,1);k=k||.12;if(r>=.44)return c;
+ let tot=0,cool=0;for(const [n,w] of c){if(n==='titanium_white'||n==='zinc_white')continue;tot+=w;if(_COOL[n])cool+=w;}
+ const isCool=tot>0&&cool/tot>.5;
+ if(r<.22)return mixL(c,isCool?[['quinacridone_rose',.3],['cobalt_violet',.2],['titanium_white',.3]]:[['cadmium_orange',.25],['naples_yellow',.35],['quinacridone_rose',.08]],k);
+ return mixL(c,isCool?[['cerulean',.3],['titanium_white',.4],['cobalt_violet',.05]]:[['cobalt_violet',.3],['cerulean',.2],['ultramarine',.1]],k);};
+let NOBRK=false;
+const _fill=fill;
+// every large form gets a base layer, then a sparser, finer second layer crossing it at about 55-65 degrees (set nox:1 to skip)
+fill=function(ctl,o){if(!o||!o.col)return _fill(ctl,o);if(NOBRK)return _fill(ctl,o);
+ const o2=Object.assign({},o,{col:BRK(o.col,o.brk)});const n=_fill(ctl,o2);
+ if(!o.nox&&!o.sharp&&(o.size||14)>=3.6){const poly=ctl.map(q=>T(q[0],q[1]));
+  if(polyArea(poly)>1200){const rot=o.xl||(1.0+R(-.2,.2));const ang0=o.ang||ANG(90);const sz=(o.size||14);
+   _fill(ctl,Object.assign({},o2,{size:sz*.7,len:(o.len||sz*2.6)*.75,cover:(o.cover||1)*.55,ang:(x,y)=>ang0(x,y)+rot,op:.42,thin:.7,blend:0,col:BRK(o.col,.16),o:Object.assign({},o.o||{},{edge:.5})}));}}
+ return n;};
+// ===== CRONO (r6 rebuild): running away toward the gate, seen from behind; shapes in the 2.4x ref crop (origin canvas 440,990) =====
+MAP(440,990,2.4,690,1555,1.0,0,0);SZ=1;
 const G3=(A,B,a,b,c,d)=>GR(A,B,[a,b,c,d||c]);
-// ---------- 1. cast shadow on the sand (long, falls to the lower right) ----------
-fill([[596,1192],[650,1168],[720,1142],[765,1150],[742,1176],[800,1196],[960,1232],[1180,1272],[1500,1330],[1500,1372],[1180,1310],[960,1272],[800,1236],[690,1218]],
- {size:26,len:90,ang:ANG(10),thin:.6,blend:1,bsz:1.6,op:.82,col:GR([600,1190],[1400,1330],[[['cobalt_violet',.7],['ultramarine',.3],['raw_umber',.3],['titanium_white',.7],['alizarin_crimson',.05]],[['cobalt_violet',.6],['ultramarine',.2],['raw_sienna',.2],['titanium_white',1.1]]])});
+const G3s=(A,B,a,b,c,d)=>GR(A,B,[a,b,c,d||c],.05);
+const LVC=[-.8,-.5];
+const HR_H=[['cadmium_yellow',.5],['cadmium_orange',.9],['cadmium_red',.2],['titanium_white',.12]];
+const HR_L=[['cadmium_orange',1],['cadmium_red',.5],['cadmium_yellow',.15]];
+const HR_M=[['cadmium_red',1],['cadmium_orange',.35],['alizarin_crimson',.2]];
+const HR_S=[['alizarin_crimson',.8],['cadmium_red',.35],['burnt_sienna',.3],['cobalt_violet',.2]];
+const HR_C=[['alizarin_crimson',.6],['burnt_umber',.4],['dioxazine_purple',.3],['ultramarine',.1]];
+const BD_L=[['titanium_white',2],['naples_yellow',.2]];
+const BD_M=[['titanium_white',2.2],['cerulean',.1],['cobalt_violet',.05],['naples_yellow',.15]];
+const BD_S=[['titanium_white',1.3],['cerulean',.15],['cobalt_violet',.2],['naples_yellow',.1],['burnt_umber',.03]];
+const TN_H=[['titanium_white',2],['cerulean',.3],['naples_yellow',.2]];
+const TN_L=[['cerulean',.4],['titanium_white',1.4],['naples_yellow',.12],['cobalt_blue',.08]];
+const TN_M=[['cerulean',.35],['cobalt_blue',.3],['titanium_white',.9],['cobalt_violet',.06]];
+const TN_S=[['cobalt_blue',.4],['cobalt_violet',.25],['titanium_white',.6],['burnt_sienna',.06]];
+const TN_C=[['ultramarine',.4],['cobalt_violet',.3],['titanium_white',.35],['burnt_sienna',.1]];
+const GR_H=[['sap_green',.4],['naples_yellow',.3],['titanium_white',.5]];
+const GR_L=[['sap_green',.6],['viridian',.2],['naples_yellow',.2],['titanium_white',.3]];
+const GR_M=[['sap_green',.7],['viridian',.4],['titanium_white',.2],['burnt_umber',.1]];
+const GR_S=[['viridian',.6],['sap_green',.3],['ultramarine',.2],['burnt_umber',.2],['titanium_white',.1]];
+const GR_C=[['viridian',.4],['ultramarine',.35],['burnt_umber',.3],['dioxazine_purple',.1]];
+const OR_L=[['cadmium_orange',1],['cadmium_yellow',.4],['titanium_white',.2]];
+const OR_M=[['cadmium_orange',1],['cadmium_red',.3],['cadmium_yellow',.1]];
+const OR_S=[['cadmium_orange',.4],['burnt_sienna',.6],['alizarin_crimson',.3],['cobalt_violet',.15]];
+const PN_H=[['naples_yellow',.5],['titanium_white',1.2],['raw_sienna',.1]];
+const PN_L=[['naples_yellow',.5],['titanium_white',.7],['raw_sienna',.3],['yellow_ochre',.15]];
+const PN_M=[['raw_sienna',.6],['naples_yellow',.35],['titanium_white',.4],['burnt_sienna',.1]];
+const PN_S=[['raw_sienna',.5],['burnt_sienna',.3],['cobalt_violet',.25],['titanium_white',.3]];
+const PN_C=[['burnt_sienna',.6],['cobalt_violet',.4],['raw_umber',.3],['ultramarine',.1]];
+const BT_H=[['burnt_sienna',.7],['yellow_ochre',.4],['titanium_white',.4]];
+const BT_L=[['burnt_sienna',.8],['raw_sienna',.4],['titanium_white',.2],['burnt_umber',.2]];
+const BT_M=[['burnt_umber',.9],['burnt_sienna',.5],['van_dyke_brown',.3]];
+const BT_S=[['van_dyke_brown',.9],['burnt_umber',.5],['cobalt_violet',.2],['ultramarine',.12]];
+const BT_C=[['ivory_black',.8],['van_dyke_brown',.6],['ultramarine',.2]];
+const SK_L=[['titanium_white',1.1],['flesh_tint',.8],['naples_yellow',.2],['cadmium_orange',.04]];
+const SK_M=[['titanium_white',.7],['flesh_tint',.9],['yellow_ochre',.1],['cadmium_orange',.08],['quinacridone_rose',.06]];
+const SK_S=[['flesh_tint',.7],['burnt_sienna',.3],['cobalt_violet',.15],['titanium_white',.3],['quinacridone_rose',.08]];
+const BK_M=[['ivory_black',.9],['ultramarine',.35],['burnt_umber',.25],['titanium_white',.12]];
+const BK_L=[['paynes_grey',.8],['ultramarine',.3],['titanium_white',.5],['burnt_umber',.2]];
+const RIMV=[['cerulean',.4],['titanium_white',1],['cobalt_violet',.45]];       // gate light, from the front right
+const RIMS=[['naples_yellow',.7],['titanium_white',.9],['cadmium_orange',.1]];  // low sun, from the left
 
-// ---------- 2. rear leg (screen left): thigh, knee, calf, boot ----------
-LIMB([[540,830],[512,930],[478,1030],[448,1118]],[104,92,76,66],[TAN_L,TAN_M,TAN_S,TAN_C],{size:15,len:50,blend:.7,bias:-.12});
-LIMB([[448,1112],[402,1062],[376,1034]],[66,58,52],[TAN_L,TAN_M,TAN_S,TAN_C],{size:11,len:34,blend:.6,bias:-.1});
-// knee cap catches the light
-fill([[404,1088],[444,1076],[470,1108],[452,1146],[420,1140]],{size:9,len:22,ang:ANG(30),blend:.5,col:GR([404,1088],[470,1140],[TAN_L,TAN_L,TAN_M])});
-// reflected sand light on the shaded thigh edge
-PATH([[548,880],[540,960],[512,1050],[488,1100]],[['naples_yellow',.4],['raw_sienna',.5],['cobalt_violet',.2],['titanium_white',.4]],8,{op:.55,taper:[.2,.6]});
-// rear boot with the sole turned up to the light
-fill([[198,1018],[250,986],[320,946],[345,924],[356,944],[358,986],[402,1022],[414,1052],[404,1082],[376,1091],[352,1070],[332,1026],[290,1030],[236,1034],[204,1030]],
- {size:13,len:40,ang:AXF([[210,1025],[300,965],[350,935]]),thin:.5,blend:.5,col:G3([200,1010],[400,1070],BOOT_L,BOOT_M,BOOT_D)});
-fill([[205,1020],[260,990],[318,950],[300,985],[250,1020]],{size:7,len:26,ang:ANG(-28),col:CC(BOOT_L),op:.9,thin:.3});
-PATH([[352,945],[356,985],[400,1022]],BOOT_L,5,{op:.8});
-
-// ---------- 3. front leg (planted): thigh, calf and boot ----------
-LIMB([[598,840],[598,930],[598,1030]],[70,62,56],[TAN_M,TAN_S,TAN_C],{size:12,len:40,blend:.6,bias:-.05});
-fill([[566,1042],[592,1030],[626,1018],[632,1062],[626,1100],[660,1090],[692,1090],[696,1106],[662,1142],[622,1182],[596,1199],[573,1191],[570,1122]],
- {size:12,len:36,ang:AXF([[600,1030],[600,1120],[690,1100]]),blend:.5,col:G3([566,1100],[690,1100],BOOT_L,BOOT_M,BOOT_D)});
-PATH([[570,1060],[574,1130],[580,1190]],BOOT_L,6,{op:.8});
-PATH([[566,1040],[595,1030],[628,1020]],BOOT_M,8,{});
-
-// ---------- 4. tunic skirt (hip length), sun on the left, violet shade right ----------
-fill([[458,688],[608,698],[622,745],[636,840],[560,852],[480,846],[392,830],[428,760]],
- {size:20,len:70,ang:AXF([[520,690],[512,760],[505,850]]),blend:1,bsz:1.7,col:G3([395,780],[640,780],BL_L,BL_M,BL_H,BL_S)});
-// shadow under the hem on the thighs
-fill([[470,850],[560,858],[636,848],[636,858],[560,870],[474,862]],{size:7,len:30,ang:ANG(0),col:CC(mixL(TAN_C,TAN_S,.6)),op:.45,thin:.55});
-// hem folds and swing, shadow cast by the swinging hand
-for(const [x,y,l] of [[430,822,40],[490,836,44],[560,846,46],[612,840,40]])PATH([[x,y-l],[x+R(-5,5),y]],BL_S,9,{op:.65,taper:[.1,.6]});
-// ---------- 5. torso (back of the tunic) ----------
-fill([[484,492],[528,470],[600,478],[634,508],[640,566],[610,690],[460,688],[462,600],[478,552]],
- {size:17,len:56,ang:AXF([[535,690],[545,590],[565,490]]),blend:1,bsz:1.7,col:G3([450,580],[650,580],BL_L,BL_M,BL_H,BL_S)});
-// shoulder blade planes and spine groove
-fill([[466,548],[520,534],[546,596],[516,640],[470,622]],{size:10,len:30,ang:ANG(60),col:CC(BL_L),op:.7,thin:.5,blend:.4});
-PATH([[566,500],[556,590],[544,680]],BL_S,7,{op:.65,taper:[.1,.7]});
-PATH([[600,520],[612,600],[606,680]],BL_C,10,{op:.5,taper:[.1,.8]});
-// ---------- belt ----------
-fill([[456,684],[612,692],[614,710],[456,704]],{size:8,len:60,ang:ANG(2),col:G3([444,690],[620,690],[['ivory_black',.9],['burnt_umber',.5],['titanium_white',.15]],[['ivory_black',1],['burnt_umber',.3],['titanium_white',.06]],[['ivory_black',1],['ultramarine',.25]])});
-// ---------- katana scabbard at the left hip ----------
-PATH([[470,706],[432,770],[392,840],[354,898]],[['ivory_black',.8],['burnt_umber',.6],['ultramarine',.12],['titanium_white',.1]],13,{});
-PATH([[464,712],[428,776],[392,838]],BOOT_L,3.5,{op:.85});
-PATH([[372,866],[352,900]],[['cadmium_yellow',.6],['yellow_ochre',.6],['burnt_umber',.2]],10,{});
-
-// ---------- 6. left arm (swinging back) ----------
-LIMB([[470,500],[428,560],[392,620],[364,700],[360,768]],[50,44,40,34,28],[GN_L,GN_M,GN_S,GN_C],{size:12,len:44,blend:.6});
-fill([[464,492],[490,502],[470,520],[446,520]],{size:8,len:18,ang:ANG(-30),col:CC(GN_L),op:.9});
-// elbow crease
-PATH([[385,585],[420,590],[430,610]],GN_C,5,{op:.6});
-// ---------- 7. right arm (forward, raised) ----------
-LIMB([[636,520],[700,500],[728,480]],[48,42,36],[GN_L,GN_M,GN_S,GN_C],{size:11,len:36,blend:.5,lv:[-.5,-.85]});
-LIMB([[728,480],[742,440],[738,396]],[40,34,28],[GN_L,GN_M,GN_S,GN_C],{size:10,len:30,blend:.5,lv:[-.6,-.8]});
-// ---------- 8. neck, ear, head skin ----------
-fill([[546,418],[598,418],[622,430],[616,468],[540,468]],{size:9,len:24,ang:ANG(90),col:G3([540,440],[620,440],SK_M,SK_S,SK_S)});
-fill([[600,380],[628,392],[630,430],[608,448],[594,420]],{size:7,len:18,ang:ANG(80),col:G3([596,410],[632,410],SK_M,SK_M,SK_S)});
-// ---------- 9. ascot ----------
-fill([[520,462],[608,454],[616,474],[600,490],[536,492],[520,480]],{size:8,len:30,ang:ANG(0),col:G3([520,470],[616,470],OR_L,OR_L,OR_S,OR_S)});
-PATH([[524,476],[496,490],[470,518],[452,540]],OR_L,10,{taper:[.1,.7]});
-PATH([[530,484],[510,508],[498,540]],OR_S,8,{taper:[.1,.7]});
-// ---------- 10. hands ----------
-fill([[338,776],[376,770],[394,792],[398,822],[404,860],[374,852],[342,838]],{size:7,len:20,ang:ANG(80),col:G3([338,800],[404,800],SK_L,SK_M,SK_S)});
-fill([[722,392],[750,398],[744,356],[728,326],[714,340],[706,352],[712,382]],{size:6,len:18,ang:ANG(-85),col:G3([704,360],[750,360],SK_L,SK_M,SK_S)});
-// ---------- 11. hair: one flame mass, spikes streaming back ----------
-const HC=[565,425],HK=1.2;const HP=a=>a.map(q=>[HC[0]+(q[0]-HC[0])*HK,HC[1]+(q[1]-HC[1])*HK]);
-const HAIR=HP([[505,414],[498,372],[470,336],[432,262],[486,300],[494,282],[455,214],[522,262],[500,200],[464,176],[540,236],[548,158],[570,226],[586,182],[600,256],[612,214],[624,282],[634,256],[640,322],[648,362],[642,402],[612,428],[540,430]]);
-fill(HAIR,{sharp:true,size:12,len:44,ang:RADF(565,430),cover:1.3,wob:.6,thin:.55,blend:.5,bop:.35,o:{taper:[.1,.75]},col:G3([430,200],[660,440],HR_M,HR_M,HR_S,HR_C)});
-// each spike: a dark underside stroke, then the sunlit side, tapering to a point
-const SPK=[[[515,330],[428,252],20],[[505,345],[440,300],16],[[525,312],[460,170],24],[[550,300],[543,150],26],[[580,300],[588,172],24],[[600,306],[614,206],22],[[620,326],[634,250],18],[[500,330],[490,200],20]];
-for(const [a,b,w] of SPK){const A=HP([a])[0],B=HP([b])[0];const mid=[(A[0]+B[0])/2+R(-8,8),(A[1]+B[1])/2];
- PATH([A,mid,B],HR_S,w*.9,{taper:[.05,.95],thin:.5});
- const o1=[A[0]-w*.18,A[1]],o2=[mid[0]-w*.14,mid[1]],o3=[B[0]-1,B[1]+4];
- PATH([o1,o2,o3],G3([430,200],[660,300],HR_L,HR_L,HR_M)(A[0],A[1]),w*.5,{taper:[.05,.95],thin:.4,load:1.2});}
-// warm sun glints along the lit left edge of the mass
-for(const [a,b] of [[[472,340],[452,292]],[[500,300],[470,214]],[[538,278],[532,190]],[[570,262],[580,194]]])PATH(HP([a,b]),HR_L,5,{taper:[.1,.9],load:1.3,thin:.3});
-// cold gate light on the shadow side
-for(const [a,b] of [[[636,330],[640,290]],[[646,380],[640,336]]])PATH(HP([a,b]),[['cobalt_violet',.7],['cerulean',.3],['titanium_white',.5]],6,{taper:[.1,.9],op:.8});
-// ---------- 12. bandana + tails ----------
-PATH([[498,388],[530,406],[590,412],[642,392]],WH_S,22,{});
-PATH([[500,384],[536,398],[590,402]],WH_L,12,{});
-PATH([[518,398],[488,402],[462,420],[420,436],[390,432]],WH_L,14,{taper:[.05,.8]});
-PATH([[522,404],[498,418],[478,440],[450,452]],WH_S,12,{taper:[.05,.8]});
-// ---------- details: cloth folds, cast shadows, rim light, accents ----------
-// pants folds across the thighs and knee
-for(const [a,b] of [[[466,940],[522,966]],[[420,1100],[470,1128]]])PATH([a,[(a[0]+b[0])/2,(a[1]+b[1])/2+R(-6,6)],b],TAN_S,6,{op:.6,taper:[.2,.6]});
-
-// tunic: cast shadow of the raised arm on the right shoulder, wrinkles pulled by the belt
-fill([[596,512],[644,534],[642,610],[604,596]],{size:8,len:26,ang:ANG(75),col:CC(BL_S),op:.35,thin:.6,blend:1.2,bop:.6});
-for(const [x,y] of [[480,676],[520,680],[560,684],[596,690]])PATH([[x,y],[x+R(8,16),y+R(-18,-10)]],BL_S,5,{op:.55,taper:[.1,.7]});
-for(const [x,y] of [[480,712],[530,718],[580,722]])PATH([[x,y],[x+R(-10,-4),y+R(14,26)]],BL_S,5,{op:.5,taper:[.1,.7]});
-// boots: lit edges and cuffs
-PATH([[570,1046],[576,1120],[584,1186]],BOOT_L,4,{op:.85,taper:[.1,.7]});
-PATH([[200,1020],[250,990],[310,950]],BOOT_L,4,{op:.85,taper:[.1,.7]});
-PATH([[352,1040],[392,1070],[404,1100]],[['burnt_umber',.8],['ivory_black',.4]],5,{op:.8});
-// cold gate light rimming the shadow edges (right side)
-for(const pts of [[[640,520],[648,580],[630,640]],[[612,700],[630,760],[636,830]],[[634,930],[632,1000],[630,1020]],[[748,410],[742,470],[728,500]]])PATH(pts,[['cerulean',.5],['titanium_white',1],['cobalt_violet',.3]],4,{op:.75,taper:[.1,.6]});
-// warm sun glints on the lit left edges
-for(const pts of [[[484,500],[470,545]],[[430,570],[402,620]],[[372,690],[366,760]],[[470,700],[444,790]],[[455,940],[445,1010]]])PATH(pts,[['naples_yellow',1],['titanium_white',1.2]],3.5,{op:.7,taper:[.1,.7]});
-// ---------- lost edges on the shadow side (soft badger drags), a few found edges stay crisp on the lit side ----------
-for(const [pts,sz,op] of [[[[642,520],[648,580],[630,650],[618,700]],12,.55],[[[632,720],[636,790],[638,850]],12,.5],[[[636,860],[634,940],[630,1020]],12,.5],[[[568,1100],[596,1190]],10,.45],[[[750,420],[742,470],[702,510]],10,.5],[[[655,380],[644,420],[612,432]],10,.5],[[[470,880],[455,960],[440,1060]],10,.35],[[[420,560],[392,640],[372,720]],10,.35]])SOFT(pts,sz,op);
+// ---------- cast shadow on the plaza, falling right and a little toward us ----------
+fill([[520,1384],[600,1370],[800,1380],[1100,1396],[1400,1410],[1640,1420],[1700,1436],[1640,1452],[1400,1448],[1100,1436],[800,1428],[620,1432],[540,1424]],{size:11,len:50,ang:ANG(4),thin:.55,blend:.9,op:.75,wob:1.3,col:GR([520,1400],[1700,1430],[[['cobalt_violet',.6],['ultramarine',.3],['burnt_umber',.5],['paynes_grey',.2]],[['cobalt_violet',.6],['ultramarine',.25],['burnt_umber',.3],['titanium_white',.25]],[['cobalt_violet',.5],['raw_sienna',.3],['titanium_white',.6]]])});
+// ---------- left (screen) leg: tan pants, the boot raised behind ----------
+fill([[508,880],[582,884],[590,960],[586,1040],[580,1110],[506,1108],[510,1040],[506,960]],{size:5.4,len:18,cover:1.2,ang:NZF(AXF([[546,884],[544,1108]]),.3,18),blend:.7,wob:1.5,col:G3([506,1000],[592,1000],PN_L,PN_M,PN_S,PN_C)});
+FOLD([[516,1030],[548,1050],[576,1040]],3.4,PN_C,PN_H,.5);
+FOLD([[520,950],[552,970],[578,962]],3,PN_S,PN_H,.45);
+// left boot: calf with a folded cuff, the foot turned out behind
+fill([[502,1108],[572,1110],[568,1170],[562,1226],[576,1262],[568,1296],[520,1304],[494,1292],[496,1250],[512,1212],[508,1160]],{size:4.6,len:15,cover:1.3,ang:NZF(AXF([[538,1110],[534,1210],[528,1290]]),.3,16),blend:.6,wob:1.4,col:G3s([494,1200],[578,1200],BT_H,BT_L,BT_M,BT_S)});
+fill([[500,1104],[574,1106],[574,1136],[502,1134]],{size:3.4,len:11,ang:ANG(-4),col:G3([500,1120],[576,1120],BT_H,BT_L,BT_M,BT_S),op:.95});   // cuff
+PATH([[502,1138],[574,1140]],BT_C,2.2,{op:.7});
+PATH([[500,1170],[498,1210]],BT_H,2.2,{op:.6,taper:[.15,.6]});
+// ---------- right leg: pants to the bent knee, then the rear boot with its sole toward us ----------
+fill([[590,884],[702,872],[708,960],[692,1060],[684,1146],[600,1160],[596,1060],[588,960]],{size:5.4,len:18,cover:1.2,ang:NZF(AXF([[646,884],[640,1160]]),.3,18),blend:.7,wob:1.5,col:G3([590,1000],[710,1000],PN_L,PN_M,PN_S,PN_C)});
+FOLD([[610,960],[650,990],[690,978]],3.6,PN_C,PN_H,.5);
+FOLD([[604,1060],[640,1090],[684,1076]],3.4,PN_S,PN_H,.45);
+// bent knee: a warm, rounded lump with creases behind it
+fill([[596,1138],[674,1128],[690,1186],[664,1232],[622,1240],[598,1202]],{size:4.4,len:13,cover:1.3,ang:ANG(20),blend:.6,wob:1.4,col:G3s([596,1180],[690,1180],PN_H,PN_L,PN_M,PN_S)});
+FOLD([[610,1176],[640,1196],[672,1186]],3.2,PN_C,PN_H,.5);
+// boot shaft and heel
+fill([[598,1196],[654,1188],[666,1240],[646,1296],[640,1350],[628,1406],[604,1418],[576,1410],[566,1360],[572,1300],[580,1250]],{size:4.6,len:15,cover:1.3,ang:NZF(AXF([[622,1200],[612,1300],[602,1410]]),.3,16),blend:.6,wob:1.3,col:G3s([566,1300],[668,1300],BT_L,BT_M,BT_S,BT_C)});
+fill([[594,1190],[656,1182],[660,1212],[598,1222]],{size:3.4,len:11,ang:ANG(-10),col:G3([594,1200],[660,1200],BT_H,BT_L,BT_M,BT_S),op:.95});   // cuff
+// the sole: a clean slab, tan welt, heel block and forefoot with an arch between
+fill([[572,1304],[636,1300],[638,1352],[630,1408],[604,1418],[578,1410],[566,1362]],{size:3.6,len:12,cover:1.3,ang:ANG(88),blend:.4,col:G3s([566,1340],[640,1340],BT_M,BT_S,BT_C,BT_C)});
+PATH([[574,1306],[634,1302]],[['raw_sienna',.7],['yellow_ochre',.4],['titanium_white',.3]],2.6,{op:.9});                 // top welt
+PATH([[570,1356],[636,1350]],[['raw_umber',.6],['ivory_black',.5]],1.8,{op:.8});                                    // arch gap
+PATH([[568,1362],[580,1410],[604,1418]],[['raw_sienna',.7],['yellow_ochre',.3],['titanium_white',.3]],2.2,{op:.8,taper:[.1,.5]});  // lit left welt
+PATH([[640,1306],[640,1352],[630,1410]],BT_C,2.4,{op:.75});
+FOLD([[580,1318],[606,1326],[630,1316]],2.4,BT_C,BT_L,.5);
+FOLD([[580,1376],[606,1386],[628,1378]],2.4,BT_C,BT_L,.5);
+// ---------- tunic skirt: flared, blown to the left by the run; folds radiate from the belt ----------
+fill([[500,700],[690,692],[712,780],[736,880],[580,908],[424,896],[450,800],[476,740]],{size:6.4,len:22,cover:1.2,ang:NZF(AXF([[560,704],[560,800],[570,900]]),.35,22),blend:.9,bsz:1.6,wob:1.6,col:GR([424,820],[736,820],[TN_H,TN_L,TN_M,TN_S,TN_C])});
+GLZ([[430,860],[470,780],[540,740],[560,800],[520,870]],CC(TN_H),ANG(100),{size:4.4,len:12,op:.55});
+GLZ([[630,730],[712,780],[736,882],[650,900],[640,820]],G3([620,800],[736,800],TN_S,TN_S,TN_C),ANG(80),{size:4.4,len:12,op:.55,cover:1.1});
+for(const [a,b,c,d] of [[[540,718],[524,780],[500,850],[470,892]],[[590,716],[586,790],[584,850],[590,900]],[[640,714],[656,780],[680,850],[712,888]],[[510,716],[484,770],[452,830],[438,884]]])FOLD([a,b,c,d],5,TN_C,TN_H,.5,[3,-1]);
+// hem: scalloped, a wind-lift on the left
+for(let i=0;i<7;i++){const x=428+i*44;PATH([[x,892+i*1.2+R(-3,3)],[x+22,910+R(-2,4)],[x+44,900+R(-3,3)]],i%2?TN_S:TN_M,4,{op:.85,taper:[.1,.3]});}
+// ---------- vest: sleeveless tunic body, light on the left shoulder-blade ----------
+fill([[510,490],[552,468],[596,470],[650,466],[690,486],[698,560],[690,650],[702,704],[498,704],[504,610],[506,540]],{size:6.4,len:22,cover:1.2,ang:NZF(AXF([[560,480],[556,590],[552,700]]),.35,20),blend:.9,bsz:1.6,wob:1.6,col:GR([500,540],[702,600],[TN_H,TN_L,TN_M,TN_S,TN_C])});
+GLZ([[516,500],[560,476],[600,486],[580,560],[540,620],[510,600]],CC(TN_H),ANG(-70),{size:4.4,len:12,op:.55});
+GLZ([[630,490],[690,500],[698,620],[690,690],[650,690],[640,600]],G3([620,560],[698,560],TN_S,TN_S,TN_C),ANG(80),{size:4.4,len:12,op:.55,cover:1.1});
+FOLD([[560,560],[580,620],[592,690]],5,TN_C,TN_H,.45);
+FOLD([[640,540],[656,610],[662,690]],4.4,TN_C,TN_H,.4);
+FOLD([[530,640],[550,672],[566,700]],4,TN_S,TN_H,.4);
+// belt
+fill([[494,694],[704,684],[708,716],[490,722]],{size:3.6,len:20,ang:ANG(-3),cover:1.3,col:G3([490,704],[710,704],BK_L,BK_M,BK_M,BK_M)});
+PATH([[498,696],[560,694],[620,690]],[['paynes_grey',.5],['titanium_white',.7],['cobalt_violet',.2]],1.8,{op:.7,taper:[.1,.6]});
+// ---------- arms: green sleeves, hand at the hip and a fist raised ----------
+LIMB([[524,498],[446,566],[388,640]],[66,60,52],[GR_H,GR_L,GR_M,GR_S,GR_C],{size:4.8,len:16,cover:1.3,lv:LVC,blend:.6,wob:1.6,ang:NZF(AXF([[524,498],[388,640]]),.25,18)});
+LIMB([[388,640],[412,718],[448,782]],[52,46,40],[GR_H,GR_L,GR_M,GR_S,GR_C],{size:4.2,len:14,cover:1.3,lv:LVC,blend:.6,wob:1.6,ang:NZF(AXF([[388,640],[448,782]]),.25,18)});
+FOLD([[402,626],[420,650],[420,676]],3.4,GR_C,GR_H,.5);
+FOLD([[420,712],[440,730],[446,756]],3,GR_C,GR_H,.45);
+LIMB([[690,502],[758,570],[806,652]],[66,60,54],[GR_H,GR_L,GR_M,GR_S,GR_C],{size:4.8,len:16,cover:1.3,lv:LVC,blend:.6,wob:1.6,ang:NZF(AXF([[690,502],[806,652]]),.25,18)});
+LIMB([[806,652],[802,584],[788,512]],[54,48,42],[GR_H,GR_L,GR_M,GR_S,GR_C],{size:4.2,len:14,cover:1.3,lv:LVC,blend:.6,wob:1.6,ang:NZF(AXF([[806,652],[788,512]]),.25,18)});
+FOLD([[780,620],[808,628],[826,610]],3.4,GR_C,GR_H,.5);
+// raised fist: knuckles toward us, thumb over the fingers
+fill([[748,508],[776,466],[806,462],[820,486],[808,516],[776,526]],{size:3.4,len:9,cover:1.3,ang:ANG(-50),col:G3s([746,490],[822,490],SK_L,SK_M,SK_S),blend:.5,wob:1.3});
+FNG([[756,480],[770,468],[790,464]],3,SK_L);FNG([[784,470],[800,466],[816,478]],3,SK_M);PATH([[760,500],[792,508],[812,500]],SK_S,2.4,{op:.7});
+// fist at the hip gripping the katana
+fill([[424,774],[452,768],[470,788],[462,816],[434,820],[418,800]],{size:3.4,len:9,cover:1.3,ang:ANG(70),col:G3s([418,790],[470,790],SK_L,SK_M,SK_S),blend:.5,wob:1.3});
+// katana: hilt up past the fist (white cord wrap), tsuba, scabbard slanting down and back
+PATH([[452,784],[470,744],[482,716]],[['paynes_grey',.5],['ivory_black',.5],['titanium_white',.4]],3.8,{});
+for(let i=0;i<4;i++){const t=i/3;PATH([[456+t*22-4,776-t*58],[456+t*22+6,772-t*58]],[['titanium_white',1],['cerulean',.2]],1.2,{op:.9});}
+PATH([[432,800],[462,790]],[['yellow_ochre',.7],['burnt_umber',.3],['titanium_white',.2]],3,{});
+PATH([[450,806],[418,866],[372,938],[338,988]],[['ivory_black',.9],['ultramarine',.3],['burnt_umber',.3]],4.6,{taper:[.05,.5]});
+PATH([[444,806],[412,866],[366,938]],[['paynes_grey',.5],['titanium_white',.9],['cerulean',.2]],1.2,{op:.8,taper:[.1,.7]});
+// ---------- neck, scarf, bandana, hair ----------
+fill([[596,418],[652,414],[660,452],[598,454]],{size:3.6,len:9,cover:1.3,ang:ANG(80),blend:.6,col:G3s([596,430],[660,430],SK_M,SK_S,SK_S)});
+fill([[566,446],[652,442],[662,476],[602,490],[568,476]],{size:3.8,len:12,cover:1.3,ang:ANG(5),wob:1.5,blend:.5,col:G3([566,460],[664,460],OR_L,OR_M,OR_S)});
+PATH([[570,462],[556,490],[540,512]],OR_M,5,{taper:[.1,.8]});PATH([[576,468],[564,492],[556,516]],OR_S,3.4,{taper:[.1,.8],op:.9});
+// hair: one flame mass. A base cap, then long tapered spikes from back to front, swept left by the run
+{const CAP=[[532,356],[526,320],[552,290],[600,278],[652,288],[690,314],[694,360],[678,402],[646,424],[606,430],[568,420],[544,396]];
+ fill(CAP,{size:5,len:16,cover:1.3,ang:NZF(RADF(610,450),.2,12),wob:1.3,blend:.5,col:GR([520,360],[700,330],[HR_H,HR_L,HR_M,HR_S,HR_C],.05)});
+ const SP=[[690,330,730,296,26,.1],[668,312,720,212,34,-.05],[650,300,664,142,34,-.15],[630,292,628,120,32,-.25],[610,288,596,96,38,-.25],[588,290,566,112,34,-.3],[566,296,520,118,36,-.35],[546,304,474,138,38,-.35],[534,324,468,262,26,-.35],[532,338,446,238,32,-.4],[552,384,500,430,20,-.2],[664,382,708,346,20,.1],[600,292,560,150,28,-.2],[636,290,690,170,28,0]];
+ for(const [bx,by,tx,ty,w,bd] of SP){const mx=(bx+tx)/2+(ty-by)*bd*.5,my=(by+ty)/2-(tx-bx)*bd*.5;const u=clamp((bx-500)/200,0,1);
+  const col=u<.35?HR_L:u<.7?HR_M:HR_S;const hl=u<.5?HR_H:HR_L;
+  PATH([[bx,by],[mx,my],[tx,ty]],col,w*.4,{taper:[.05,.95],thin:.55});
+  PATH([[bx-w*.18,by],[mx-w*.18,my],[tx-w*.05,ty+8]],hl,w*.18,{op:.8,taper:[.1,.9],thin:.5});
+  PATH([[bx+w*.2,by+2],[mx+w*.2,my],[tx+w*.03,ty+14]],u<.7?HR_S:HR_C,w*.2,{op:.6,taper:[.1,.9],thin:.5});}
+ // shadow between spikes and a few loose strands, warm sun glints on the sun side
+ for(const [a,b,c] of [[[560,330],[556,250],[546,190]],[[600,340],[600,260],[596,190]],[[640,340],[642,280],[650,220]],[[700,330],[704,300],[706,280]]])PATH([a,b,c],HR_C,2.6,{op:.45,taper:[.2,.9]});
+ for(const [a,b,c] of [[[542,320],[516,280],[490,250]],[[560,300],[546,240],[530,190]],[[600,290],[596,220],[590,160]]])PATH([a,b,c],RIMS,1.5,{op:.6,taper:[.2,.8]});
+ fill([[548,392],[606,410],[672,396],[660,424],[606,430],[560,420]],{size:3.4,len:10,ang:ANG(0),col:CC(HR_C),op:.6,thin:.6,blend:.5});}
+// bandana: white band round the back of the head with a knot and two long tails blown left
+fill([[538,366],[600,378],[672,368],[690,392],[650,410],[600,414],[552,406]],{size:3.8,len:14,cover:1.3,ang:ANG(8),wob:1.4,blend:.5,col:G3([538,386],[690,386],BD_L,BD_M,BD_S)});
+PATH([[562,370],[532,400],[492,430],[452,452]],BD_M,8,{taper:[.08,.4]});PATH([[566,376],[536,404],[496,434],[458,456]],BD_S,3.6,{taper:[.08,.4],op:.8});
+PATH([[544,384],[520,408],[484,434]],BD_L,2.6,{op:.9,taper:[.2,.8]});
+PATH([[596,380],[574,412],[540,444],[506,476]],BD_M,7.4,{taper:[.08,.4]});PATH([[600,388],[578,418],[544,448],[512,480]],BD_S,3.2,{taper:[.08,.4],op:.8});
+PATH([[582,394],[560,418],[528,448]],BD_L,2.4,{op:.9,taper:[.2,.8]});
+PATH([[548,368],[600,380],[670,370]],BD_L,2.2,{op:.8,taper:[.2,.5]});   // lit top edge
+// ---------- rim light from the gate on the right (shadow) edges, warm sun on the left edges ----------
+for(const pts of [[[698,520],[694,610],[702,700]],[[734,884],[712,790],[702,712]],[[708,960],[692,1060],[684,1140]],[[812,500],[824,560],[812,650]],[[690,330],[692,372],[676,400]]])PATH(pts,RIMV,3,{op:.6,taper:[.25,.6]});
+for(const pts of [[[500,712],[480,760],[450,810],[432,868]],[[510,500],[506,560]],[[502,590],[500,640]],[[516,504],[486,532]],[[444,570],[414,610]],[[508,884],[506,960],[506,1040]],[[536,334],[520,310],[496,280]],[[540,386],[560,414]]])PATH(pts,RIMS,2.4,{op:.5,taper:[.25,.6]});
+// ---------- lost edges on the shadow side ----------
+for(const [pts,sz,op] of [[[[698,520],[694,610],[702,700]],10,.4],[[[734,884],[712,790]],10,.35],[[[708,960],[692,1060]],9,.35],[[[666,1240],[646,1296],[640,1350]],8,.35]])SOFT(pts,sz,op);

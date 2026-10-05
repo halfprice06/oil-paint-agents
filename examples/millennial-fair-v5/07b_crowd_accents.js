@@ -552,13 +552,20 @@ function V(pts,w,cols,o){o=o||{};const n=pts.length;const wd=i=>Array.isArray(w)
   if(cols[3])RS(off(-.44),K(cols[3],.03),wm*.13,{opacity:.5,load:1,thin:.3,taper:[.2,.3]});}
 // an elliptical-ish curved line from a to b bulging by bend
 const CV=(a,b,bend,t)=>{const m=[(a[0]+b[0])/2,(a[1]+b[1])/2];const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1;return [a,[m[0]-dy/L*bend,m[1]+dx/L*bend],b];};
-// RIGHT CROWD below the stage, looking up at the gate: backs, raised arms, shoulders in light, long clean shadows to the lower right. From the lit 3D reference, each person refined.
+// CROWD ACCENTS (r6): the last touches of thick light paint on dry paint, where the low sun catches hats, hair and shoulders of the nearer people.
+// Each touch is skipped if a nearer person's body would cover that spot (positions come from the listed figures, never from pixels).
+const LEFT=FIGS.filter(f=>f.n[0]==='c'&&f.x<1195&&f.y<1120).sort((a,b)=>a.y-b.y);
 const RIGHT=FIGS.filter(f=>f.n[0]==='c'&&f.x>=1150&&f.y>=1140).sort((a,b)=>a.y-b.y);
-const EXR=new Map();
-for(const F of RIGHT){const h=hpOf(F);if(h<130)continue;const v=mkr(figHash(F)+3)();const calm=['stand','stand_relaxed','hands_behind','talk','walk','walk_b'].includes(F.pose);
-  if(!calm)continue;if(F.p==='female'&&v<.18)EXR.set(F.n,'parasol');else if((F.p==='male'||F.p==='elder')&&v>.9)EXR.set(F.n,'kid');}
+const NEWL=newPeople(LEFT,[50,905,1150,1100],22,['child','child','female','male','elder'],4242,.5);
 const NEWR=newPeople(RIGHT,[1230,1190,2150,1330],8,['child','female','male','child'],9191,.32);
-const LISTR=RIGHT.concat(NEWR).sort((a,b)=>a.y-b.y);
-paintCrowd(LISTR,{hz:()=>0,shadowCol:()=>'#80607e',extras:EXR});
-for(let k=0;k<10;k++){const y=R(1060,1200),x=R(1180,2080);SB([[x,y,.6],[x+R(60,120),y+R(-4,4),.7],[x+R(120,220),y+R(-6,6),.5]],R(18,28),R(.2,.3));}
+const ALL=LEFT.concat(NEWL,RIGHT,NEWR);
+const EXC=[[1985,1170,2215,1262],[2205,1250,2300,1590],[2020,1270,2145,1590],[130,1290,260,1580]];
+const covered=(A,x,y)=>{const hA=hpOf(A);for(const B of ALL){if(B===A||B.y<=A.y+hA*.04)continue;const hB=hpOf(B);if(Math.abs(B.x-x)<hB*.2&&y>B.J.head[1]-hB*.14&&y<B.y)return true;}for(const e of EXC)if(x>e[0]&&x<e[2]&&y>e[1]&&y<e[3])return true;return false;};
+const WARMS=['#fff2cc','#ffe2a0','#fff8e0','#ffd8a8'];
+for(const F of ALL){const h=hpOf(F);if(h<(F.x<1195?125:140))continue;const g=geo(F),r=mkr(figHash(F)+31);const hzv=F.x<1195?clamp(.09-(F.y-805)/130*.09,0,.09):0;const H=Hf(hzv);const hc=g.hc,hr=g.hr;
+  if(r()<.6){const hx=hc[0]-hr*.35,hy=hc[1]-hr*(F.hat||F.hs==='bald'?1.05:.85);if(!covered(F,hx,hy)){const c=F.hat?mixh(F.hatc||'#e8c466',WARMS[Math.floor(r()*4)],.5):mixh(F.hr||'#5a3a28',WARMS[Math.floor(r()*4)],.35);
+    RS([[hx-hr*.5,hy+hr*.12,.5],[hx,hy,.9],[hx+hr*.55,hy+hr*.05,.5]],K(H(c),.04),Math.max(1.8,hr*.4),{opacity:.88,load:1.35,thin:.25,taper:[.25,.45]});}}
+  if(r()<.55){const sx=g.J.shoulderL[0],sy=g.J.shoulderL[1];const x=sx+g.sw*.12,y=sy+h*.012;if(!covered(F,x,y)){const c=mixh(LT(F.top||'#888070',.4),WARMS[Math.floor(r()*4)],.25);
+    RS([[sx-g.sw*.05,sy+h*.02,.5],[sx+g.sw*.2,sy-h*.004,.9],[sx+g.sw*.5,sy-h*.012,.5]],K(H(c),.04),Math.max(1.8,h*.02),{opacity:.85,load:1.35,thin:.25,taper:[.25,.5]});}}
+}
 p.dry();

@@ -134,37 +134,28 @@ function figure(x,yb,h,o){
   // sun on the shoulder and the sunward sleeve
   F([[x-sw*.95+lean,Y(.80),.6],[x-sw*1.0+lean*.6,Y(.72),.8],[x-sw*1.05,Y(.6),.4]],H(LITC(P.lit,.55)),h*.014,{load:1.25,thin:.25,opacity:.85});
 }
-// BALLOONS: each a small lit sphere, strings as wobbling single strokes
-const BAL=[[1050,100,'#e8742a',26],[1262,186,'#d93a30',26],[1480,122,'#e03a30',24],[880,134,'#e8c030',26],[742,216,'#c8a860',24],[1100,182,'#6a9ae0',22],[962,320,'#d94a58',27],[602,172,'#7a5ab0',22],[1090,236,'#8fd0e8',24],[1372,292,'#3a60c0',23],[800,432,'#3a60c0',23],[880,352,'#70c0a0',22],[1110,452,'#d93a30',27],[1372,478,'#e8c030',22],[1190,300,'#e87898',22]];
-for(const [x,y,c,r] of BAL){
-  const L=R(80,130);const pts=[[x,y+r*.95,.6]];for(let i=1;i<=4;i++)pts.push([x+R(-8,8)*i/2+i*2,y+r+L*i/4,.6]);
-  F(pts,K('#6a5a62',.03),2.2,{load:.9,thin:.3,opacity:.6});
-  F([[x,y,.9]],K(c,.03),r*2.2,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.28,y+r*.3,.9]],K(SHC(c,.55),.03),r*1.45,{brush:'round',load:1,thin:.3,opacity:.8});
-  F([[x-r*.28,y-r*.3,.9]],K(LITC(c,.35),.03),r*1.15,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.42,y+r*.5,.7],[x+r*.2,y+r*.7,.7]],K(Tn(c,'#fff0d0',.25),.03),r*.28,{load:1,thin:.3,opacity:.7}); // reflected light in the shade
-  F([[x-r*.42,y-r*.45,.9]],K('#fffaf0',.01),r*.4,{brush:'round',load:1.3,thin:.25});
-  F([[x-1,y+r*.98,.7],[x+2,y+r*1.12,.7]],K(SHC(c,.3),.03),r*.28,{load:1,thin:.3});
-  SB([[x-r*.7,y-r*.1],[x-r*.2,y+r*.4],[x+r*.4,y+r*.6]],r*.8,.3);
+// SKY, dry layer: warm and cool glazes over the dried cloud masses, thick crisp lights on the sun-side crests, high thin cirrus,
+// a deeper overhead blue and a warm pale veil toward the horizon. Everything here sits on dry paint, so strokes are deliberate.
+const CL=[
+ [[819,-14,81],[984,-33,105],[904,69,124],[709,115,112],[1112,73,112],[1222,165,95],[587,210,83],[782,201,117],[972,197,122],[1130,242,83],[685,258,66],[1039,258,61]],
+ [[1248,161,99],[1323,86,83],[1422,55,74],[1400,168,110],[1510,192,83],[1290,242,69],[1455,252,57],[1554,234,48]],
+ [[15,34,94],[144,8,80],[116,91,76],[245,75,62],[-41,112,67],[329,114,44]],
+ [[1590,218,40],[1655,200,46],[1700,232,34],[1625,245,32],[1560,246,26]]];
+const skyC=(x,y)=>K(G([[0,'#2c62ae'],[.22,'#3d79c2'],[.45,'#6aa0d3'],[.68,'#a8cbe4'],[.86,'#e2dcc6'],[1,'#f3e0b6']],clamp(y/790,0,1)),.025);
+// deeper blue glaze overhead and in the upper right, a pale warm veil low down: transparent, long, flat
+for(let i=0;i<20;i++){const x=R(-100,2400),y=R(590,800);S(x,y,R(300,700),R(-.03,.04),K(pick(['#f6e6c0','#f0dcc0','#f8ecd0']),.025),R(40,90),{load:.45,thin:.8,edge:.8,opacity:R(.16,.3),taper:[.3,.5]});}
+for(const lobes of CL){
+  const top=Math.min(...lobes.map(l=>l[1]-l[2]));
+  for(const [cx,cy,r] of lobes){
+    // thick crisp lights on the crest: two or three short curved strokes of nearly pure white, never in a row
+    if(r>40&&cy-r<top+r*1.2){for(let k=0;k<(r>70?3:2);k++){const a=R(3.7,4.9),d=r*R(.7,.9);S(cx+Math.cos(a)*d,cy+Math.sin(a)*d,r*R(.25,.5),a+1.57+R(-.3,.3),K('#fffdf8',.008),r*R(.07,.12),{load:R(1.2,1.4),thin:.28,edge:.4,opacity:R(.8,1),taper:[.3,.5]});}}
+    // a touch of bounce light low on the sunward flank: warm pink-grey
+    if(R(0,1)<.5)arc(cx-r*.2,cy+r*.2,r*.78,R(2.4,2.8),R(3.0,3.3),K('#e4c8cc',.03),r*.14,{load:.6,thin:.6,edge:.6,opacity:.5,taper:[.3,.5]});
+  }
 }
-// second layer: each balloon is a slightly tall translucent form: lit crescent on the sun side, core shade, a bounce of sky light low on the
-// shade side, a curved window-light highlight, a pinched knot and a short dark tie; colours kept related to the balloon's own hue.
-for(const [x,y,c,r] of BAL){
-  const sx=x,sy=y;
-  // lit crescent following the upper-left rim
-  arc(sx-r*.05,sy-r*.04,r*.62,R(3.3,3.6),R(4.7,5.1),K(LITC(c,.4),.03),r*.55,{load:1.15,thin:.3,edge:.5,taper:[.25,.45]});
-  // core shadow crescent on the lee, then the sky-blue / warm bounce just inside the lower rim
-  arc(sx+r*.08,sy+r*.06,r*.66,R(-.2,.2),R(1.6,2.0),K(SHC(c,.6),.03),r*.4,{load:1,thin:.35,edge:.5,taper:[.25,.45],opacity:.85});
-  arc(sx+r*.04,sy+r*.04,r*.8,R(.5,.8),R(1.5,1.9),K(Tn(c,pick(['#9ec4ee','#f4d8a8','#c8b8e8']),.45),.03),r*.2,{load:1,thin:.3,edge:.5,taper:[.3,.5],opacity:.7});
-  // transmitted glow at the lit edge: thin, bright, broken
-  arc(sx,sy,r*.9,R(3.5,3.8),R(4.5,4.9),K(LITC(c,.6),.02),r*.1,{load:1.2,thin:.25,taper:[.3,.5],opacity:.75});
-  // window highlight: a short curved soft-edged stroke, then a hot touch
-  F([[sx-r*.5,sy-r*.28,.5],[sx-r*.4,sy-r*.45,.9],[sx-r*.2,sy-r*.55,.5]],K('#fffaf0',.01),r*.2,{load:1.3,thin:.25,edge:.4,taper:[.3,.5]});
-  F([[sx-r*.46,sy-r*.42,.9]],K('#ffffff',.005),r*.11,{brush:'round',load:1.3,thin:.25});
-  // knot and tie
-  F([[sx-r*.1,sy+r*.92,.7],[sx+r*.1,sy+r*1.06,.8]],K(SHC(c,.45),.03),r*.26,{load:1,thin:.3,taper:[.1,.3]});
-  SB([[sx-r*.6,sy+r*.1],[sx-r*.3,sy+r*.5],[sx+r*.2,sy+r*.7]],r*.8,.18);
-}
-// string: a faint light edge along each string where the sun catches it, and a slack curl at the tie
-for(const [x,y,c,r] of BAL){const L=R(60,110);const pts=[[x+1.5,y+r*1.1,.5]];for(let i=1;i<=3;i++)pts.push([x+1.5+R(-4,4)*i/2+i*1.6,y+r*1.1+L*i/3,.5]);
-  F(pts,K('#e8dcd0',.03),1.4,{load:.9,thin:.3,opacity:.35,taper:[.1,.5]});}
+// dry scumbles of near-white on the lit crowns: low load, broken, drawn as curved drags that follow each lobe's form (not flecks), so the light has a skin of texture
+for(const lobes of CL){for(const [cx,cy,r] of lobes){for(let k=0;k<Math.round(r/9);k++){const a=R(3.1,5.3),d=r*R(.3,.82);const span=R(.35,.8);
+  arc(cx,cy,d,a,a+span,K(pick(['#fff6e6','#f6eef4','#eae4f4','#fffaf0','#f4ecdc']),.015),r*R(.05,.1)+3,{load:R(.25,.42),thin:.5,edge:.5,opacity:R(.45,.8),taper:[.25,.45]});}}}
+// cirrus: long soft wisps high up, drawn out by a nearly dry brush
+for(let i=0;i<16;i++){const x=R(-100,2400),y=R(10,230);S(x,y,R(260,560),R(-.1,.04),K(pick(['#d8e6f6','#e4ecf8','#f2f0f4']),.02),R(10,24),{load:R(.25,.4),thin:.7,edge:.8,opacity:R(.2,.4),taper:[.4,.6]});}
+p.dry();

@@ -134,37 +134,71 @@ function figure(x,yb,h,o){
   // sun on the shoulder and the sunward sleeve
   F([[x-sw*.95+lean,Y(.80),.6],[x-sw*1.0+lean*.6,Y(.72),.8],[x-sw*1.05,Y(.6),.4]],H(LITC(P.lit,.55)),h*.014,{load:1.25,thin:.25,opacity:.85});
 }
-// BALLOONS: each a small lit sphere, strings as wobbling single strokes
-const BAL=[[1050,100,'#e8742a',26],[1262,186,'#d93a30',26],[1480,122,'#e03a30',24],[880,134,'#e8c030',26],[742,216,'#c8a860',24],[1100,182,'#6a9ae0',22],[962,320,'#d94a58',27],[602,172,'#7a5ab0',22],[1090,236,'#8fd0e8',24],[1372,292,'#3a60c0',23],[800,432,'#3a60c0',23],[880,352,'#70c0a0',22],[1110,452,'#d93a30',27],[1372,478,'#e8c030',22],[1190,300,'#e87898',22]];
-for(const [x,y,c,r] of BAL){
-  const L=R(80,130);const pts=[[x,y+r*.95,.6]];for(let i=1;i<=4;i++)pts.push([x+R(-8,8)*i/2+i*2,y+r+L*i/4,.6]);
-  F(pts,K('#6a5a62',.03),2.2,{load:.9,thin:.3,opacity:.6});
-  F([[x,y,.9]],K(c,.03),r*2.2,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.28,y+r*.3,.9]],K(SHC(c,.55),.03),r*1.45,{brush:'round',load:1,thin:.3,opacity:.8});
-  F([[x-r*.28,y-r*.3,.9]],K(LITC(c,.35),.03),r*1.15,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.42,y+r*.5,.7],[x+r*.2,y+r*.7,.7]],K(Tn(c,'#fff0d0',.25),.03),r*.28,{load:1,thin:.3,opacity:.7}); // reflected light in the shade
-  F([[x-r*.42,y-r*.45,.9]],K('#fffaf0',.01),r*.4,{brush:'round',load:1.3,thin:.25});
-  F([[x-1,y+r*.98,.7],[x+2,y+r*1.12,.7]],K(SHC(c,.3),.03),r*.28,{load:1,thin:.3});
-  SB([[x-r*.7,y-r*.1],[x-r*.2,y+r*.4],[x+r*.4,y+r*.6]],r*.8,.3);
+// SKY REFINE: fresh wet gradient (deeper overhead, warm and pale at the horizon), then real cumulus masses built lobe by lobe
+// back to front: a cool shadow crescent on the lee side, a lit cream cap on the sun side (upper left), soft terminators,
+// small cauliflower sub-lobes on the lit rim, a flat cool belly, and broken edges into the sky.
+const SKY2=[[0,'#2c62ae'],[.22,'#3d79c2'],[.45,'#6aa0d3'],[.68,'#a8cbe4'],[.86,'#e2dcc6'],[1,'#f3e0b6']];
+const sk2=(x,y,j)=>{let c=G(SKY2,y/790);const w=clamp(1-Math.hypot(x+80,(y-60)*.9)/1700,0,1);c=mixh(c,'#f2e4c0',w*.22);c=mixh(c,'#2a56a0',clamp(1-y/330,0,1)*clamp((x-900)/1500,0,1)*.2);return K(c,j===undefined?.02:j);};
+// gradient laid in broad, slightly slanting strokes that vary in length, crossed, then melted
+const FASTSKY=typeof FASTSKY_==='undefined'?0:1;
+if(!FASTSKY)for(let y=-30;y<830;y+=44){for(let x=-200;x<2500;x+=R(200,340)){const yy=y+R(-14,14);S(x+R(-40,40),yy,R(280,520),R(-.05,.09),sk2(x,yy),R(88,128),{load:1,thin:.6,edge:.45,taper:[.2,.3],bend:R(-14,14)});}}
+if(!FASTSKY)for(let i=0;i<70;i++){const x=R(-100,2500),y=R(-20,800);S(x,y,R(200,480),R(-.18,.2),sk2(x,y,.035),R(50,100),{load:R(.55,.95),thin:.55,edge:.55,taper:[.3,.4],opacity:R(.5,.9)});}
+for(let i=0;i<70;i++){const x=R(-100,2500),y=R(-20,800);SBs(x,y,R(500,900),R(-.1,.12),88,.55);}
+// pale warm haze band low on the sky, cooler blue-violet veil high up, both soft
+for(let i=0;i<26;i++){const x=R(-100,2400),y=R(560,780);S(x,y,R(300,600),R(-.03,.05),K(R(0,1)<.5?'#f4e4bc':'#efe0cc',.03),R(40,70),{load:.6,thin:.7,edge:.8,opacity:R(.25,.5),taper:[.3,.5]});}
+for(let i=0;i<14;i++){const x=R(-100,2400),y=R(-10,200);S(x,y,R(300,600),R(-.04,.06),K('#2c5ea8',.03),R(40,80),{load:.5,thin:.7,edge:.8,opacity:R(.2,.4),taper:[.3,.5]});}
+for(let i=0;i<30;i++){const x=R(-100,2500),y=R(0,800);SBs(x,y,R(500,800),R(-.06,.08),88,.45);}
+
+const CPAL={hi:'#fffcf6',lit:'#f7efe8',mid:'#d0cce2',shade:'#aaa6c8',deep:'#8c88b6',belly:'#a09dc2',refl:'#dcc0c8'};
+// one lobe: an occluding body (a few big overlapping blobs), a lee side deepening to cool violet, and on the sun side a pile of
+// overlapping lit strokes that follow the form (brighter toward the upper-left rim), then a soft terminator melt.
+function lobe(cx,cy,r,L,pal,base){
+  const body=K(mixh(mixh(pal.shade,pal.mid,clamp(.25+L*.5+R(-.1,.1),0,1)),pal.deep,clamp((cy-(base-r))/r*.12,0,.3)),.02);
+  for(let k=0;k<3;k++){S(cx+R(-.2,.2)*r,cy+R(-.18,.18)*r,r*R(.5,1.0),R(-.4,.4),body,r*R(.95,1.25),{load:1.05,thin:.45,edge:.3,taper:[.25,.25]});}
+  // lee side: darker, cooler strokes along the form
+  for(let k=0;k<Math.max(3,Math.round(r/9));k++){const a=R(-.4,2.5),d=r*R(.25,.85);const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d;
+    S(x,y,r*R(.3,.6),a+1.57+R(-.4,.4),K(mixh(pal.shade,pal.deep,clamp(.55-L*.5+R(-.2,.25),0,1)),.025),r*R(.14,.26),{load:.95,thin:.5,edge:.5,taper:[.3,.5],opacity:R(.6,.9)});}
+  // sun side: overlapping lit strokes that follow the curvature (broad and heavily overlapped, so they read as a lit mass), melted twice, then a small second layer of lights on the crown
+  for(let k=0;k<Math.max(4,Math.round(r/6));k++){const a=R(3.0,5.6),d=r*R(.2,.9);const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d;
+    const rim=clamp((d/r-.2)/.7,0,1)*clamp(1-Math.abs(a-4.2)/1.6,0,1);const t=clamp(.2+rim*.6+L*.2+R(-.1,.1),0,1);
+    S(x,y,r*R(.4,.8),a+1.57+R(-.35,.35),K(G([[0,pal.mid],[.5,pal.lit],[1,pal.hi]],t),.012),r*R(.22,.4),{load:R(1,1.2),thin:.45,edge:.2,taper:[.1,.2]});}
+  for(let k=0;k<3;k++)SB([[cx+Math.cos(3.3+k*.45)*r*.75,cy+Math.sin(3.3+k*.45)*r*.75],[cx+Math.cos(4.2+k*.4)*r*.55,cy+Math.sin(4.2+k*.4)*r*.55],[cx+Math.cos(5.2+k*.2)*r*.75,cy+Math.sin(5.2+k*.2)*r*.75]],Math.min(88,r*.8),.55);
+  for(let k=0;k<Math.max(2,Math.round(r/12));k++){const a=R(3.4,5.0),d=r*R(.45,.85);const x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d;
+    S(x,y,r*R(.25,.45),a+1.57+R(-.4,.4),K(G([[0,pal.lit],[1,pal.hi]],R(.4,1)),.01),r*R(.1,.16),{load:R(1.1,1.3),thin:.35,edge:.3,taper:[.15,.3]});}
+  // terminator melt across the form
+  SB([[cx+Math.cos(3.6)*r*.5,cy+Math.sin(3.6)*r*.5],[cx,cy],[cx+Math.cos(.4)*r*.5,cy+Math.sin(.4)*r*.5]],Math.min(88,r*.8),R(.35,.55));
+  // a few crisp thick crests at the very top of the sun side
+  for(let k=0;k<Math.round(r/32);k++){const a=R(3.7,4.9),d=r*R(.6,.88);S(cx+Math.cos(a)*d,cy+Math.sin(a)*d,r*R(.3,.5),a+1.57+R(-.3,.3),K(pal.hi,.01),r*R(.07,.12),{load:1.3,thin:.3,edge:.6,taper:[.35,.5]});}
 }
-// second layer: each balloon is a slightly tall translucent form: lit crescent on the sun side, core shade, a bounce of sky light low on the
-// shade side, a curved window-light highlight, a pinched knot and a short dark tie; colours kept related to the balloon's own hue.
-for(const [x,y,c,r] of BAL){
-  const sx=x,sy=y;
-  // lit crescent following the upper-left rim
-  arc(sx-r*.05,sy-r*.04,r*.62,R(3.3,3.6),R(4.7,5.1),K(LITC(c,.4),.03),r*.55,{load:1.15,thin:.3,edge:.5,taper:[.25,.45]});
-  // core shadow crescent on the lee, then the sky-blue / warm bounce just inside the lower rim
-  arc(sx+r*.08,sy+r*.06,r*.66,R(-.2,.2),R(1.6,2.0),K(SHC(c,.6),.03),r*.4,{load:1,thin:.35,edge:.5,taper:[.25,.45],opacity:.85});
-  arc(sx+r*.04,sy+r*.04,r*.8,R(.5,.8),R(1.5,1.9),K(Tn(c,pick(['#9ec4ee','#f4d8a8','#c8b8e8']),.45),.03),r*.2,{load:1,thin:.3,edge:.5,taper:[.3,.5],opacity:.7});
-  // transmitted glow at the lit edge: thin, bright, broken
-  arc(sx,sy,r*.9,R(3.5,3.8),R(4.5,4.9),K(LITC(c,.6),.02),r*.1,{load:1.2,thin:.25,taper:[.3,.5],opacity:.75});
-  // window highlight: a short curved soft-edged stroke, then a hot touch
-  F([[sx-r*.5,sy-r*.28,.5],[sx-r*.4,sy-r*.45,.9],[sx-r*.2,sy-r*.55,.5]],K('#fffaf0',.01),r*.2,{load:1.3,thin:.25,edge:.4,taper:[.3,.5]});
-  F([[sx-r*.46,sy-r*.42,.9]],K('#ffffff',.005),r*.11,{brush:'round',load:1.3,thin:.25});
-  // knot and tie
-  F([[sx-r*.1,sy+r*.92,.7],[sx+r*.1,sy+r*1.06,.8]],K(SHC(c,.45),.03),r*.26,{load:1,thin:.3,taper:[.1,.3]});
-  SB([[sx-r*.6,sy+r*.1],[sx-r*.3,sy+r*.5],[sx+r*.2,sy+r*.7]],r*.8,.18);
+function cumulus(base,lobes,pal){
+  const ys=lobes.map(l=>l[1]-l[2]),top=Math.min(...ys);const x0=Math.min(...lobes.map(l=>l[0]-l[2])),x1=Math.max(...lobes.map(l=>l[0]+l[2]));
+  // 1 mass: connect the lobes so there are no holes, and block in the flat belly
+  for(let i=0;i<lobes.length;i++){const a=lobes[i];const ds=lobes.map((l,j)=>[Math.hypot(a[0]-l[0],a[1]-l[1]),j]).filter(q=>q[1]!==i).sort((u,v)=>u[0]-v[0]).slice(0,2);
+    for(const [dd,j] of ds){const nb=lobes[j];F([[a[0],a[1],.9],[(a[0]+nb[0])/2,(a[1]+nb[1])/2,.9],[nb[0],nb[1],.9]],K(pal.shade,.02),Math.min(a[2],nb[2])*1.9,{load:1.05,thin:.45,edge:.3});}}
+  for(let k=0;k<Math.round((x1-x0)/60);k++){const x=R(x0+20,x1-20);S(x,base-R(8,30),R(120,240),R(-.03,.03),K(R(0,1)<.7?pal.belly:pal.deep,.03),R(30,50),{load:1,thin:.5,edge:.3,taper:[.25,.4]});}
+  const order=lobes.slice().sort((a,b)=>(a[1]-a[2]*.4)-(b[1]-b[2]*.4));
+  for(const [cx,cy,r] of order){lobe(cx,cy,r,clamp(1-(cy-top)/(base-top),0,1),pal,base);}
+  // 2 belly: cool and flat, darker toward the lee (right), a faint warm bounce under the lit left
+  for(let k=0;k<Math.round((x1-x0)/60);k++){const x=R(x0+20,x1-20),t=(x-x0)/(x1-x0);S(x,base-R(6,26),R(80,200),R(-.04,.04),K(mixh(pal.deep,pal.shade,.3+.5*(1-t)),.03),R(20,36),{load:.9,thin:.5,edge:.55,taper:[.3,.4],opacity:.8});}
+  for(let k=0;k<4;k++){const x=R(x0+30,x0+(x1-x0)*.5);S(x,base-R(4,12),R(60,140),R(-.03,.03),K(pal.refl,.03),R(10,18),{load:.8,thin:.5,edge:.7,taper:[.3,.5],opacity:.6});}
+  // 3 melt: soft passes along the outer rim, and a few through the mass
+  for(const [cx,cy,r] of lobes){const a=R(3.0,3.5);SB([[cx+Math.cos(a)*r*.95,cy+Math.sin(a)*r*.95],[cx+Math.cos(a+.9)*r,cy+Math.sin(a+.9)*r],[cx+Math.cos(a+1.8)*r,cy+Math.sin(a+1.8)*r]],Math.min(88,r*.6),.5);}
+  for(let k=0;k<Math.round((x1-x0)/110);k++)SBs(R(x0,x1),R(base-80,base-8),R(120,260),R(-.06,.06),70,.4);
+  // 4 broken edge: only on true silhouette points (not inside a neighbouring lobe): cloud colour dragged out into the sky, sky scumbled back at the rim
+  const outside=(x,y)=>lobes.every(l=>Math.hypot(x-l[0],y-l[1])>l[2]*.93);
+  for(const [cx,cy,r] of lobes){for(let k=0;k<Math.max(3,Math.round(r/14));k++){const a=R(0,TAU);if(Math.sin(a)>.5)continue;const px=cx+Math.cos(a)*r*1.0,py=cy+Math.sin(a)*r*1.0;if(!outside(px+Math.cos(a)*6,py+Math.sin(a)*6))continue;
+    const tang=a+Math.PI/2+R(-.4,.4);const lit=Math.cos(a-3.9)>0;const out=R(0,1)<.6;const c=out?K(lit?pal.lit:pal.mid,.025):sk2(px,py-20,.03);
+    S(px+(out?Math.cos(a)*4:-Math.cos(a)*6),py+(out?Math.sin(a)*4:-Math.sin(a)*6),R(30,r*.9),tang,c,R(10,20),{load:R(.3,.5),thin:.5,edge:.7,taper:[.3,.6],opacity:R(.45,.8)});}}
 }
-// string: a faint light edge along each string where the sun catches it, and a slack curl at the tie
-for(const [x,y,c,r] of BAL){const L=R(60,110);const pts=[[x+1.5,y+r*1.1,.5]];for(let i=1;i<=3;i++)pts.push([x+1.5+R(-4,4)*i/2+i*1.6,y+r*1.1+L*i/3,.5]);
-  F(pts,K('#e8dcd0',.03),1.4,{load:.9,thin:.3,opacity:.35,taper:[.1,.5]});}
+// farther clouds first
+cumulus(262,[[1590,218,40],[1655,200,46],[1700,232,34],[1625,245,32],[1560,246,26]],Object.assign({},CPAL,{mid:'#e4e2f0',shade:'#c6c4de',deep:'#aeadd0',belly:'#b6b4d4'}));
+cumulus(280,[[1248,161,99],[1323,86,83],[1422,55,74],[1400,168,110],[1510,192,83],[1290,242,69],[1455,252,57],[1554,234,48]],CPAL);
+cumulus(160,[[15,34,94],[144,8,80],[116,91,76],[245,75,62],[-41,112,67],[329,114,44]],Object.assign({},CPAL,{hi:'#fff6e4'}));
+cumulus(300,[[819,-14,81],[984,-33,105],[904,69,124],[709,115,112],[1112,73,112],[1222,165,95],[587,210,83],[782,201,117],[972,197,122],[1130,242,83],[685,258,66],[1039,258,61]],CPAL);
+// low strato-cumulus strips near the horizon, flatter and warmer
+cumulus(330,[[1290,314,24],[1375,306,32],[1460,313,26],[1545,318,22]],Object.assign({},CPAL,{lit:'#fbe6cc',mid:'#e8dae4',shade:'#c8bcd4'}));
+cumulus(448,[[690,424,22],[765,413,32],[835,426,22]],Object.assign({},CPAL,{lit:'#fbe6cc',mid:'#eadbe2',shade:'#cdbfd4',belly:'#bdb2cc'}));
+cumulus(552,[[2255,520,26],[2312,508,36],[2372,524,28]],Object.assign({},CPAL,{lit:'#fbe6cc',mid:'#e2d8e6',shade:'#c4b8d0',belly:'#b8aecc'}));
+// glints of deeper blue and a few thin wisps across the open sky
+for(let i=0;i<20;i++){const x=R(1500,2400),y=R(100,420);S(x,y,R(120,300),R(-.05,.1),K(R(0,1)<.5?'#8cb4de':'#4f86c6',.04),R(22,44),{load:.6,thin:.6,edge:.7,taper:[.4,.6],opacity:.55});}
+p.dry();

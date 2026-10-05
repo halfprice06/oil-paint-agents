@@ -134,37 +134,117 @@ function figure(x,yb,h,o){
   // sun on the shoulder and the sunward sleeve
   F([[x-sw*.95+lean,Y(.80),.6],[x-sw*1.0+lean*.6,Y(.72),.8],[x-sw*1.05,Y(.6),.4]],H(LITC(P.lit,.55)),h*.014,{load:1.25,thin:.25,opacity:.85});
 }
-// BALLOONS: each a small lit sphere, strings as wobbling single strokes
-const BAL=[[1050,100,'#e8742a',26],[1262,186,'#d93a30',26],[1480,122,'#e03a30',24],[880,134,'#e8c030',26],[742,216,'#c8a860',24],[1100,182,'#6a9ae0',22],[962,320,'#d94a58',27],[602,172,'#7a5ab0',22],[1090,236,'#8fd0e8',24],[1372,292,'#3a60c0',23],[800,432,'#3a60c0',23],[880,352,'#70c0a0',22],[1110,452,'#d93a30',27],[1372,478,'#e8c030',22],[1190,300,'#e87898',22]];
-for(const [x,y,c,r] of BAL){
-  const L=R(80,130);const pts=[[x,y+r*.95,.6]];for(let i=1;i<=4;i++)pts.push([x+R(-8,8)*i/2+i*2,y+r+L*i/4,.6]);
-  F(pts,K('#6a5a62',.03),2.2,{load:.9,thin:.3,opacity:.6});
-  F([[x,y,.9]],K(c,.03),r*2.2,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.28,y+r*.3,.9]],K(SHC(c,.55),.03),r*1.45,{brush:'round',load:1,thin:.3,opacity:.8});
-  F([[x-r*.28,y-r*.3,.9]],K(LITC(c,.35),.03),r*1.15,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.42,y+r*.5,.7],[x+r*.2,y+r*.7,.7]],K(Tn(c,'#fff0d0',.25),.03),r*.28,{load:1,thin:.3,opacity:.7}); // reflected light in the shade
-  F([[x-r*.42,y-r*.45,.9]],K('#fffaf0',.01),r*.4,{brush:'round',load:1.3,thin:.25});
-  F([[x-1,y+r*.98,.7],[x+2,y+r*1.12,.7]],K(SHC(c,.3),.03),r*.28,{load:1,thin:.3});
-  SB([[x-r*.7,y-r*.1],[x-r*.2,y+r*.4],[x+r*.4,y+r*.6]],r*.8,.3);
+// STAGE, FENCE, CURTAIN, TELEPODS and the GATE RIM, second layers.
+// Wood: boards with a lit left edge, a dark gap, grain streaks that follow the plank; brass: rings with hot crests and dark grooves,
+// a vertical highlight streak, cool sky reflections in the shade; steel dome: curved facets, sky band above, warm ground band below.
+// Gate rim: transparent colour first, then thick pale light in broken bursts along a wavering edge, with streamers spiralling out.
+const WD2=[[0,'#3a2630'],[.3,'#6a4430'],[.6,'#a8703c'],[1,'#e2b672']];
+function board(x,y0,y1,w,t,o){o=o||{};
+  const segs=Math.max(2,Math.round((y1-y0)/55));
+  for(let k=0;k<segs;k++){const ya=lerp(y0,y1,k/segs)-R(0,6),yb=lerp(y0,y1,(k+1)/segs)+R(0,6);const tt=clamp(t-(k/segs)*.12+R(-.05,.05),0,1);
+    F([[x+w/2+R(-1,1),ya,.8],[x+w/2+R(-1.5,1.5),(ya+yb)/2,.9],[x+w/2+R(-1,1),yb,.8]],K(G(WD2,tt),.035),w*1.05,{brush:'flat',load:1.1,thin:.4,edge:.15,taper:[.05,.1]});}
+  // grain: a few long wavering streaks along the board, darker and lighter
+  for(let k=0;k<R(2,4);k++){const gx=x+R(.15,.85)*w,ga=y0+R(0,.4)*(y1-y0),gb=ga+R(.3,.6)*(y1-y0);
+    F([[gx,ga,.5],[gx+R(-1.5,1.5),(ga+gb)/2,.7],[gx+R(-1.5,1.5),gb,.5]],K(R(0,1)<.6?G(WD2,clamp(t-.25,0,1)):G(WD2,clamp(t+.2,0,1)),.04),R(2,4),{load:.9,thin:.4,edge:.5,opacity:R(.3,.55),taper:[.2,.3]});}
+  // lit left edge and the dark gap on the right, both broken
+  F([[x+2,y0+R(0,10),.6],[x+2,(y0+y1)/2,.8],[x+2,y1-R(0,20),.5]],K(G(WD2,clamp(t+.3,0,1)),.03),Math.max(3,w*.14),{load:1.1,thin:.3,edge:.3,opacity:.75,taper:[.15,.3]});
+  F([[x+w-1,y0,.6],[x+w-1,y0+(y1-y0)*R(.35,.6),.8]],K('#241620',.03),3.5,{load:1,thin:.3,opacity:.8,taper:[.1,.4]});
+  F([[x+w-1,y0+(y1-y0)*R(.5,.7),.7],[x+w-1,y1,.6]],K('#241620',.03),3.5,{load:1,thin:.3,opacity:.7,taper:[.3,.2]});
+  if(R(0,1)<.18){const ky=y0+R(.2,.8)*(y1-y0),kx=x+w*R(.3,.7);F([[kx,ky,.8]],K('#3a2418',.03),R(6,9),{brush:'round',load:1,thin:.3,opacity:.85});F([[kx-1,ky-1,.7]],K(G(WD2,.7),.03),R(10,13),{brush:'round',load:.4,thin:.5,opacity:.3});}
+  if(o.nails){F([[x+w/2,y0+6,.8]],K('#2a2024',.03),3.2,{load:1,thin:.3});F([[x+w/2,y1-8,.8]],K('#2a2024',.03),3.2,{load:1,thin:.3});}
 }
-// second layer: each balloon is a slightly tall translucent form: lit crescent on the sun side, core shade, a bounce of sky light low on the
-// shade side, a curved window-light highlight, a pinched knot and a short dark tie; colours kept related to the balloon's own hue.
-for(const [x,y,c,r] of BAL){
-  const sx=x,sy=y;
-  // lit crescent following the upper-left rim
-  arc(sx-r*.05,sy-r*.04,r*.62,R(3.3,3.6),R(4.7,5.1),K(LITC(c,.4),.03),r*.55,{load:1.15,thin:.3,edge:.5,taper:[.25,.45]});
-  // core shadow crescent on the lee, then the sky-blue / warm bounce just inside the lower rim
-  arc(sx+r*.08,sy+r*.06,r*.66,R(-.2,.2),R(1.6,2.0),K(SHC(c,.6),.03),r*.4,{load:1,thin:.35,edge:.5,taper:[.25,.45],opacity:.85});
-  arc(sx+r*.04,sy+r*.04,r*.8,R(.5,.8),R(1.5,1.9),K(Tn(c,pick(['#9ec4ee','#f4d8a8','#c8b8e8']),.45),.03),r*.2,{load:1,thin:.3,edge:.5,taper:[.3,.5],opacity:.7});
-  // transmitted glow at the lit edge: thin, bright, broken
-  arc(sx,sy,r*.9,R(3.5,3.8),R(4.5,4.9),K(LITC(c,.6),.02),r*.1,{load:1.2,thin:.25,taper:[.3,.5],opacity:.75});
-  // window highlight: a short curved soft-edged stroke, then a hot touch
-  F([[sx-r*.5,sy-r*.28,.5],[sx-r*.4,sy-r*.45,.9],[sx-r*.2,sy-r*.55,.5]],K('#fffaf0',.01),r*.2,{load:1.3,thin:.25,edge:.4,taper:[.3,.5]});
-  F([[sx-r*.46,sy-r*.42,.9]],K('#ffffff',.005),r*.11,{brush:'round',load:1.3,thin:.25});
-  // knot and tie
-  F([[sx-r*.1,sy+r*.92,.7],[sx+r*.1,sy+r*1.06,.8]],K(SHC(c,.45),.03),r*.26,{load:1,thin:.3,taper:[.1,.3]});
-  SB([[sx-r*.6,sy+r*.1],[sx-r*.3,sy+r*.5],[sx+r*.2,sy+r*.7]],r*.8,.18);
+// ----- right: stage deck edge and the plank front -----
+// top rail: a lit lip, a mid face, a shadow line, grain along its length
+for(let x=2085;x<2425;x+=R(70,130)){const w=R(80,140);S(Math.min(x+w/2,2420)-w/2+w/2,872,w,R(-.01,.01),K(G(WD2,R(.55,.8)),.035),R(30,38),{brush:'flat',load:1.1,thin:.4,edge:.15});}
+for(let k=0;k<7;k++)S(R(2100,2400),R(856,888),R(60,160),R(-.01,.01),K(R(0,1)<.5?G(WD2,.35):G(WD2,.95),.04),R(2,4),{load:.9,thin:.4,edge:.5,opacity:R(.3,.5),taper:[.2,.3]});
+S(2255,851,340,0,K('#f0cc88',.03),8,{load:1.2,thin:.3,edge:.2,opacity:.85,taper:[.05,.05]});
+S(2255,892,340,0,K('#2a1a22',.03),9,{load:1.05,thin:.35,edge:.3,opacity:.85,taper:[.05,.05]});
+for(let x=2085;x<2425;){const w=R(26,36);board(x,893,1034,Math.min(w,2425-x),clamp(.62-(x-2085)/340*.18+R(-.16,.14),.1,.9),{nails:true});x+=w;}
+// cast shadow of the rail on the boards, stepping, and cool gate light on the nearest boards
+for(let k=0;k<9;k++)S(2090+k*38+R(-8,8),R(896,912),R(40,80),R(-.02,.02),K('#2a1a2a',.04),R(10,16),{load:.9,thin:.5,edge:.55,opacity:R(.4,.7),taper:[.2,.4]});
+SB([[2090,900],[2250,906],[2420,900]],40,.35);
+for(let k=0;k<7;k++)S(R(2090,2150),R(900,1030),R(40,100),1.57,K('#9ab8ec',.04),R(8,14),{load:.6,thin:.5,edge:.7,opacity:R(.2,.4),taper:[.3,.5]});
+SB([[2120,900],[2124,970],[2120,1034]],36,.25);SB([[2250,900],[2252,970],[2250,1034]],40,.22);SB([[2380,900],[2382,970],[2380,1034]],40,.22);
+// the base below, in shade: a few vertical boards, darker, with warm bounce light low down
+for(let x=2065;x<2425;){const w=R(30,42);board(x,1036,1176,Math.min(w,2425-x),clamp(.28-(x-2065)/360*.1+R(-.1,.1),.05,.5),{nails:false});x+=w;}
+for(let k=0;k<8;k++)S(R(2080,2400),R(1130,1176),R(50,110),R(-.02,.02),K('#a05848',.04),R(10,18),{load:.8,thin:.5,edge:.6,opacity:R(.25,.45),taper:[.3,.4]});
+// ----- platform (Lucca's) top: boards running along the stage in light, front face boards in violet-brown shade -----
+for(const [yb,t0] of [[985,.78],[998,.72],[1011,.68],[1024,.64],[1037,.6]]){
+  for(let x=1160;x<2085;){const L=R(120,280);const xe=Math.min(x+L,2085);S((x+xe)/2,yb+(x-1160)/925*-8*0,xe-x,R(-.006,.006),K(G(WD2,clamp(t0-(x-1160)/925*.2+R(-.12,.12),0,1)),.035),R(13,15),{brush:'flat',load:1.1,thin:.4,edge:.15,taper:[.04,.08]});if(xe>=2085)break;x=xe-R(0,16);}
+  for(let x=1160;x<2085;){const L=R(100,300);S(x+L/2,yb+6,L,0,K('#2a1a24',.03),2.8,{load:.95,thin:.35,opacity:R(.45,.75),taper:[.2,.3]});x+=L+R(10,60);}
+  for(let k=0;k<5;k++)S(R(1170,2070),yb+R(-4,4),R(60,200),R(-.004,.004),K(R(0,1)<.5?G(WD2,.35):G(WD2,.95),.04),R(2,3.4),{load:.9,thin:.4,edge:.5,opacity:R(.3,.5),taper:[.2,.3]});
 }
-// string: a faint light edge along each string where the sun catches it, and a slack curl at the tie
-for(const [x,y,c,r] of BAL){const L=R(60,110);const pts=[[x+1.5,y+r*1.1,.5]];for(let i=1;i<=3;i++)pts.push([x+1.5+R(-4,4)*i/2+i*1.6,y+r*1.1+L*i/3,.5]);
-  F(pts,K('#e8dcd0',.03),1.4,{load:.9,thin:.3,opacity:.35,taper:[.1,.5]});}
+for(let x=1160;x<2085;){const w=R(26,36);board(x,1048,1124,Math.min(w,2085-x),clamp(.32-(x-1160)/925*.12+R(-.1,.1),.05,.55),{nails:false});x+=w;}
+S(1620,1042,925,0,K('#2e1e2c',.04),9,{load:1,thin:.4,opacity:.7,taper:[.05,.05]});
+SB([[1170,1058],[1600,1062],[2080,1056]],40,.3);
+// ----- curtain behind the left of the stage: vertical folds, lit on one side, deep violet in the hollows -----
+for(let k=0;k<11;k++){const x=R(1134,1420),y0=R(840,880),y1=R(960,992);const lit=R(0,1)<.4;
+  F([[x,y0,.5],[x+R(-6,6),(y0+y1)/2,.9],[x+R(-8,8),y1,.5]],K(lit?pick(['#6a5070','#665068','#745a70']):pick(['#2e2438','#3a2c44','#3a2a38']),.04),R(26,52),{load:.9,thin:.5,edge:.55,opacity:R(.35,.6),taper:[.25,.4]});}
+for(let k=0;k<6;k++){const x=R(1134,1420);SB([[x,850],[x+R(-5,5),920],[x+R(-5,5),990]],44,.35);}
+for(let k=0;k<5;k++){const x=R(1134,1420);F([[x,880,.5],[x+R(-4,4),940,.8],[x+R(-4,4),990,.5]],K('#b49ab8',.04),R(4,8),{load:1.1,thin:.3,edge:.4,opacity:R(.35,.6),taper:[.3,.4]});}
+// ---------- the gate's rim ----------
+const GX2=1760,GY2=790,GR2=278;
+const rimR=a=>GR2*(1+.034*Math.sin(a*5+1.3)+.022*Math.sin(a*9+.4)+.016*Math.sin(a*3+2.1));
+const polar=(a,rf)=>[GX2+Math.cos(a)*rimR(a)*rf,GY2+Math.sin(a)*rimR(a)*rf*.985];
+function rimArc(a0,a1,rf,c,size,o,n){n=n||6;const pts=[];for(let i=0;i<n;i++){const a=lerp(a0,a1,i/(n-1));const q=polar(a,rf+R(-.008,.008));pts.push([q[0],q[1],.5+.5*Math.sin(Math.PI*clamp(i/(n-1)*.9+.05,0,1))]);}return F(pts,c,size,o);}
+// 1 transparent colour: broad glazes of violet, blue and cyan around the edge, outside and inside, following the flow
+for(let k=0;k<110;k++){const a=R(0,TAU),L=R(.2,.6),rf=R(.9,1.12);rimArc(a,a+L,rf,K(pick(['#6a6ae0','#8a82ec','#7ab4f0','#9ad0f8','#a890e8','#5a5ccc']),.04),R(12,30),{load:R(.45,.75),thin:.75,edge:.6,opacity:R(.3,.5),taper:[.3,.5]});}
+// dark indigo just inside the edge, so the light above it reads
+for(let k=0;k<44;k++){const a=R(0,TAU),L=R(.2,.5);rimArc(a,a+L,R(.78,.93),K(pick(['#2c2c86','#34349a','#3e3ca8']),.03),R(9,18),{load:.95,thin:.45,edge:.35,opacity:R(.55,.8),taper:[.25,.4]});}
+// thick pale light in broken bursts (broad, tapering), over the transparent colour; brightest on the upper left, with gaps where indigo shows through
+for(let k=0;k<120;k++){const a=R(0,TAU);const w=1+.5*Math.cos(a-3.9);if(R(0,1)>.3+.45*w)continue;const L=R(.14,.34);
+  const c=K(pick(['#f4fdff','#d6f4ff','#e8f8ff','#c4ecff','#e4dcff']),.015);rimArc(a,a+L,R(.97,1.03),c,R(6,12),{load:R(1.05,1.3),thin:.3,edge:.4,opacity:R(.55,.9),taper:[.15,.3]},5);}
+for(let k=0;k<24;k++){const a=R(0,TAU);const w=1+.5*Math.cos(a-3.9);if(R(0,1)>.3+.4*w)continue;rimArc(a,a+R(.1,.22),R(.985,1.02),K('#ffffff',.005),R(3.5,6),{load:1.35,thin:.25,opacity:R(.6,.9),taper:[.2,.4]},4);}
+// streamers: short broad tongues of rim colour spiralling outward, thinning to nothing
+for(let k=0;k<20;k++){const a=R(0,TAU);const turn=R(.25,.55),out=R(1.06,1.26);const pts=[];for(let i=0;i<5;i++){const u=i/4;const aa=a+u*turn;const rf=lerp(1.0,out,u);const q=polar(aa,rf);pts.push([q[0],q[1],.9-u*.5]);}
+  F(pts,K(pick(['#a8dcfa','#c4ecff','#9a98f0','#d8c8f8']),.03),R(12,26),{load:.7,thin:.6,edge:.7,opacity:R(.25,.45),taper:[.2,.7]});}
+// soft glow breathing out of the rim into the surroundings
+for(let k=0;k<26;k++){const a=R(0,TAU);const q=polar(a,R(1.0,1.18));S(q[0],q[1],R(60,130),a+1.57+R(-.4,.4),K(pick(['#b4e4fa','#a8a8f4']),.04),R(30,60),{load:.4,thin:.8,edge:.9,opacity:R(.1,.22),taper:[.3,.5]});}
+for(let k=0;k<14;k++){const a=R(0,TAU);arc(GX2,GY2,GR2*R(.92,1.04),a,a+R(.3,.6),'titanium_white',60,{brush:'soft',opacity:.35});}
+// ---------- telepods, second layer ----------
+const BRS=[[0,'#fff2b8'],[.18,'#f4cc66'],[.42,'#d29c3a'],[.68,'#8e5c24'],[.88,'#5c3a18'],[1,'#a07434']];
+function podBase(cx){
+  // solid base planes first (the gate's arms were laid over the old ones): drum, brass cylinder, steel dome body
+  const yb=1030;
+  cover([[cx-98,962],[cx+98,962],[cx+98,yb],[cx-98,yb]],26,(x,y)=>K(G([[0,'#bfd0e4'],[.3,'#8ea4c0'],[.65,'#566a8c'],[1,'#33405c']],clamp((x-cx+98)/196,0,1)),.03),{ang:1.57,angJ:.05,len:2.2,dens:2.6,o:{thin:.4,edge:.2}});
+  cover([[cx-80,770],[cx+80,770],[cx+80,964],[cx-80,964]],22,(x,y)=>K(G([[0,'#ffeaa4'],[.22,'#e6bb52'],[.55,'#b8802e'],[.85,'#6a4418'],[1,'#8a5c28']],clamp((x-cx+80)/160+R(-.03,.03),0,1)),.03),{ang:1.57,angJ:.04,len:2.2,dens:3,o:{thin:.35,edge:.15}});
+  const dpoly0=ELL(cx,772,102,74,0,28).map(q=>[q[0],Math.min(q[1],836)]);
+  cover(dpoly0,22,(x,y)=>K(G([[0,'#222a3a'],[.35,'#46526a'],[.7,'#7d8ca4'],[1,'#c6d2e2']],clamp(.5+((cx-x)/102)*.38+((772-y)/74)*.42+R(-.06,.06),0,1)),.03),{angf:(x,y)=>Math.atan2(y-772,x-cx)+Math.PI/2,angJ:.12,len:2.4,dens:3.5,o:{thin:.4,edge:.2}});
+}
+podBase(1475);podBase(1982);p.dry();
+function pod2(cx,gateSide){
+  // brass rings: body in five pieces from lit to shade, hot crest on the lit side, dark groove below, cool sky reflection in the shade
+  for(let y=806,ri=0;y<962;y+=21,ri++){const bend=7;const yy=(x)=>y+bend*(1-Math.pow((x-cx)/82,2)*1);
+    const cuts=[-80,-50,-12,28,62,80];
+    for(let c=0;c<5;c++){const xa=cx+cuts[c]+R(-3,3),xb=cx+cuts[c+1]+R(-3,3);const u=((xa+xb)/2-cx+80)/160;
+      F([[xa,yy(xa),.7],[(xa+xb)/2,yy((xa+xb)/2),.9],[xb,yy(xb),.7]],K(G(BRS,clamp(u+R(-.04,.04)+(ri%2?.02:-.02),0,1)),.03),R(11,14),{load:1.1,thin:.3,edge:.2,taper:[.08,.12]});}
+    F([[cx-82,yy(cx-82)+8,.6],[cx,yy(cx)+8.5,.8],[cx+82,yy(cx+82)+8,.6]],K('#3e2410',.03),R(3.5,5),{load:.95,thin:.35,opacity:R(.55,.8),taper:[.15,.2]});
+    const hx=cx-R(60,40);F([[hx-18,yy(hx-18)-3.5,.5],[hx,yy(hx)-3.5,.9],[hx+26,yy(hx+26)-3.5,.5]],K('#fffbd4',.015),R(3.5,5),{load:1.35,thin:.25,opacity:R(.75,1),taper:[.25,.45]});
+    if(R(0,1)<.7)F([[cx+36,yy(cx+36)-3,.5],[cx+52,yy(cx+52)-3,.8],[cx+64,yy(cx+64)-2,.5]],K('#98aec0',.04),R(3,4),{load:1,thin:.3,opacity:R(.3,.55),taper:[.3,.4]});
+    if(R(0,1)<.6)F([[cx+66,yy(cx+66)+1,.5],[cx+78,yy(cx+78)+1,.6]],K('#c88a44',.04),R(4,6),{load:1,thin:.3,opacity:.6,taper:[.3,.4]});}
+  // vertical highlight streak and shade column, in pieces so the rings still break it
+  for(const [y0,y1] of [[800,860],[858,912],[908,960]])F([[cx-56+R(-2,2),y0,.5],[cx-56+R(-2,2),(y0+y1)/2,.8],[cx-56+R(-2,2),y1,.5]],K('#fff4c4',.02),R(6,9),{load:1.2,thin:.3,edge:.5,opacity:R(.3,.45),taper:[.25,.35]});
+  for(const [y0,y1] of [[800,880],[878,960]])F([[cx+44,y0,.5],[cx+46,(y0+y1)/2,.8],[cx+44,y1,.5]],K('#4a2c14',.03),R(14,22),{load:.8,thin:.5,edge:.7,opacity:R(.3,.45),taper:[.25,.35]});
+  S(cx,800,170,0,K('#3a2438',.03),14,{load:.9,thin:.5,edge:.6,opacity:.5,taper:[.1,.1]});   // shade under the dome
+  S(cx,957,170,0,K('#2a1c26',.03),10,{load:.9,thin:.5,edge:.6,opacity:.55,taper:[.1,.1]});  // contact shade on the drum top
+  SB([[cx-70,810],[cx-68,880],[cx-70,950]],22,.3);SB([[cx+20,810],[cx+22,880],[cx+20,950]],24,.3);
+  // steel dome: facets following the curve, light from the upper left, sky band above, warm ground band below, cool rim from the gate
+  const dcx=cx,dcy=772,rx=102,ry=74;
+  const DST=[[0,'#1e2638'],[.3,'#3e4a64'],[.6,'#6e7e9c'],[.85,'#a4b4cc'],[1,'#dce6f2']];
+  const earc=(a0,a1,rr,c,size,o)=>{const pts=[];for(let i=0;i<5;i++){const a=lerp(a0,a1,i/4);pts.push([dcx+Math.cos(a)*rx*rr,Math.min(dcy+Math.sin(a)*ry*rr,832),.5+.5*Math.sin(Math.PI*(i/4*.9+.05))]);}return F(pts,c,size,o);};
+  for(const rr of [.88,.64,.4]){for(let a=3.2;a<6.2;a+=R(.9,1.2)){const am=a+.3;const x=dcx+Math.cos(am)*rx*rr,y=dcy+Math.sin(am)*ry*rr;
+    const L=clamp(.3+((dcx-x)/rx)*.48+((dcy-y)/ry)*.5+R(-.06,.06),0,1);earc(a,a+R(1.1,1.5),rr,K(G(DST,L),.03),R(11,16),{load:1,thin:.4,edge:.45,taper:[.2,.3],opacity:.92});}}
+  for(let a=-.1;a<.9;a+=.5){earc(a,a+.5,.8,K(G(DST,R(.05,.25)),.03),R(14,20),{load:1,thin:.4,edge:.4,taper:[.2,.35],opacity:.85});}
+  for(const rr of [.86,.6])SB([[dcx+Math.cos(3.3)*rx*rr,dcy+Math.sin(3.3)*ry*rr],[dcx+Math.cos(4.5)*rx*rr,dcy+Math.sin(4.5)*ry*rr],[dcx+Math.cos(5.8)*rx*rr,dcy+Math.sin(5.8)*ry*rr]],30,.4);
+  earc(4.0,5.2,.8,K('#9ab8dc',.03),R(6,9),{load:1,thin:.4,edge:.5,opacity:.4,taper:[.3,.4]});     // sky reflected near the top
+  earc(.5,2.4,.84,K('#7a6670',.03),R(8,11),{load:.95,thin:.4,edge:.5,opacity:.45,taper:[.3,.4]});    // warm ground reflected low
+  for(let k=0;k<3;k++){const sx=dcx+(gateSide>0?1:-1)*R(80,98),sy=dcy+R(-28,10);F([[sx,sy,.6],[sx-gateSide*R(1,5),sy-R(14,26),.8]],K('#c4eeff',.02),R(4,6),{load:1.2,thin:.3,opacity:R(.55,.8),taper:[.2,.5]});}
+  // seam with a few rivets, and the crisp specular
+  const seam=[];for(let i=0;i<7;i++){const x=dcx-96+i*32;const t=(x-dcx)/rx;seam.push([x,Math.min(dcy+ry*.62*Math.sqrt(Math.max(0,1-t*t))+4,834),.7]);}
+  F(seam,K('#202838',.02),3.6,{load:1,thin:.3,opacity:.6,taper:[.05,.05]});
+  for(const q of seam.slice(1,6)){if(R(0,1)<.75){F([[q[0],q[1]-3,.8]],K('#3a4660',.02),R(5,7),{brush:'round',load:1,thin:.3});F([[q[0]-1.5,q[1]-4.5,.8]],K('#e0ecf8',.02),R(2,3.2),{brush:'round',load:1.2,thin:.25});}}
+  F([[dcx-64,750,.5],[dcx-40,735,.9],[dcx-14,732,.5]],K('#f4f8fc',.01),R(13,16),{load:1.35,thin:.28,taper:[.3,.5]});
+  F([[dcx-74,762,.5],[dcx-62,752,.7]],K('#ffffff',.01),6,{load:1.35,thin:.25});
+}
+pod2(1475,1);pod2(1982,-1);
+p.dry();

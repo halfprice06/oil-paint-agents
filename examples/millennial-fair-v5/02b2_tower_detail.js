@@ -134,37 +134,29 @@ function figure(x,yb,h,o){
   // sun on the shoulder and the sunward sleeve
   F([[x-sw*.95+lean,Y(.80),.6],[x-sw*1.0+lean*.6,Y(.72),.8],[x-sw*1.05,Y(.6),.4]],H(LITC(P.lit,.55)),h*.014,{load:1.25,thin:.25,opacity:.85});
 }
-// BALLOONS: each a small lit sphere, strings as wobbling single strokes
-const BAL=[[1050,100,'#e8742a',26],[1262,186,'#d93a30',26],[1480,122,'#e03a30',24],[880,134,'#e8c030',26],[742,216,'#c8a860',24],[1100,182,'#6a9ae0',22],[962,320,'#d94a58',27],[602,172,'#7a5ab0',22],[1090,236,'#8fd0e8',24],[1372,292,'#3a60c0',23],[800,432,'#3a60c0',23],[880,352,'#70c0a0',22],[1110,452,'#d93a30',27],[1372,478,'#e8c030',22],[1190,300,'#e87898',22]];
-for(const [x,y,c,r] of BAL){
-  const L=R(80,130);const pts=[[x,y+r*.95,.6]];for(let i=1;i<=4;i++)pts.push([x+R(-8,8)*i/2+i*2,y+r+L*i/4,.6]);
-  F(pts,K('#6a5a62',.03),2.2,{load:.9,thin:.3,opacity:.6});
-  F([[x,y,.9]],K(c,.03),r*2.2,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.28,y+r*.3,.9]],K(SHC(c,.55),.03),r*1.45,{brush:'round',load:1,thin:.3,opacity:.8});
-  F([[x-r*.28,y-r*.3,.9]],K(LITC(c,.35),.03),r*1.15,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.42,y+r*.5,.7],[x+r*.2,y+r*.7,.7]],K(Tn(c,'#fff0d0',.25),.03),r*.28,{load:1,thin:.3,opacity:.7}); // reflected light in the shade
-  F([[x-r*.42,y-r*.45,.9]],K('#fffaf0',.01),r*.4,{brush:'round',load:1.3,thin:.25});
-  F([[x-1,y+r*.98,.7],[x+2,y+r*1.12,.7]],K(SHC(c,.3),.03),r*.28,{load:1,thin:.3});
-  SB([[x-r*.7,y-r*.1],[x-r*.2,y+r*.4],[x+r*.4,y+r*.6]],r*.8,.3);
-}
-// second layer: each balloon is a slightly tall translucent form: lit crescent on the sun side, core shade, a bounce of sky light low on the
-// shade side, a curved window-light highlight, a pinched knot and a short dark tie; colours kept related to the balloon's own hue.
-for(const [x,y,c,r] of BAL){
-  const sx=x,sy=y;
-  // lit crescent following the upper-left rim
-  arc(sx-r*.05,sy-r*.04,r*.62,R(3.3,3.6),R(4.7,5.1),K(LITC(c,.4),.03),r*.55,{load:1.15,thin:.3,edge:.5,taper:[.25,.45]});
-  // core shadow crescent on the lee, then the sky-blue / warm bounce just inside the lower rim
-  arc(sx+r*.08,sy+r*.06,r*.66,R(-.2,.2),R(1.6,2.0),K(SHC(c,.6),.03),r*.4,{load:1,thin:.35,edge:.5,taper:[.25,.45],opacity:.85});
-  arc(sx+r*.04,sy+r*.04,r*.8,R(.5,.8),R(1.5,1.9),K(Tn(c,pick(['#9ec4ee','#f4d8a8','#c8b8e8']),.45),.03),r*.2,{load:1,thin:.3,edge:.5,taper:[.3,.5],opacity:.7});
-  // transmitted glow at the lit edge: thin, bright, broken
-  arc(sx,sy,r*.9,R(3.5,3.8),R(4.5,4.9),K(LITC(c,.6),.02),r*.1,{load:1.2,thin:.25,taper:[.3,.5],opacity:.75});
-  // window highlight: a short curved soft-edged stroke, then a hot touch
-  F([[sx-r*.5,sy-r*.28,.5],[sx-r*.4,sy-r*.45,.9],[sx-r*.2,sy-r*.55,.5]],K('#fffaf0',.01),r*.2,{load:1.3,thin:.25,edge:.4,taper:[.3,.5]});
-  F([[sx-r*.46,sy-r*.42,.9]],K('#ffffff',.005),r*.11,{brush:'round',load:1.3,thin:.25});
-  // knot and tie
-  F([[sx-r*.1,sy+r*.92,.7],[sx+r*.1,sy+r*1.06,.8]],K(SHC(c,.45),.03),r*.26,{load:1,thin:.3,taper:[.1,.3]});
-  SB([[sx-r*.6,sy+r*.1],[sx-r*.3,sy+r*.5],[sx+r*.2,sy+r*.7]],r*.8,.18);
-}
-// string: a faint light edge along each string where the sun catches it, and a slack curl at the tie
-for(const [x,y,c,r] of BAL){const L=R(60,110);const pts=[[x+1.5,y+r*1.1,.5]];for(let i=1;i<=3;i++)pts.push([x+1.5+R(-4,4)*i/2+i*1.6,y+r*1.1+L*i/3,.5]);
-  F(pts,K('#e8dcd0',.03),1.4,{load:.9,thin:.3,opacity:.35,taper:[.1,.5]});}
+// TOWER, dry layer: warm glaze down the sunlit faces, cool glaze down the shade, darkening toward the ground (crowd and plaza shade),
+// stone roughness caught by dry-brush scumbles along the courses, a few cracks and chipped blocks, shingle texture and sunlit spots on the roof.
+const STL=[[0,'#8c6c62'],[.3,'#b99874'],[.62,'#dcc08a'],[1,'#f6e4b0']];
+const STS=[[0,'#4a3f5e'],[.4,'#6c5a7c'],[.75,'#8d7890'],[1,'#b49a9a']];
+const RFL=[[0,'#8a4a36'],[.35,'#b8683e'],[.7,'#d8904e'],[1,'#f2bd70']];
+const RFS=[[0,'#46304c'],[.45,'#6c4658'],[.8,'#8e6260'],[1,'#b88478']];
+// glazes: warm sun on the left faces, cool sky on the right; transparent, long, vertical
+for(let k=0;k<16;k++){const x=R(200,380);S(x,R(400,640),R(160,300),1.57+R(-.03,.03),K(pick(['#f4d890','#f0c880','#fae6b0']),.03),R(24,46),{load:.4,thin:.8,edge:.8,opacity:R(.14,.26),taper:[.3,.5]});}
+for(let k=0;k<12;k++){const x=R(410,535);S(x,R(420,640),R(140,280),1.57+R(-.03,.03),K(pick(['#6a62a4','#7a6aa8','#5e5890']),.03),R(24,46),{load:.4,thin:.8,edge:.8,opacity:R(.14,.26),taper:[.3,.5]});}
+for(let k=0;k<12;k++){S(R(270,350),R(700,790),R(60,100),R(-.03,.03),K('#7a5c64',.03),R(20,34),{load:.4,thin:.8,edge:.8,opacity:R(.14,.24),taper:[.3,.5]});}
+// dry scumbles along the courses: low load catches the weave, lighter on the lit side
+for(let k=0;k<110;k++){const lit=R(0,1)<.62;const x=lit?R(198,382):R(396,540);const y=R(352,790);if(y>466&&y<498)continue;
+  S(x,y,R(26,70),R(-.025,.025),K(lit?G(STL,R(.55,1)):G(STS,R(.3,.85)),.03),R(8,17),{brush:'flat',load:R(.2,.4),thin:.5,edge:.5,opacity:R(.45,.75),taper:[.2,.4]});}
+// chipped blocks: a handful of clean small rectangles lighter or darker than their course
+for(let k=0;k<26;k++){const lit=R(0,1)<.65;const x=lit?R(210,370):R(405,530);const y=R(358,790);if(y>466&&y<498)continue;
+  S(x,y,R(12,26),R(-.02,.02),K(lit?G(STL,R(R(0,1)<.5?.2:.88,R(0,1)<.5?.45:1)):G(STS,R(R(0,1)<.5?.05:.7,R(0,1)<.5?.3:.95)),.03),R(9,14),{brush:'flat',load:1.05,thin:.4,edge:.2,opacity:R(.6,.85)});}
+// cracks: short, wobbling, dark, thin and broken
+for(let k=0;k<8;k++){const lit=R(0,1)<.6;const x=lit?R(215,370):R(410,530),y=R(520,780);const pts=[];let cx=x,cy=y;for(let i=0;i<4;i++){pts.push([cx,cy,.6]);cx+=R(-5,5);cy+=R(7,13);}
+  F(pts,K(lit?'#6a5048':'#3a3050',.03),R(1.8,2.8),{load:.9,thin:.3,opacity:R(.45,.7),taper:[.2,.4]});}
+// roof: shingle texture (short ticks across the rafters) and sun spots near the hip
+for(let k=0;k<130;k++){const t=R(.12,.96);const yy=lerp(100,330,t);const xl=lerp(386,142,t);const x=R(xl+8,388);S(x,yy,R(14,34),R(-.05,.05)-.05*(1-t),K(G(RFL,R(.25,.95)),.04),R(4,8),{load:R(.7,1.1),thin:.35,edge:.4,opacity:R(.5,.8),taper:[.25,.4]});}
+for(let k=0;k<90;k++){const t=R(.12,.96);const yy=lerp(100,330,t);const xr=lerp(386,618,t);const x=R(392,xr-10);S(x,yy,R(14,32),R(.0,.06),K(G(RFS,R(.05,.7)),.04),R(4,8),{load:R(.7,1.0),thin:.35,edge:.4,opacity:R(.45,.75),taper:[.25,.4]});}
+for(let k=0;k<5;k++){const t=R(.1,.5);S(lerp(386,142,t)+R(10,50),lerp(90,330,t),R(16,34),R(.4,.9),K('#f8c880',.03),R(3.5,6),{load:1.25,thin:.28,edge:.4,opacity:R(.6,.9),taper:[.2,.5]});}
+// bell: hot spot and a hint of the clapper's shadow on the arch floor
+F([[300,414,.7],[304,408,.8]],K('#fff6cc',.01),6,{load:1.35,thin:.25,taper:[.3,.4]});
+p.dry();

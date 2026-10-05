@@ -134,37 +134,26 @@ function figure(x,yb,h,o){
   // sun on the shoulder and the sunward sleeve
   F([[x-sw*.95+lean,Y(.80),.6],[x-sw*1.0+lean*.6,Y(.72),.8],[x-sw*1.05,Y(.6),.4]],H(LITC(P.lit,.55)),h*.014,{load:1.25,thin:.25,opacity:.85});
 }
-// BALLOONS: each a small lit sphere, strings as wobbling single strokes
-const BAL=[[1050,100,'#e8742a',26],[1262,186,'#d93a30',26],[1480,122,'#e03a30',24],[880,134,'#e8c030',26],[742,216,'#c8a860',24],[1100,182,'#6a9ae0',22],[962,320,'#d94a58',27],[602,172,'#7a5ab0',22],[1090,236,'#8fd0e8',24],[1372,292,'#3a60c0',23],[800,432,'#3a60c0',23],[880,352,'#70c0a0',22],[1110,452,'#d93a30',27],[1372,478,'#e8c030',22],[1190,300,'#e87898',22]];
-for(const [x,y,c,r] of BAL){
-  const L=R(80,130);const pts=[[x,y+r*.95,.6]];for(let i=1;i<=4;i++)pts.push([x+R(-8,8)*i/2+i*2,y+r+L*i/4,.6]);
-  F(pts,K('#6a5a62',.03),2.2,{load:.9,thin:.3,opacity:.6});
-  F([[x,y,.9]],K(c,.03),r*2.2,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.28,y+r*.3,.9]],K(SHC(c,.55),.03),r*1.45,{brush:'round',load:1,thin:.3,opacity:.8});
-  F([[x-r*.28,y-r*.3,.9]],K(LITC(c,.35),.03),r*1.15,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.42,y+r*.5,.7],[x+r*.2,y+r*.7,.7]],K(Tn(c,'#fff0d0',.25),.03),r*.28,{load:1,thin:.3,opacity:.7}); // reflected light in the shade
-  F([[x-r*.42,y-r*.45,.9]],K('#fffaf0',.01),r*.4,{brush:'round',load:1.3,thin:.25});
-  F([[x-1,y+r*.98,.7],[x+2,y+r*1.12,.7]],K(SHC(c,.3),.03),r*.28,{load:1,thin:.3});
-  SB([[x-r*.7,y-r*.1],[x-r*.2,y+r*.4],[x+r*.4,y+r*.6]],r*.8,.3);
-}
-// second layer: each balloon is a slightly tall translucent form: lit crescent on the sun side, core shade, a bounce of sky light low on the
-// shade side, a curved window-light highlight, a pinched knot and a short dark tie; colours kept related to the balloon's own hue.
-for(const [x,y,c,r] of BAL){
-  const sx=x,sy=y;
-  // lit crescent following the upper-left rim
-  arc(sx-r*.05,sy-r*.04,r*.62,R(3.3,3.6),R(4.7,5.1),K(LITC(c,.4),.03),r*.55,{load:1.15,thin:.3,edge:.5,taper:[.25,.45]});
-  // core shadow crescent on the lee, then the sky-blue / warm bounce just inside the lower rim
-  arc(sx+r*.08,sy+r*.06,r*.66,R(-.2,.2),R(1.6,2.0),K(SHC(c,.6),.03),r*.4,{load:1,thin:.35,edge:.5,taper:[.25,.45],opacity:.85});
-  arc(sx+r*.04,sy+r*.04,r*.8,R(.5,.8),R(1.5,1.9),K(Tn(c,pick(['#9ec4ee','#f4d8a8','#c8b8e8']),.45),.03),r*.2,{load:1,thin:.3,edge:.5,taper:[.3,.5],opacity:.7});
-  // transmitted glow at the lit edge: thin, bright, broken
-  arc(sx,sy,r*.9,R(3.5,3.8),R(4.5,4.9),K(LITC(c,.6),.02),r*.1,{load:1.2,thin:.25,taper:[.3,.5],opacity:.75});
-  // window highlight: a short curved soft-edged stroke, then a hot touch
-  F([[sx-r*.5,sy-r*.28,.5],[sx-r*.4,sy-r*.45,.9],[sx-r*.2,sy-r*.55,.5]],K('#fffaf0',.01),r*.2,{load:1.3,thin:.25,edge:.4,taper:[.3,.5]});
-  F([[sx-r*.46,sy-r*.42,.9]],K('#ffffff',.005),r*.11,{brush:'round',load:1.3,thin:.25});
-  // knot and tie
-  F([[sx-r*.1,sy+r*.92,.7],[sx+r*.1,sy+r*1.06,.8]],K(SHC(c,.45),.03),r*.26,{load:1,thin:.3,taper:[.1,.3]});
-  SB([[sx-r*.6,sy+r*.1],[sx-r*.3,sy+r*.5],[sx+r*.2,sy+r*.7]],r*.8,.18);
-}
-// string: a faint light edge along each string where the sun catches it, and a slack curl at the tie
-for(const [x,y,c,r] of BAL){const L=R(60,110);const pts=[[x+1.5,y+r*1.1,.5]];for(let i=1;i<=3;i++)pts.push([x+1.5+R(-4,4)*i/2+i*1.6,y+r*1.1+L*i/3,.5]);
-  F(pts,K('#e8dcd0',.03),1.4,{load:.9,thin:.3,opacity:.35,taper:[.1,.5]});}
+// GATE, third layer: transparent colour in the spiral arms with thick pale light laid over it, dark indigo hollows between, small bright knots where the arms cross.
+// Only the annulus between the heroes' places and the rim (r 95-268) is worked here.
+const GX3=1760,GY3=790,GR3=278;
+const arm=(a0,u0,u1,n)=>{const pts=[];for(let i=0;i<n;i++){const u=lerp(u0,u1,i/(n-1));const r=GR3*.98*Math.exp(-2.4*u)+14;const a=a0+u*3.6;pts.push([GX3+Math.cos(a)*r,GY3+Math.sin(a)*r,.55+.4*Math.sin(Math.PI*clamp(i/(n-1)*.9+.05,0,1))]);}return pts;};
+const inAnn=pts=>pts.every(q=>{const d=Math.hypot(q[0]-GX3,q[1]-GY3);return d>95&&d<268;});
+for(let k=0;k<110;k++){const a0=R(0,TAU);const u0=R(.0,.45),u1=u0+R(.12,.3);const pts=arm(a0,u0,u1,5);if(!inAnn(pts))continue;
+  F(pts,K(pick(['#6a6ae2','#7a8cf0','#5a5cd0','#8aa6f4','#9a84ec']),.04),R(14,30),{load:.5,thin:.75,edge:.6,opacity:R(.22,.4),taper:[.3,.5]});}
+for(let k=0;k<44;k++){const a0=R(0,TAU);const u0=R(.0,.45),u1=u0+R(.08,.2);const pts=arm(a0+R(.12,.3),u0,u1,5);if(!inAnn(pts))continue;
+  F(pts,K(pick(['#2c2c88','#34349c','#26267a']),.03),R(8,16),{load:.9,thin:.45,edge:.4,opacity:R(.5,.75),taper:[.25,.45]});}
+for(let k=0;k<140;k++){const a0=R(0,TAU);const u0=R(.0,.5),u1=u0+R(.06,.16);const pts=arm(a0,u0,u1,4);if(!inAnn(pts))continue;
+  F(pts,K(pick(['#f4fdff','#d6f4ff','#c4ecff','#e8f0ff','#ffffff']),.012),R(4,10),{load:R(1.1,1.35),thin:.28,edge:.35,opacity:R(.65,.95),taper:[.2,.4]});}
+// bright knots where the light gathers: a few thick, soft-edged touches, not dots in a row
+for(let k=0;k<18;k++){const a=R(0,TAU),r=R(110,255);F([[GX3+Math.cos(a)*r,GY3+Math.sin(a)*r,.8],[GX3+Math.cos(a+.1)*r*1.01,GY3+Math.sin(a+.1)*r*1.01,.8]],K(pick(['#ffffff','#eafcff','#d8f0ff']),.01),R(8,16),{load:1.3,thin:.28,edge:.5,opacity:R(.6,.9),taper:[.3,.5]});}
+for(let k=0;k<6;k++)arc(GX3,GY3,R(110,250),R(0,TAU),R(0,TAU)+1.2,'titanium_white',48,{brush:'soft',opacity:.3});
+
+// leaves nearest the gate catch its light: small cool-white marks on the edges of leaf clumps that face the vortex, strongest close to the rim and dying away with distance
+{const TR3=[[1730,-10],[2410,-10],[2410,440],[2300,466],[2200,432],[2130,470],[2020,424],[1930,452],[1880,364],[1790,330],[1760,220],[1715,100]];
+ const BT3=[[1130,745],[1118,650],[1186,600],[1218,505],[1330,470],[1400,412],[1500,440],[1600,402],[1720,420],[1830,410],[1900,482],[2002,522],[2040,622],[2062,745]];
+ for(let k=0;k<240;k++){const a=R(Math.PI*.78,Math.PI*2.2),d=R(284,400);const x=GX3+Math.cos(a)*d,y=GY3+Math.sin(a)*d*.95;if(!inPoly(BT3,x,y)&&!inPoly(TR3,x,y))continue;const near=clamp(1-(d-284)/130,0,1);
+  const ang=a+1.57+R(-.8,.8);S(x,y,R(8,20),ang,K(pick(['#d4f6fc','#b8ecf8','#e8fcff','#a8e0f0']),.03),R(4,9),{load:R(.9,1.2),thin:.3,edge:.3,opacity:clamp(.3+near*.6,0,1)*R(.7,1),taper:[.2,.45]});}
+ for(let k=0;k<60;k++){const a=R(Math.PI*.78,Math.PI*2.2),d=R(284,360);const x=GX3+Math.cos(a)*d,y=GY3+Math.sin(a)*d*.95;if(!inPoly(BT3,x,y)&&!inPoly(TR3,x,y))continue;
+  S(x,y,R(16,40),a+1.57+R(-.6,.6),K(pick(['#7ab8d8','#8ac8e0','#6aa8d0']),.04),R(8,16),{load:.5,thin:.7,edge:.7,opacity:R(.15,.3),taper:[.3,.5]});}}
+p.dry();

@@ -134,37 +134,31 @@ function figure(x,yb,h,o){
   // sun on the shoulder and the sunward sleeve
   F([[x-sw*.95+lean,Y(.80),.6],[x-sw*1.0+lean*.6,Y(.72),.8],[x-sw*1.05,Y(.6),.4]],H(LITC(P.lit,.55)),h*.014,{load:1.25,thin:.25,opacity:.85});
 }
-// BALLOONS: each a small lit sphere, strings as wobbling single strokes
-const BAL=[[1050,100,'#e8742a',26],[1262,186,'#d93a30',26],[1480,122,'#e03a30',24],[880,134,'#e8c030',26],[742,216,'#c8a860',24],[1100,182,'#6a9ae0',22],[962,320,'#d94a58',27],[602,172,'#7a5ab0',22],[1090,236,'#8fd0e8',24],[1372,292,'#3a60c0',23],[800,432,'#3a60c0',23],[880,352,'#70c0a0',22],[1110,452,'#d93a30',27],[1372,478,'#e8c030',22],[1190,300,'#e87898',22]];
-for(const [x,y,c,r] of BAL){
-  const L=R(80,130);const pts=[[x,y+r*.95,.6]];for(let i=1;i<=4;i++)pts.push([x+R(-8,8)*i/2+i*2,y+r+L*i/4,.6]);
-  F(pts,K('#6a5a62',.03),2.2,{load:.9,thin:.3,opacity:.6});
-  F([[x,y,.9]],K(c,.03),r*2.2,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.28,y+r*.3,.9]],K(SHC(c,.55),.03),r*1.45,{brush:'round',load:1,thin:.3,opacity:.8});
-  F([[x-r*.28,y-r*.3,.9]],K(LITC(c,.35),.03),r*1.15,{brush:'round',load:1.1,thin:.3});
-  F([[x+r*.42,y+r*.5,.7],[x+r*.2,y+r*.7,.7]],K(Tn(c,'#fff0d0',.25),.03),r*.28,{load:1,thin:.3,opacity:.7}); // reflected light in the shade
-  F([[x-r*.42,y-r*.45,.9]],K('#fffaf0',.01),r*.4,{brush:'round',load:1.3,thin:.25});
-  F([[x-1,y+r*.98,.7],[x+2,y+r*1.12,.7]],K(SHC(c,.3),.03),r*.28,{load:1,thin:.3});
-  SB([[x-r*.7,y-r*.1],[x-r*.2,y+r*.4],[x+r*.4,y+r*.6]],r*.8,.3);
-}
-// second layer: each balloon is a slightly tall translucent form: lit crescent on the sun side, core shade, a bounce of sky light low on the
-// shade side, a curved window-light highlight, a pinched knot and a short dark tie; colours kept related to the balloon's own hue.
-for(const [x,y,c,r] of BAL){
-  const sx=x,sy=y;
-  // lit crescent following the upper-left rim
-  arc(sx-r*.05,sy-r*.04,r*.62,R(3.3,3.6),R(4.7,5.1),K(LITC(c,.4),.03),r*.55,{load:1.15,thin:.3,edge:.5,taper:[.25,.45]});
-  // core shadow crescent on the lee, then the sky-blue / warm bounce just inside the lower rim
-  arc(sx+r*.08,sy+r*.06,r*.66,R(-.2,.2),R(1.6,2.0),K(SHC(c,.6),.03),r*.4,{load:1,thin:.35,edge:.5,taper:[.25,.45],opacity:.85});
-  arc(sx+r*.04,sy+r*.04,r*.8,R(.5,.8),R(1.5,1.9),K(Tn(c,pick(['#9ec4ee','#f4d8a8','#c8b8e8']),.45),.03),r*.2,{load:1,thin:.3,edge:.5,taper:[.3,.5],opacity:.7});
-  // transmitted glow at the lit edge: thin, bright, broken
-  arc(sx,sy,r*.9,R(3.5,3.8),R(4.5,4.9),K(LITC(c,.6),.02),r*.1,{load:1.2,thin:.25,taper:[.3,.5],opacity:.75});
-  // window highlight: a short curved soft-edged stroke, then a hot touch
-  F([[sx-r*.5,sy-r*.28,.5],[sx-r*.4,sy-r*.45,.9],[sx-r*.2,sy-r*.55,.5]],K('#fffaf0',.01),r*.2,{load:1.3,thin:.25,edge:.4,taper:[.3,.5]});
-  F([[sx-r*.46,sy-r*.42,.9]],K('#ffffff',.005),r*.11,{brush:'round',load:1.3,thin:.25});
-  // knot and tie
-  F([[sx-r*.1,sy+r*.92,.7],[sx+r*.1,sy+r*1.06,.8]],K(SHC(c,.45),.03),r*.26,{load:1,thin:.3,taper:[.1,.3]});
-  SB([[sx-r*.6,sy+r*.1],[sx-r*.3,sy+r*.5],[sx+r*.2,sy+r*.7]],r*.8,.18);
-}
-// string: a faint light edge along each string where the sun catches it, and a slack curl at the tie
-for(const [x,y,c,r] of BAL){const L=R(60,110);const pts=[[x+1.5,y+r*1.1,.5]];for(let i=1;i<=3;i++)pts.push([x+1.5+R(-4,4)*i/2+i*1.6,y+r*1.1+L*i/3,.5]);
-  F(pts,K('#e8dcd0',.03),1.4,{load:.9,thin:.3,opacity:.35,taper:[.1,.5]});}
+// PLAZA, dry layer: transparent warm and cool glazes in large planes that follow the light pools and the shade, then low-load scumbles so the weave shows; nothing sharper than the planes below.
+const bump3=(x,y,cx,cy,rx,ry)=>{const u=(x-cx)/rx,v=(y-cy)/ry;return Math.exp(-(u*u+v*v));};
+const POOLS3=[[420,1250,480,110,1],[1350,1450,560,120,1],[900,1180,320,50,.8],[2000,1380,300,70,.7],[200,1380,250,90,.7]];
+const SHAD3=[[150,1610,720,150,1],[2050,1600,700,110,1],[1000,1580,380,75,1],[300,1000,700,40,.5],[2150,1250,200,60,.7]];
+function zone3(x,y){let pool=0,sh=0;for(const [cx,cy,rx,ry,k] of POOLS3)pool=Math.max(pool,bump3(x,y,cx,cy,rx,ry)*k);for(const [cx,cy,rx,ry,k] of SHAD3)sh=Math.max(sh,bump3(x,y,cx,cy,rx,ry)*k);return [pool,sh];}
+const lean=(x,y)=>-(x-1200)/(Math.abs(y-860)+400)*.035;
+// large glazes: warm gold in the pools, cool violet where the plaza falls into shade, a pinkish ochre between
+for(let i=0;i<150;i++){const y=1010+R(0,1)*590,x=R(-100,2500);const [pool,sh]=zone3(x,y);const t=(y-950)/650;
+  const c=sh>.45?pick(['#7a6a9c','#8a7aa8','#9a8098']):pool>.4?pick(['#f6dc9c','#f4e0aa','#f0d08c']):pick(['#d8a47c','#d4b090','#c8a2a0']);
+  S(x,y,lerp(240,620,t)*R(.7,1.3),lean(x,y)+R(-.02,.02),K(c,.03),lerp(30,70,t)*R(.8,1.2),{load:.4,thin:.8,edge:.8,opacity:R(.1,.2),taper:[.3,.5]});}
+// dry-brush scumbles, long and low, picking up the canvas tooth
+for(let i=0;i<820;i++){const y=1005+Math.pow(R(0,1),.9)*595,x=R(-80,2480);const [pool,sh]=zone3(x,y);const t=(y-950)/650;
+  const c=sh>.5?pick(['#8c7898','#a08ca8','#7a6a90']):pool>.4?pick(['#f8ecc4','#f0d9a0','#fff2d0']):pick(['#dcb890','#cba27c','#e2c8a4','#bfa4a0']);
+  S(x,y,lerp(150,380,t)*R(.6,1.3),lean(x,y)+R(-.025,.025),K(c,.03),lerp(7,20,t)*R(.7,1.3),{load:R(.18,.34),thin:.5,edge:.5,opacity:R(.4,.7),taper:[.15,.3]});}
+// a few cool reflected accents low in the light, so the sand is not all one temperature
+for(let i=0;i<60;i++){const y=1120+R(0,1)*470,x=R(0,2400);const [pool,sh]=zone3(x,y);if(pool<.3)continue;const t=(y-950)/650;
+  S(x,y,lerp(90,240,t)*R(.6,1.2),lean(x,y)+R(-.02,.02),K(pick(['#c8cce0','#d4d0e0','#bcc8d8']),.03),lerp(7,14,t)*R(.7,1.3),{load:.5,thin:.6,edge:.6,opacity:R(.25,.4),taper:[.25,.45]});}
+// finer broken colour in the far ground (texture follows perspective: small and tight toward the horizon, bigger toward us)
+for(let i=0;i<520;i++){const y=1000+Math.pow(R(0,1),1.35)*300,x=R(-60,2460);const t=(y-950)/650;const [pool,sh]=zone3(x,y);
+  const c=sh>.5?pick(['#8c7898','#a08ca8','#9a86a0']):pool>.4?pick(['#f4e4b0','#ecd49c','#f8ecc4','#e6c892']):pick(['#dcb890','#d0a880','#e4cca8','#c8b0a4','#d8c0b8']);
+  S(x,y,lerp(40,120,t)*R(.6,1.4),lean(x,y)+R(-.02,.02),K(c,.03),lerp(4,11,t)*R(.7,1.3),{load:R(.3,.6),thin:.55,edge:.5,opacity:R(.35,.65),taper:[.2,.4]});}
+// big soft planes of light and air, nearly invisible: the plaza is a touch brighter in the middle distance and cooler at the near corners
+for(let i=0;i<40;i++){const y=R(1020,1600),x=R(-100,2500);const near=clamp((y-1300)/300,0,1);
+  S(x,y,R(400,800),lean(x,y),K(near>.5&&(x<500||x>1900)?'#a898c0':pick(['#f8ecc8','#f4e0b0']),.025),R(70,130),{load:.3,thin:.85,edge:.9,opacity:R(.07,.14),taper:[.3,.5]});}
+// a few long thin seams of slab joints, low contrast and interrupted
+for(let i=0;i<30;i++){const y=1030+Math.pow(R(0,1),1.2)*560,x=R(-100,2300);const t=(y-950)/650;
+  S(x,y,lerp(100,360,t)*R(.5,1.2),lean(x,y)+R(-.008,.008),K(R(0,1)<.5?'#a88c74':'#9a8a98',.03),lerp(1.8,3.6,t),{load:.6,thin:.5,edge:.6,opacity:R(.14,.26),taper:[.3,.4]});}
+p.dry();
