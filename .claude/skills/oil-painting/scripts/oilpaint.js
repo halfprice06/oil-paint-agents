@@ -576,8 +576,24 @@
         }
         // 3. ...and share it across the brush (soft hairs splay and mingle)
         const spread = 0.28 * nC, alpha = pk * spread * spread;   // steady-state spread ~ a quarter of the brush
-        const iters = Math.min(12, Math.ceil(alpha / 0.22)), al1 = alpha / iters;
-        for (let it = 0; it < iters; it++) {
+        const iters = Math.ceil(alpha / 0.22), al1 = alpha / Math.max(1, iters);
+        if (iters > 12) {
+          // big brushes: the explicit diffusion below would need too many steps (and is unstable
+          // if capped), so do the same spread as three masked box blurs of matching variance
+          const sigma = Math.min(nC, Math.sqrt(2 * alpha));
+          const rad = Math.max(1, Math.round((Math.sqrt(4 * sigma * sigma + 1) - 1) / 2));
+          for (let pass = 0; pass < 3; pass++) {
+            tR.set(cR); tG.set(cG); tB.set(cB); tA.set(cA);
+            let sr = 0, sg = 0, sb = 0, sa = 0, sn = 0;
+            for (let j = -rad; j <= rad; j++) if (j >= 0 && j < nC && has[j] > 0.5) { sr += tR[j]; sg += tG[j]; sb += tB[j]; sa += tA[j]; sn++; }
+            for (let j = 0; j < nC; j++) {
+              if (has[j] > 0.5 && sn > 0) { cR[j] = sr / sn; cG[j] = sg / sn; cB[j] = sb / sn; cA[j] = sa / sn; }
+              const jo = j - rad, ji = j + rad + 1;
+              if (jo >= 0 && has[jo] > 0.5) { sr -= tR[jo]; sg -= tG[jo]; sb -= tB[jo]; sa -= tA[jo]; sn--; }
+              if (ji < nC && has[ji] > 0.5) { sr += tR[ji]; sg += tG[ji]; sb += tB[ji]; sa += tA[ji]; sn++; }
+            }
+          }
+        } else for (let it = 0; it < iters; it++) {
           tR.set(cR); tG.set(cG); tB.set(cB); tA.set(cA);
           for (let j = 0; j < nC; j++) {
             if (has[j] < 0.5) continue;
