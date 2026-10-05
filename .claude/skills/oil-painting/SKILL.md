@@ -57,7 +57,7 @@ paint surface from 2x crops. Keep backups of pass files before big rewrites.
 - Don't loop over an image or grid to place strokes. Loops are fine for a group of marks when
   their position, size, angle and colour vary with intent.
 - A `strokes.json` replays only on the engine version that made it. Old engines are in
-  `scripts/legacy/`.
+  `scripts/legacy/`; an `ENGINE` file (e.g. `v4`) in a painting folder makes `render.js` use one.
 
 ## Running several painter agents
 

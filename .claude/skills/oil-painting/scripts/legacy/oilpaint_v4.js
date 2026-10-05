@@ -12,10 +12,6 @@
  * leaves a ridged paint surface that is lit as impasto when rendered.
  *
  * Works in browsers (window.OilPaint) and Node (module.exports).
- *
- * v5 adds: brush:'soft' (a dry badger/mop blender that melts wet colour without striations),
- * taper:[start,end] (feathered stroke ends, with a gentle default for short touches), and
- * edge:0..1 (sides of the stroke feather into the paint below). v4 is kept as oilpaint_v4.js.
  */
 (function (global) {
   'use strict';
@@ -220,12 +216,6 @@
      *  angle:   optional fixed brush orientation in radians (flat/knife calligraphy).
      *           Without it the brush face stays perpendicular to the direction of travel.
      *  thin:    0..1 amount of medium; thinner paint is flatter and spreads further (default 0)
-     *  taper:   number | [start, end], 0..1: fraction of the stroke over which paint fades in / out
-     *           (feathered ends). Omitted: a gentle default that mostly affects short touches.
-     *           0 or false: v4-style blunt ends.
-     *  edge:    0..1 softness of the stroke's sides: paint thins towards them and they melt into
-     *           wet paint below (default 0 = bristle-crisp sides)
-     *  soft:    true with load 0 (or brush:'soft'): a soft dry blender, see _softBlend
      */
     stroke(spec) {
       const s = spec;
@@ -270,9 +260,6 @@
       if (path.length < 2) return;
       const total = path[path.length - 1].d || 1;
       const autoPressure = pts.every((p) => p[2] == null);
-      const env = taperEnvelope(s.taper, total, size);
-      if (brush === 'soft' || (s.soft && load === 0)) { this._softBlend(s, path, total, size, opacity, rng, autoPressure, env); return; }
-      const edgeSoft = clamp(s.edge || 0, 0, 1);
 
       // ---- bristles (each one is really a clump of hairs)
       const spacing = (isKnife ? 1.1 : brush === 'fan' ? 3.2 : 1.7) * sqs;
@@ -314,16 +301,8 @@
           col[0] = clamp(col[0] * (1 + j + wm), 0, 1); col[1] = clamp(col[1] * (1 + j), 0, 1); col[2] = clamp(col[2] * (1 + j - wm), 0, 1);
         }
         const edge = Math.abs(u) > 0.4 && !isKnife;
-        // edge softness: paint thins towards the sides (smooth, with a little per-bristle jitter)
-        let ef = 1;
-        if (edgeSoft > 0) {
-          const t = clamp((0.5 - Math.abs(u)) / (0.5 * edgeSoft) + (rng() - 0.5) * 0.15 * edgeSoft, 0, 1);
-          ef = t * t * (3 - 2 * t);
-        }
-        let ts0 = 0, ts1 = 0;
-        if (env && !isKnife) { const q = (2 * u) * (2 * u); ts0 = env.lenA * 0.5 * q; ts1 = env.lenB * 0.75 * q; }
         bristles.push({
-          u, prof, r, area, ef, ts0, ts1,
+          u, prof, r, area,
           L: capS * load * lv * area * (edge ? 0.75 : 1),   // paint amount held
           col,
           wobA: isKnife ? 0 : (rng() - 0.5) * (edge ? 1.3 : 0.6) * sc, wobF: 0.01 + rng() * 0.04, wobP: rng() * 6.28,
@@ -332,12 +311,6 @@
           s0: (brush === 'filbert' || brush === 'round' ? (1 - Math.sqrt(Math.max(0, 1 - (2 * u) ** 2))) * Math.min(size * 0.3, total * 0.25) : 0) + (isKnife ? 0 : (0.45 * (0.5 + 0.5 * endA(u)) ** 1.5 + 0.55 * rng() ** 2) * size * 0.35 * ragged),   // ragged start
           s1: (brush === 'filbert' || brush === 'round' ? (1 - Math.sqrt(Math.max(0, 1 - (2 * u) ** 2))) * Math.min(size * 0.3, total * 0.25) : 0) + (isKnife ? 0 : (0.45 * (0.5 + 0.5 * endB(u)) ** 1.5 + 0.55 * rng() ** 2) * size * 0.45 * ragged),   // ragged lift-off
         });
-        if (ts0 + ts1 > 0) {
-          const bb = bristles[bristles.length - 1];
-          bb.s0 += ts0; bb.s1 += ts1;
-          const over = bb.s0 + bb.s1 - total * 0.85;
-          if (over > 0) { const k = (total * 0.85) / (bb.s0 + bb.s1); bb.s0 *= k; bb.s1 *= k; }
-        }
       }
 
       const rate = DEPK * (isKnife ? 1.3 : 1) * (1 - thin * 0.4);
@@ -386,8 +359,6 @@
           const b = clamp((total - P.d) / Math.min(size * 1.2, total * 0.35), 0, 1);
           pr *= (0.35 + 0.65 * Math.sqrt(a)) * (0.25 + 0.75 * Math.sqrt(b));
         }
-        const ev = env ? env(P.d) : 1;   // feathered ends: less paint, lighter touch
-        if (ev < 1) pr *= 0.55 + 0.45 * ev;
         let nx, ny;
         if (fixedN) { nx = fixedN[0]; ny = fixedN[1]; } else { nx = -P.ty; ny = P.tx; }
         let width = size;
@@ -420,10 +391,9 @@
           }
           const c = pr * br.prof;
           if (c <= 0.01) continue;
-          const dk = ev * br.ef;   // deposit factor at this point of the stroke / across its width
           const lfrac = br.L / (br.area * capS);
           // dry-brush threshold: low paint + light pressure only touches the weave peaks
-          const thr = 0.95 - (pr * 0.6 + Math.min(lfrac, 1.2) * 0.9 * (ev < 1 ? 0.35 + 0.65 * ev : 1));
+          const thr = 0.95 - (pr * 0.6 + Math.min(lfrac, 1.2) * 0.9);
           const rr = br.r, x0 = Math.floor(bx - rr - 0.5), x1 = Math.ceil(bx + rr + 0.5);
           const y0 = Math.floor(by - rr - 0.5), y1 = Math.ceil(by + rr + 0.5);
           for (let yy = y0; yy <= y1; yy++) {
@@ -447,7 +417,7 @@
               // --- shove wet paint along (bow wave): it leaves this pixel and travels with the bristle
               let wet = W[i];
               if (wet > 0.01) {
-                let pv = wet * plow * cw * f * (0.4 + 0.6 * pr) * (0.3 + 0.7 * dk);
+                let pv = wet * plow * cw * f * (0.4 + 0.6 * pr);
                 if (pv > wet * 0.45) pv = wet * 0.45;
                 const bt = pv / (br.bowV + pv + 1e-9);
                 br.bowC[0] += (R[i] - br.bowC[0]) * bt; br.bowC[1] += (G[i] - br.bowC[1]) * bt; br.bowC[2] += (B[i] - br.bowC[2]) * bt;
@@ -465,7 +435,7 @@
               }
               const a = A[i];
               const full = br.L / (br.area * capS);
-              let dep = full > 0 ? Math.pow(full > 1.5 ? 1.5 : full, 0.6) * rate * cw * f * thick * dk : 0;
+              let dep = full > 0 ? Math.pow(full > 1.5 ? 1.5 : full, 0.6) * rate * cw * f * thick : 0;
               if (dep > br.L) dep = br.L;
               if (dep <= 1e-6) continue;
               const wetNow = W[i], dryA = a - wetNow;
@@ -482,7 +452,7 @@
               A[i] = a + add; W[i] = wetNow + add;
               // relief: fine bristle grooves along the stroke, ridges at its edges and where it lifts
               const tv = gAmp * 0.55 * br.gv * (1.4 - 0.5 * Math.min(1, full));
-              let tk = cover * 1.6 * opacity * wt * wt * (dk < 1 ? dk : 1); if (tk > 1) tk = 1;
+              let tk = cover * 1.6 * opacity * wt * wt; if (tk > 1) tk = 1;
               T[i] += (tv - T[i]) * tk;
               br.L -= dep;
             }
@@ -490,140 +460,6 @@
         }
       }
       // whatever is still in the bow wave stays on the brush when it lifts
-    }
-
-    /**
-     * Soft blender (brush:'soft', or soft:true with load:0): a dry badger / mop brush.
-     * It carries no paint. Its hairs gather the wet colour under them, carry it a little way
-     * along the stroke and share it across the brush, and lay it back down, so colour is
-     * averaged and diffused over the footprint: edges and gradients melt without bristle
-     * striations or plowed ridges. It gently flattens relief and only acts on wet paint.
-     * opacity = strength (default 1). drag (default 1) scales how far colour is carried.
-     */
-    _softBlend(s, path, total, size, opacity, rng, autoPressure, env) {
-      const sc = this.scale;
-      const W = this.W, A = this.A, R = this.R, G = this.G, B = this.B, T = this.T;
-      const w = this.w, h = this.h;
-      const strength = opacity;
-      if (strength <= 0) return;
-      const drag = clamp(s.drag == null ? 1 : s.drag, 0, 4);
-      const fixedN = s.angle != null ? [Math.cos(s.angle), Math.sin(s.angle)] : null;
-      const halfW0 = size * 0.5;
-      const halfL = clamp(size * 0.1, 1.2 * sc, 5 * sc);       // contact length along the stroke
-      const nC = clamp(Math.round(size / (1.6 * Math.sqrt(sc))), 4, 160);
-      const cR = new Float32Array(nC), cG = new Float32Array(nC), cB = new Float32Array(nC), cA = new Float32Array(nC), has = new Float32Array(nC);
-      const sR = new Float32Array(nC), sG = new Float32Array(nC), sB = new Float32Array(nC), sA = new Float32Array(nC), sW = new Float32Array(nC);
-      const tR = new Float32Array(nC), tG = new Float32Array(nC), tB = new Float32Array(nC), tA = new Float32Array(nC);
-      // hair density varies gently across the mop: a faint, soft texture rather than an airbrush
-      const knots = 3 + Math.floor(nC / 10), kv = [];
-      for (let k = 0; k <= knots; k++) kv.push(rng());
-      const dens = new Float32Array(nC);
-      for (let j = 0; j < nC; j++) {
-        const t = (j + 0.5) / nC * knots, k = Math.min(knots - 1, Math.floor(t)), f = t - k, e = f * f * (3 - 2 * f);
-        dens[j] = 0.75 + 0.25 * (kv[k] + (kv[k + 1] - kv[k]) * e) + (rng() - 0.5) * 0.22;
-      }
-      const carryLen = Math.max(2.5 * sc, size * 0.45 * drag);
-      const cur = [0, 0, 0], tgt = [0, 0, 0];
-      const maxK = 1.3;
-      // the touch is never perfectly even along the stroke either
-      const f1 = 6.28 / (size * (1.5 + rng())), f2 = 6.28 / (size * (0.6 + 0.5 * rng())), ph1 = rng() * 6.28, ph2 = rng() * 6.28;
-      for (let k = 0; k < path.length; k++) {
-        const P = path[k];
-        let pr = P.p == null ? 1 : P.p;
-        if (autoPressure) {
-          const a = clamp(P.d / Math.min(size * 0.6, total * 0.3), 0, 1);
-          const b = clamp((total - P.d) / Math.min(size * 0.8, total * 0.35), 0, 1);
-          pr *= (0.3 + 0.7 * Math.sqrt(a)) * (0.3 + 0.7 * Math.sqrt(b));
-        }
-        if (env) pr *= env(P.d);
-        if (pr <= 0.005) continue;
-        const tx = P.tx, ty = P.ty;
-        let nx, ny;
-        if (fixedN) { nx = fixedN[0]; ny = fixedN[1]; } else { nx = -ty; ny = tx; }
-        const halfW = halfW0 * (0.75 + 0.25 * pr);
-        const stepLen = P.step;
-        // bounding box of the oriented footprint
-        const ex = Math.abs(nx) * halfW + Math.abs(tx) * halfL, ey = Math.abs(ny) * halfW + Math.abs(ty) * halfL;
-        const x0 = Math.max(0, Math.floor(P.x - ex)), x1 = Math.min(w - 1, Math.ceil(P.x + ex));
-        const y0 = Math.max(0, Math.floor(P.y - ey)), y1 = Math.min(h - 1, Math.ceil(P.y + ey));
-        if (x0 > x1 || y0 > y1) continue;
-        const cs = nC / (2 * halfW);
-        // 1. gather the wet colour under each part of the brush
-        sR.fill(0); sG.fill(0); sB.fill(0); sA.fill(0); sW.fill(0);
-        for (let yy = y0; yy <= y1; yy++) {
-          const dy = yy + 0.5 - P.y;
-          for (let xx = x0; xx <= x1; xx++) {
-            const dx = xx + 0.5 - P.x;
-            const al = dx * tx + dy * ty; if (al > halfL || al < -halfL) continue;
-            const u = dx * nx + dy * ny; if (u >= halfW || u <= -halfW) continue;
-            const i = yy * w + xx, wet = W[i];
-            if (wet <= 0.003) continue;
-            const g = wet / (wet + 0.06);
-            let j = ((u + halfW) * cs) | 0; if (j >= nC) j = nC - 1;
-            sR[j] += R[i] * g; sG[j] += G[i] * g; sB[j] += B[i] * g; sA[j] += A[i] * g; sW[j] += g;
-          }
-        }
-        // 2. the hairs take up some of it (colour memory carried along the stroke)
-        const pk = 1 - Math.exp(-stepLen / carryLen);
-        for (let j = 0; j < nC; j++) {
-          if (sW[j] <= 0.05) continue;
-          const iw = 1 / sW[j], r = sR[j] * iw, g = sG[j] * iw, b = sB[j] * iw, a = sA[j] * iw;
-          if (has[j] < 0.5) { cR[j] = r; cG[j] = g; cB[j] = b; cA[j] = a; has[j] = 1; }
-          else {
-            const q = pk * (0.5 + 0.5 * Math.min(1, sW[j] / (2 * halfL)));
-            cR[j] += (r - cR[j]) * q; cG[j] += (g - cG[j]) * q; cB[j] += (b - cB[j]) * q; cA[j] += (a - cA[j]) * q;
-          }
-        }
-        // 3. ...and share it across the brush (soft hairs splay and mingle)
-        const spread = 0.28 * nC, alpha = pk * spread * spread;   // steady-state spread ~ a quarter of the brush
-        const iters = Math.min(12, Math.ceil(alpha / 0.22)), al1 = alpha / iters;
-        for (let it = 0; it < iters; it++) {
-          tR.set(cR); tG.set(cG); tB.set(cB); tA.set(cA);
-          for (let j = 0; j < nC; j++) {
-            if (has[j] < 0.5) continue;
-            let lr = 0, lg = 0, lb = 0, la = 0, n = 0;
-            if (j > 0 && has[j - 1] > 0.5) { lr += tR[j - 1]; lg += tG[j - 1]; lb += tB[j - 1]; la += tA[j - 1]; n++; }
-            if (j < nC - 1 && has[j + 1] > 0.5) { lr += tR[j + 1]; lg += tG[j + 1]; lb += tB[j + 1]; la += tA[j + 1]; n++; }
-            if (!n) continue;
-            cR[j] += al1 * (lr - n * tR[j]); cG[j] += al1 * (lg - n * tG[j]); cB[j] += al1 * (lb - n * tB[j]); cA[j] += al1 * (la - n * tA[j]);
-          }
-        }
-        // 4. lay the averaged colour back down, softly, where the paint is wet
-        const lfo = 0.84 + 0.16 * Math.sin(P.d * f1 + ph1) * Math.sin(P.d * f2 + ph2);
-        const kStep = strength * maxK * pr * lfo * Math.min(1, stepLen / (2 * halfL));
-        const edgeW = halfW * 0.55;
-        for (let yy = y0; yy <= y1; yy++) {
-          const dy = yy + 0.5 - P.y;
-          for (let xx = x0; xx <= x1; xx++) {
-            const dx = xx + 0.5 - P.x;
-            const al = dx * tx + dy * ty; if (al > halfL || al < -halfL) continue;
-            const u = dx * nx + dy * ny; if (u >= halfW || u <= -halfW) continue;
-            const i = yy * w + xx, wet = W[i];
-            if (wet <= 0.003) continue;
-            // continuous position across the brush, linear between hair groups
-            let fj = (u + halfW) * cs - 0.5; if (fj < 0) fj = 0; if (fj > nC - 1) fj = nC - 1;
-            const j0 = fj | 0, j1 = j0 < nC - 1 ? j0 + 1 : j0, fr = fj - j0;
-            const h0 = has[j0] > 0.5, h1 = has[j1] > 0.5;
-            if (!h0 && !h1) continue;
-            const wa = h0 ? (h1 ? 1 - fr : 1) : 0, wb = 1 - wa;
-            tgt[0] = cR[j0] * wa + cR[j1] * wb; tgt[1] = cG[j0] * wa + cG[j1] * wb; tgt[2] = cB[j0] * wa + cB[j1] * wb;
-            const ta = cA[j0] * wa + cA[j1] * wb;
-            let e = (halfW - Math.abs(u)) / edgeW; if (e > 1) e = 1; e = e * e * (3 - 2 * e);
-            const lk = 1 - Math.abs(al) / (halfL * 1.6);
-            let kk = kStep * e * lk * (dens[j0] * wa + dens[j1] * wb) * (wet / (wet + 0.08));
-            if (kk <= 1e-4) continue;
-            if (kk > 0.9) kk = 0.9;
-            cur[0] = R[i]; cur[1] = G[i]; cur[2] = B[i];
-            mixInto(cur, tgt, kk);
-            R[i] = cur[0]; G[i] = cur[1]; B[i] = cur[2];
-            // relief: soften the bristle grooves, ease the thickness towards its local level
-            T[i] -= T[i] * kk * 0.45;
-            let dA = (ta - A[i]) * kk * 0.3;
-            if (dA < -wet * 0.5) dA = -wet * 0.5;
-            A[i] += dA; W[i] = wet + dA;
-          }
-        }
-      }
     }
 
     // ------------------------------------------------------------- rendering
@@ -706,38 +542,6 @@
     }
   }
 
-  // Feathered stroke ends: returns env(d) in 0..1 along the path (or null for none).
-  // taper: number | [start, end] = fraction of the stroke length over which paint fades in / out.
-  // Omitted: a gentle default scaled to the brush, so short touches lose their blunt, stamped
-  // ends while long strokes keep their body (only their last half-brush-width softens a little).
-  function taperEnvelope(taper, total, size) {
-    if (taper === false || taper === 0) return null;
-    let a, b, fa, fb;   // fade lengths and floors
-    if (taper == null) {
-      const shortK = clamp(1.6 - total / (size * 2), 0, 1);   // 1 for dabs, 0 for strokes > 3 sizes
-      a = Math.min(total * (0.12 + 0.1 * shortK), size * 0.3);
-      b = Math.min(total * (0.18 + 0.2 * shortK), size * 0.55);
-      fa = 0.55 - 0.3 * shortK; fb = 0.5 - 0.42 * shortK;
-    } else {
-      const t = Array.isArray(taper) ? taper : [taper, taper];
-      let t0 = clamp(+t[0] || 0, 0, 1), t1 = clamp(+t[1] || 0, 0, 1);
-      if (t0 + t1 > 1) { const k = 1 / (t0 + t1); t0 *= k; t1 *= k; }
-      a = t0 * total; b = t1 * total; fa = 0; fb = 0;
-    }
-    if (a < 0.5 && b < 0.5) return null;
-    const sm = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
-    const shape = taper == null ? 1.1 * clamp(1.6 - total / (size * 2), 0, 1) : 1;
-    const env = (d) => {
-      let e = 1;
-      if (a >= 0.5 && d < a) e *= fa + (1 - fa) * sm(d / a);
-      if (b >= 0.5 && total - d < b) e *= fb + (1 - fb) * sm((total - d) / b);
-      return e;
-    };
-    // the outer bristles leave the canvas earlier / touch down later: a rounded, pointed end
-    env.lenA = a * shape; env.lenB = b * shape;
-    return env;
-  }
-
   // separable running-sum box blur, in place on src (tmp is scratch of the same size)
   function boxBlur(src, tmp, w, h, r) {
     if (r < 1) return;
@@ -802,7 +606,7 @@
     }
   }
 
-  const api = { OilPainting, PIGMENTS, parseColor, mixRGB, rgbToHex, hexToRgb, mulberry32, VERSION: 'v5' };
+  const api = { OilPainting, PIGMENTS, parseColor, mixRGB, rgbToHex, hexToRgb, mulberry32 };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
-  global.OilPaint = api;
+  global.OilPaintV4 = api;
 })(typeof window !== 'undefined' ? window : globalThis);

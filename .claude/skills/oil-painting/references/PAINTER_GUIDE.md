@@ -31,6 +31,11 @@ Outputs `final.png` (or `detail.png` for a crop), `progress/<pass>.png`, and `st
 (the full stroke log, used to replay the painting being painted). Look at the PNGs with
 your image-reading tool after every pass and correct what you see.
 
+Engine versions: a stroke log replays exactly only on the engine that painted it. A painting folder
+with an `ENGINE` file containing `v4` (or `v3`, `v2`) is rendered with that older engine, which
+does not have `brush: 'soft'`, `taper` or `edge`. New paintings need no `ENGINE` file (current
+engine, v5). Don't add v5 options to a v4 painting's passes; that painting stays on v4.
+
 ## The brush API (variable `p` inside each pass file)
 
 ```js
@@ -45,11 +50,18 @@ p.stroke({
   opacity: 0..1,                   // < 1 = transparent glaze over dry paint below
   angle:   radians,                // fix the brush orientation (calligraphic flat marks);
                                    // otherwise the brush face stays square to the direction of travel
-  thin:    0..1                    // more medium: flatter, smoother, thinner paint
+  thin:    0..1,                   // more medium: flatter, smoother, thinner paint
+  taper:   0..1 | [start, end],    // feathered ends: fraction of the stroke over which paint fades in/out
+  edge:    0..1                    // soft sides: paint thins towards the stroke's edges (default 0)
 });
 // load: 0 is a clean, dry blending brush: it carries no paint of its own, it picks up the wet
 // paint it touches and drags it along, softening and melting edges (colour is ignored).
 p.stroke({points: [...], brush: 'filbert', size: 30, load: 0, color: 'titanium_white'});
+// brush: 'soft' is a dry badger / mop blender (v5). It carries no paint: it averages and diffuses the
+// wet colour under it across its width and a little along the stroke, melting an edge or a
+// gradient without bristle striations or plowed ridges. It gently flattens relief and keeps some
+// paint texture. opacity = strength (0.3-0.6 for a light touch). Only works on wet paint.
+p.stroke({points: [...], brush: 'soft', size: 50, opacity: 0.8});   // (or load: 0, soft: true)
 p.dab({x, y, color, size, brush, angle, load, pressure})  // a single short touch
 p.dry()                 // the painting dries: later strokes no longer pick up / blend with it
 p.random(), p.rand(a, b)   // seeded randomness (use these, not Math.random, for reproducibility)
@@ -82,6 +94,26 @@ white strongly, so a little goes a long way. Mix the way a painter would.
 - Thick light paint in the lights, thinner darker paint in the shadows reads as real oil.
 - Stroke direction is everything: follow form (curve strokes around a round object,
   horizontal for water, radiating for foliage, short directional dabs for leaves/petals).
+
+## Blending and soft ends (engine v5)
+
+- **Which blender.** `load: 0` with a bristle brush drags paint and leaves dry-brush striations and
+  a ragged ridge: use it where you want the blend to show the brush (grass, rough skies, hair).
+  `brush: 'soft'` melts without marks: a sky gradient laid in bands, the turning edge between light
+  and shadow on a face or an apple, the edges of a cloud, atmospheric distance. Size it at 1.5-3x
+  the width of the zone you want to melt. Two or three light passes (`opacity` 0.4-0.7) at varied
+  angles beat one heavy pass; zigzag across a boundary, then one long stroke along it.
+- **Don't soften everything.** A soft-blended area next to crisp strokes reads as oil paint; a whole
+  canvas run over with the soft brush reads as an airbrushed digital image. Soften turning edges and
+  the distance, keep accents, lights and the focal edge sharp, and paint some strokes after blending.
+- **It needs wet paint.** Blend in the same pass, before `p.dry()`. On dry paint it does nothing.
+- **taper.** Strokes now have a gentle default taper: short touches and dabs get rounded,
+  lighter, slightly broken ends instead of blunt stamped ones; long strokes keep their body.
+  Set `taper: [0.3, 0.6]` (fade in over 30% of the stroke, out over 60%) for strokes that melt into
+  their neighbours: petals, grass blades, feathered hair, wisps of cloud, the tail of a wave.
+  `taper: 0` gives v4's blunt ends (crisp architectural or knife-like marks).
+- **edge.** `edge: 0.5-0.8` makes the stroke's sides thin out so they sink into wet paint below:
+  soft modelling strokes on skin, cloud masses, out-of-focus backgrounds. Keep 0 for crisp marks.
 
 ## Working method (as a painter would)
 
@@ -119,8 +151,9 @@ What gives a canvas away as computer-made, and what to do instead:
   into big, suggestive strokes.
 - **Bright pure colour.** Real paintings are mostly greyed, related colours with a few saturated
   accents. Knock pure pigments down with their complement or an earth colour.
-- **Gradients made of parallel stripes.** Blend by dragging a stroke through wet paint, or by
-  crossing strokes at varied angles, not by stacking stripes of stepped colour.
+- **Gradients made of parallel stripes.** Blend by dragging a stroke through wet paint, crossing
+  strokes at varied angles, or melting the steps with a few `brush: 'soft'` passes, not by leaving
+  stacked stripes of stepped colour.
 
 The paint surface itself (bristle grooves, ridges at stroke edges, paint piling up where the brush lifts)
 comes from the engine; your job is the hand and the eye.

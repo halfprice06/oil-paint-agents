@@ -20,13 +20,35 @@
  *
  *   --scale 3     simulate on a 3x larger canvas (same strokes, finer paint) -> final_3x.png
  *
+ * Engine version: if <paintingDir>/ENGINE exists and names an older engine ("v2", "v3", "v4"),
+ * that engine (oilpaint_vN.js, next to this script or in legacy/) is used, so old stroke logs
+ * replay exactly. No ENGINE file = the current engine. --engine vN overrides.
+ *
  * Writes: final.png (or --out), strokes.json (full replayable stroke log),
  * and with --progress one PNG per pass in progress/.
  */
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
-const { OilPainting, PIGMENTS, parseColor, rgbToHex, mulberry32 } = require('./oilpaint.js');
+
+// pick the engine that made this painting (ENGINE file), so old stroke logs replay exactly
+function loadEngine(dir, override) {
+  let ver = override;
+  if (!ver) {
+    const f = path.join(dir, 'ENGINE');
+    if (fs.existsSync(f)) ver = fs.readFileSync(f, 'utf8').trim().toLowerCase();
+  }
+  if (ver && /^v\d+$/.test(ver)) {
+    for (const cand of [path.join(__dirname, `oilpaint_${ver}.js`), path.join(__dirname, 'legacy', `oilpaint_${ver}.js`)]) {
+      if (fs.existsSync(cand)) { console.log(`engine ${ver} (${path.relative(__dirname, cand)})`); return require(cand); }
+    }
+    const cur = require('./oilpaint.js');
+    if (cur.VERSION && cur.VERSION !== ver) console.warn(`warning: ENGINE says ${ver} but no oilpaint_${ver}.js found; using current engine ${cur.VERSION}`);
+    return cur;
+  }
+  return require('./oilpaint.js');
+}
+let OilPainting, PIGMENTS, parseColor, rgbToHex, mulberry32;
 
 function crc32(buf) {
   let c, crc = 0xffffffff;
@@ -93,6 +115,7 @@ function main() {
   const opt = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null; };
   const has = (name) => args.includes(name);
   const cfg = JSON.parse(fs.readFileSync(path.join(dir, 'painting.json'), 'utf8'));
+  ({ OilPainting, PIGMENTS, parseColor, rgbToHex, mulberry32 } = loadEngine(dir, opt('--engine')));
   const upto = opt('--upto') ? parseInt(opt('--upto'), 10) : cfg.passes.length;
   const crop = opt('--crop') ? opt('--crop').split(',').map(Number) : null;
   const zoom = opt('--zoom') ? parseInt(opt('--zoom'), 10) : 1;
