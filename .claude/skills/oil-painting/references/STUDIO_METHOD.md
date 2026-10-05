@@ -97,3 +97,14 @@ or more resolution make it worse. Work like a painter in front of a model instea
    skies and cloud edges; `taper:[0.3,0.6]` for marks that should feather out; `edge:0.5–0.8` for
    strokes that sink into wet paint below. Keep a few razor edges at the focal point. All of this
    happens before `p.dry()`.
+
+## 5. Look it up, for every detail
+
+Before painting any element (a face, a hand, a stone wall, a canvas tent, a cloud, brass, foliage,
+cobbles), look at real photos of it and at how a master painted it, the way a painter keeps
+references pinned beside the easel. Search the web, download a few images into your folder's
+`refs/` (Unsplash `https://images.unsplash.com/photo-...?w=800` works with curl; Wikimedia needs a
+descriptive User-Agent), and look at them with your image tool next to your crop renders. Ask: how
+does light actually sit on this thing, what are its few big planes, what does the edge do, what
+colour is the shadow? Then paint that, not the symbol in your head. Looking only: never sample
+pixels or trace. Note sources in `refs/README.md`.
