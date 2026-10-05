@@ -1,0 +1,657 @@
+{
+ "_comment": "Millennial Fair v5 reference: 2400x1600, horizon ~y520, late-afternoon sun from the left/behind, violet gate light. Feet positions ('at') are canvas pixels.",
+ "camera": {
+  "width": 2400,
+  "height": 1600,
+  "fov": 40,
+  "eyeHeight": 3.6,
+  "horizonY": 520
+ },
+ "sun": {
+  "azimuth": -108,
+  "elevation": 24,
+  "color": "#ffd6a0",
+  "intensity": 3.2,
+  "softness": 1.3,
+  "samples": 4
+ },
+ "sky": {
+  "color": "#a8c4e4",
+  "ambientSky": "#9ec0ea",
+  "ambientGround": "#d0a878",
+  "intensity": 1.1
+ },
+ "ground": {
+  "color": "#d2b484"
+ },
+ "exposure": 1.0,
+ "lights": [
+  {
+   "at": [
+    1776,
+    1085
+   ],
+   "y": 2.2,
+   "offset": [
+    0,
+    0,
+    0.8
+   ],
+   "color": "#8060ff",
+   "intensity": 35
+  }
+ ],
+ "props": [
+  {
+   "type": "box",
+   "at": [
+    1745,
+    1085
+   ],
+   "size": [
+    5.2,
+    0.6,
+    3.6
+   ],
+   "y": 0.3,
+   "offset": [
+    0,
+    0,
+    -1.8
+   ],
+   "color": "#a89070"
+  },
+  {
+   "type": "disc",
+   "at": [
+    1776,
+    1085
+   ],
+   "y": 1.95,
+   "offset": [
+    0,
+    0,
+    -1.6
+   ],
+   "size": [
+    1.95,
+    0.15
+   ],
+   "color": "#5a4ad0",
+   "emissive": "#4a3ab0",
+   "emissiveIntensity": 0.9,
+   "faceCamera": true,
+   "castShadow": false
+  },
+  {
+   "type": "cylinder",
+   "at": [
+    1470,
+    1085
+   ],
+   "size": [
+    0.5,
+    1.5
+   ],
+   "y": 1.35,
+   "offset": [
+    0,
+    0,
+    -0.7
+   ],
+   "color": "#c8a048"
+  },
+  {
+   "type": "dome",
+   "at": [
+    1470,
+    1085
+   ],
+   "size": [
+    0.58
+   ],
+   "y": 2.1,
+   "offset": [
+    0,
+    0,
+    -0.7
+   ],
+   "color": "#5a5a6a",
+   "roughness": 0.5
+  },
+  {
+   "type": "cylinder",
+   "at": [
+    2070,
+    1085
+   ],
+   "size": [
+    0.5,
+    1.5
+   ],
+   "y": 1.35,
+   "offset": [
+    0,
+    0,
+    -0.7
+   ],
+   "color": "#c8a048"
+  },
+  {
+   "type": "dome",
+   "at": [
+    2070,
+    1085
+   ],
+   "size": [
+    0.58
+   ],
+   "y": 2.1,
+   "offset": [
+    0,
+    0,
+    -0.7
+   ],
+   "color": "#5a5a6a",
+   "roughness": 0.5
+  }
+ ],
+ "figures": [
+  {
+   "name": "crono",
+   "preset": "boy",
+   "height": 1.74,
+   "at": [
+    690,
+    1555
+   ],
+   "faceToward": [
+    1776,
+    1045
+   ],
+   "pose": {
+    "base": "run",
+    "head": [
+     -14,
+     14,
+     0
+    ],
+    "kneeR": 70,
+    "hipR": [
+     -15,
+     4,
+     0
+    ],
+    "ankleR": [
+     -25,
+     0
+    ]
+   },
+   "colors": {
+    "skin": "#e8b48e",
+    "hair": "#d03a18",
+    "top": "#8cc0e2",
+    "sleeves": "#3a8a3a",
+    "pants": "#c8a878",
+    "shoes": "#6a4a2a",
+    "belt": "#3a2a1a"
+   },
+   "clothes": {
+    "tunic": {
+     "length": 0.36,
+     "flare": 0.55
+    },
+    "belt": true,
+    "boots": 0.2
+   },
+   "hair": {
+    "style": "spiky",
+    "length": 0.2,
+    "spikes": 18,
+    "volume": 1.15,
+    "sweep": [
+     0,
+     0.7,
+     -1
+    ]
+   },
+   "hat": {
+    "style": "headband",
+    "color": "#eeeeea",
+    "flow": [
+     -0.4,
+     -0.2,
+     1
+    ]
+   },
+   "scarf": "#e07030",
+   "facingOffset": 30
+  },
+  {
+   "name": "marle",
+   "preset": "girl",
+   "height": 1.6,
+   "at": [
+    1720,
+    1300
+   ],
+   "ground": false,
+   "lift": 1.85,
+   "faceCamera": true,
+   "facingOffset": -10,
+   "pose": {
+    "base": "fall_back",
+    "pelvis": [
+     -25,
+     0,
+     -50
+    ],
+    "spine": [
+     -22,
+     0,
+     -10
+    ],
+    "neck": [
+     0,
+     0,
+     0
+    ],
+    "head": [
+     12,
+     -20,
+     0
+    ],
+    "hipL": [
+     55,
+     15,
+     0
+    ],
+    "kneeL": 75,
+    "hipR": [
+     30,
+     10,
+     0
+    ],
+    "kneeR": 50,
+    "shoulderL": [
+     30,
+     65,
+     0
+    ],
+    "elbowL": 30,
+    "handL": 0.2,
+    "shoulderR": [
+     150,
+     40,
+     0
+    ],
+    "elbowR": 25,
+    "handR": 0
+   },
+   "colors": {
+    "skin": "#f0c8a8",
+    "top": "#c4e2f2",
+    "shoes": "#e8d8a0",
+    "belt": "#e0b040"
+   },
+   "clothes": {
+    "top": "jumpsuit",
+    "belt": true
+   },
+   "hair": {
+    "style": "ponytail",
+    "color": "#f0a878",
+    "length": 0.7,
+    "volume": 1.15,
+    "flow": [
+     1,
+     0.8,
+     -0.3
+    ]
+   }
+  },
+  {
+   "name": "lucca",
+   "preset": "girl",
+   "height": 1.46,
+   "build": 1.05,
+   "at": [
+    1390,
+    1130
+   ],
+   "faceToward": [
+    1776,
+    1045
+   ],
+   "facingOffset": -55,
+   "pose": {
+    "base": "cheer",
+    "shoulderL": [
+     40,
+     120,
+     -20
+    ],
+    "elbowL": 70,
+    "shoulderR": [
+     20,
+     110,
+     -30
+    ],
+    "elbowR": 60,
+    "head": [
+     -6,
+     20,
+     0
+    ]
+   },
+   "colors": {
+    "skin": "#ecc09a",
+    "top": "#e08030",
+    "sleeves": "#3a9a8a",
+    "pants": "#2a2a32",
+    "shoes": "#3a2a20",
+    "hair": "#6a4a9a"
+   },
+   "clothes": {
+    "legs": "shorts",
+    "boots": 0.25
+   },
+   "hair": "bob",
+   "hat": {
+    "style": "helmet",
+    "color": "#4a6a8a",
+    "band": "#d8b040"
+   },
+   "glasses": "#d0b040",
+   "lift": 0.6
+  },
+  {
+   "name": "fg_left",
+   "preset": "male",
+   "at": [
+    190,
+    1585
+   ],
+   "faceToward": [
+    1000,
+    1300
+   ],
+   "pose": "stand_relaxed",
+   "colors": {
+    "top": "#a83a3a",
+    "pants": "#3a6a4a",
+    "hat": "#d8c8a0"
+   },
+   "hat": {
+    "style": "cap",
+    "color": "#d8c8a0"
+   }
+  },
+  {
+   "name": "fg_umbrella",
+   "preset": "female",
+   "at": [
+    2060,
+    1575
+   ],
+   "faceToward": [
+    1700,
+    1200
+   ],
+   "pose": {
+    "base": "stand",
+    "shoulderR": [
+     15,
+     15,
+     0
+    ],
+    "elbowR": 90,
+    "handR": 0.95,
+    "wristR": [
+     0,
+     0
+    ]
+   },
+   "colors": {
+    "top": "#9a3a3a",
+    "skirt": "#5a3a3a"
+   },
+   "clothes": {
+    "skirt": {
+     "length": 0.7
+    }
+   },
+   "hair": "bun",
+   "prop": {
+    "type": "umbrella",
+    "hand": "R",
+    "length": 1.05,
+    "radius": 0.012,
+    "angle": 90,
+    "offset": 0.1,
+    "color": "#3a2a1a",
+    "canopy": 0.45,
+    "canopyColor": "#c8402a"
+   }
+  },
+  {
+   "name": "fg_right",
+   "preset": "male",
+   "at": [
+    2235,
+    1562
+   ],
+   "faceToward": [
+    1700,
+    1100
+   ],
+   "pose": "hands_behind",
+   "colors": {
+    "top": "#7a9a4a",
+    "pants": "#3a3a5a"
+   },
+   "hat": {
+    "style": "cap",
+    "color": "#5a5a4a"
+   }
+  }
+ ],
+ "crowds": [
+  {
+   "name": "left",
+   "count": 90,
+   "seed": 11,
+   "region": {
+    "poly": [
+     [
+      0,
+      870
+     ],
+     [
+      1180,
+      870
+     ],
+     [
+      1180,
+      990
+     ],
+     [
+      1020,
+      1125
+     ],
+     [
+      0,
+      1140
+     ]
+    ]
+   },
+   "faceToward": [
+    1776,
+    1045
+   ],
+   "facingJitter": 45,
+   "minSpacing": 0.55,
+   "hatChance": 0.3,
+   "palette": {
+    "tops": [
+     "#a8584a",
+     "#6a84a8",
+     "#8a9a5a",
+     "#d8b860",
+     "#9a6a8a",
+     "#e0d8c8",
+     "#5a8a7a",
+     "#c88a5a",
+     "#8a7a6a",
+     "#b0b8c8",
+     "#c05a4a",
+     "#5a7a9a",
+     "#a0b8d8",
+     "#e8d8a8",
+     "#7a9aba",
+     "#9a8ab8",
+     "#6aa06a",
+     "#e0a050"
+    ],
+    "pants": [
+     "#5a5048",
+     "#6a5a4a",
+     "#4a5260",
+     "#8a7a60",
+     "#7a7060",
+     "#5a6a5a",
+     "#9a8a70",
+     "#4a4a52"
+    ]
+   },
+   "poses": {
+    "stand": 4,
+    "stand_relaxed": 4,
+    "walk": 0.6,
+    "walk_b": 0.6,
+    "look_up": 1.2,
+    "talk": 1,
+    "hands_behind": 0.6,
+    "arms_crossed": 0.6,
+    "hands_on_hips": 0.5,
+    "wave": 0.6,
+    "point": 0.5,
+    "cheer": 0.5,
+    "shield_eyes": 0.5
+   }
+  },
+  {
+   "name": "right",
+   "count": 62,
+   "seed": 22,
+   "region": {
+    "poly": [
+     [
+      1150,
+      1095
+     ],
+     [
+      2290,
+      1095
+     ],
+     [
+      2290,
+      1330
+     ],
+     [
+      1150,
+      1330
+     ]
+    ]
+   },
+   "faceToward": [
+    1776,
+    1045
+   ],
+   "facingJitter": 30,
+   "minSpacing": 0.55,
+   "poses": {
+    "stand": 3,
+    "stand_relaxed": 3,
+    "cheer": 1.5,
+    "wave": 1,
+    "point": 1,
+    "look_up": 1.5,
+    "shield_eyes": 0.6,
+    "jump_cheer": 0.3
+   },
+   "palette": {
+    "tops": [
+     "#a8584a",
+     "#6a84a8",
+     "#8a9a5a",
+     "#d8b860",
+     "#9a6a8a",
+     "#e0d8c8",
+     "#5a8a7a",
+     "#c88a5a",
+     "#8a7a6a",
+     "#b0b8c8",
+     "#c05a4a",
+     "#5a7a9a",
+     "#a0b8d8",
+     "#e8d8a8",
+     "#7a9aba",
+     "#9a8ab8",
+     "#6aa06a",
+     "#e0a050"
+    ],
+    "pants": [
+     "#5a5048",
+     "#6a5a4a",
+     "#4a5260",
+     "#8a7a60",
+     "#7a7060",
+     "#5a6a5a",
+     "#9a8a70",
+     "#4a4a52"
+    ]
+   }
+  }
+ ],
+ "crops": [
+  {
+   "name": "crono",
+   "x": 380,
+   "y": 950,
+   "w": 700,
+   "h": 650,
+   "scale": 1.5
+  },
+  {
+   "name": "gate",
+   "x": 1150,
+   "y": 450,
+   "w": 1000,
+   "h": 650,
+   "scale": 1.5
+  },
+  {
+   "name": "crowd_left",
+   "x": 0,
+   "y": 760,
+   "w": 1200,
+   "h": 420,
+   "scale": 1.5
+  },
+  {
+   "name": "crowd_right",
+   "x": 1100,
+   "y": 950,
+   "w": 1300,
+   "h": 450,
+   "scale": 1.5
+  }
+ ],
+ "passes": [
+  "lit",
+  "value",
+  "flat",
+  "id"
+ ]
+}

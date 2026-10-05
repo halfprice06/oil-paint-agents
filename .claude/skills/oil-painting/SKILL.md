@@ -51,6 +51,12 @@ node $SKILL/scripts/render.js my-painting --scale 3         # final_3x.png, the 
 After every pass, look at the PNGs with your image-reading tool and fix what you see. Judge the
 paint surface from 2x crops. Keep backups of pass files before big rewrites.
 
+## Figures and crowds
+
+Don't invent people from symbols. Pose them in a lit 3D scene with `scripts/pose3d` (see its
+README), render crops, and paint what you see: planes of light and shadow, overlaps, cast shadows.
+You may read joint positions from its `out.json` to place limbs; never sample its pixels.
+
 ## Rules
 
 - No filters and no pixel sampling or programmatic tracing of any image. Looking at references is

@@ -1,0 +1,457 @@
+{
+ "camera": {
+  "width": 2400,
+  "height": 1200,
+  "fov": 28,
+  "position": [
+   0,
+   3.2,
+   13
+  ],
+  "lookAt": [
+   0,
+   0.9,
+   -2.5
+  ]
+ },
+ "sun": {
+  "azimuth": -50,
+  "elevation": 40,
+  "intensity": 3,
+  "softness": 1.5
+ },
+ "sky": {
+  "color": "#c8d4e0",
+  "intensity": 1.1
+ },
+ "ground": {
+  "color": "#bfb4a0"
+ },
+ "figures": [
+  {
+   "name": "stand",
+   "preset": "male",
+   "pose": "stand",
+   "position": [
+    -5.6000000000000005,
+    0,
+    0
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "short"
+  },
+  {
+   "name": "stand_relaxed",
+   "preset": "female",
+   "pose": "stand_relaxed",
+   "position": [
+    -4,
+    0,
+    0
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "ponytail"
+  },
+  {
+   "name": "walk",
+   "preset": "boy",
+   "pose": "walk",
+   "position": [
+    -2.4000000000000004,
+    0,
+    0
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "spiky"
+  },
+  {
+   "name": "walk_b",
+   "preset": "girl",
+   "pose": "walk_b",
+   "position": [
+    -0.8,
+    0,
+    0
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "bob"
+  },
+  {
+   "name": "run",
+   "preset": "child",
+   "pose": "run",
+   "position": [
+    0.8,
+    0,
+    0
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "curly"
+  },
+  {
+   "name": "run_b",
+   "preset": "elder",
+   "pose": "run_b",
+   "position": [
+    2.4000000000000004,
+    0,
+    0
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "long"
+  },
+  {
+   "name": "sprint",
+   "preset": "male",
+   "pose": "sprint",
+   "position": [
+    4,
+    0,
+    0
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "short"
+  },
+  {
+   "name": "lunge",
+   "preset": "female",
+   "pose": "lunge",
+   "position": [
+    5.6000000000000005,
+    0,
+    0
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "ponytail"
+  },
+  {
+   "name": "reach_up",
+   "preset": "boy",
+   "pose": "reach_up",
+   "position": [
+    -5.6000000000000005,
+    0,
+    -3.2
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "spiky"
+  },
+  {
+   "name": "reach_forward",
+   "preset": "girl",
+   "pose": "reach_forward",
+   "position": [
+    -4,
+    0,
+    -3.2
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "bob"
+  },
+  {
+   "name": "wave",
+   "preset": "child",
+   "pose": "wave",
+   "position": [
+    -2.4000000000000004,
+    0,
+    -3.2
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "curly"
+  },
+  {
+   "name": "cheer",
+   "preset": "elder",
+   "pose": "cheer",
+   "position": [
+    -0.8,
+    0,
+    -3.2
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "long"
+  },
+  {
+   "name": "jump_cheer",
+   "preset": "male",
+   "pose": "jump_cheer",
+   "position": [
+    0.8,
+    0,
+    -3.2
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "short"
+  },
+  {
+   "name": "point",
+   "preset": "female",
+   "pose": "point",
+   "position": [
+    2.4000000000000004,
+    0,
+    -3.2
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "ponytail"
+  },
+  {
+   "name": "hands_on_hips",
+   "preset": "boy",
+   "pose": "hands_on_hips",
+   "position": [
+    4,
+    0,
+    -3.2
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "spiky"
+  },
+  {
+   "name": "arms_crossed",
+   "preset": "girl",
+   "pose": "arms_crossed",
+   "position": [
+    5.6000000000000005,
+    0,
+    -3.2
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "bob"
+  },
+  {
+   "name": "hands_behind",
+   "preset": "child",
+   "pose": "hands_behind",
+   "position": [
+    -5.6000000000000005,
+    0,
+    -6.4
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "curly"
+  },
+  {
+   "name": "look_up",
+   "preset": "elder",
+   "pose": "look_up",
+   "position": [
+    -4,
+    0,
+    -6.4
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "long"
+  },
+  {
+   "name": "talk",
+   "preset": "male",
+   "pose": "talk",
+   "position": [
+    -2.4000000000000004,
+    0,
+    -6.4
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "short"
+  },
+  {
+   "name": "shield_eyes",
+   "preset": "female",
+   "pose": "shield_eyes",
+   "position": [
+    -0.8,
+    0,
+    -6.4
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "ponytail"
+  },
+  {
+   "name": "hold_child_hand",
+   "preset": "boy",
+   "pose": "hold_child_hand",
+   "position": [
+    0.8,
+    0,
+    -6.4
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "spiky"
+  },
+  {
+   "name": "fall_back",
+   "preset": "girl",
+   "pose": "fall_back",
+   "position": [
+    2.4000000000000004,
+    0,
+    -6.4
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "bob"
+  },
+  {
+   "name": "float",
+   "preset": "child",
+   "pose": "float",
+   "position": [
+    4,
+    0,
+    -6.4
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "curly"
+  },
+  {
+   "name": "sit_ground",
+   "preset": "elder",
+   "pose": "sit_ground",
+   "position": [
+    5.6000000000000005,
+    0,
+    -6.4
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "long"
+  },
+  {
+   "name": "crouch",
+   "preset": "male",
+   "pose": "crouch",
+   "position": [
+    -5.6000000000000005,
+    0,
+    -9.600000000000001
+   ],
+   "facing": 25,
+   "colors": {
+    "top": "#7a8aa0",
+    "pants": "#5a4a3a",
+    "hair": "#3a2a1a"
+   },
+   "hair": "short"
+  }
+ ]
+}

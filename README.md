@@ -10,7 +10,7 @@ those strokes into paint on linen.
 | ![Jug and Two Apples](examples/jug-and-two-apples/final.png) | ![Late Light, Breaking Sea](examples/late-light-breaking-sea/final.png) | ![Pond Under the Poplars](examples/pond-under-the-poplars/final.png) |
 | *Jug and Two Apples*, 826 strokes | *Late Light, Breaking Sea*, 2128 strokes | *Pond Under the Poplars*, 1308 strokes |
 
-Also: [*The Gate Over Guardia Meadow*](examples/gate-over-guardia-meadow/final.png), an impressionist Chrono Trigger homage in 12,308 strokes, and [*The Gate Opens at the Millennial Fair*](examples/millennial-fair/final.png), the game's opening Telepod scene in about 17,900 strokes, and its [50k redo](examples/millennial-fair-50k/final.png) on a 2400x1600 canvas in 46,645 strokes (`final_2x.jpg` is 4800x3200).
+Also: [*The Gate Over Guardia Meadow*](examples/gate-over-guardia-meadow/final.png), an impressionist Chrono Trigger homage in 12,308 strokes, and [*The Gate Opens at the Millennial Fair*](examples/millennial-fair/final.png), the game's opening Telepod scene in about 17,900 strokes, and its [50k redo](examples/millennial-fair-50k/final.png) on a 2400x1600 canvas in 46,645 strokes (`final_2x.jpg` is 4800x3200). The latest, [*v5*](examples/millennial-fair-v5/final.png), uses engine v5 and paints the crowd and characters by looking at a lit 3D mannequin reference (`scripts/pose3d`).
 
 Each example folder has the pass files, the value study, the painter's notes, a 1x render and
 a 3x render (`final_3x.jpg`).
@@ -23,6 +23,7 @@ a 3x render (`final_3x.jpg`).
   scripts/oilpaint.js               the paint engine (Node and browser)
   scripts/render.js                 render a painting folder to PNG (1x, crops, --scale 3)
   scripts/sketch.js                 render your SVG value study to PNG (needs Playwright)
+  scripts/pose3d/                   posed, lit 3D mannequin scenes as figure and crowd references
   scripts/legacy/                   older engine versions, for replaying older stroke logs
   references/PAINTER_GUIDE.md       brush API, pigments, how the paint behaves
   references/STUDIO_METHOD.md       the method: value study, passes, edges, review
