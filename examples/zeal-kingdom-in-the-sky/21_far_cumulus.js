@@ -147,14 +147,16 @@ for(const r of rows){const [cx,cy,rx,ry]=r;const far=cy<1016;const w=clamp(1-cx/
 }
 blendPoly(RECT(0,995,W,1060),40,.45,0,80);
 // middle deck: flat horizontal drifts of thin cloud, each a long low lens: violet underside, pale body, warm lit top edge toward the sun
-const drifts=[[90,1120,200,14],[500,1100,160,10],[760,1165,240,16],[1000,1148,170,12],[1300,1132,150,10],[1650,1190,230,16],[1870,1168,170,12],[2080,1125,160,11],[2300,1150,200,14],[300,1190,180,13],[1150,1205,200,14],[2200,1205,180,12],[600,1215,150,11]];
-for(const d of drifts){const [cx,cy,rx,ry]=d;const w=clamp(1-cx/1900,0,1),dim=ISL(cx,cy);
+const drifts=[[300,1125,420,16,1],[1000,1150,380,15,.6],[1500,1180,450,18,1],[2050,1135,360,14,.6],[2330,1190,300,13,1]];
+for(const d of drifts){const [cx,cy,rx,ry,vis]=d;const w=clamp(1-cx/1900,0,1),dim=ISL(cx,cy);const lost=vis<1;
   const und=()=>{const c=CL.shad();if(dim)c.push(['ultramarine',dim*.1]);return c;};
-  for(let i=0;i<Math.round(rx/32);i++)S(cx+R(-rx,rx),cy+ry*R(.3,1.3),R(160,320),R(-.015,.015),und(),R(12,22),{brush:'flat',load:.8,thin:.65,edge:.5,taper:[.2,.2],opacity:.7,stir:.7});
-  for(let i=0;i<Math.round(rx/20);i++){const x=cx+R(-rx,rx),y=cy+R(-ry*.6,ry*.5);const c=p.random()<.6?CL.half():CL.halfD();if(dim)c.push(['ultramarine',dim*.1],['cobalt_violet',dim*.1]);S(x,y,R(160,340),R(-.02,.02),c,R(14,28),{brush:'flat',load:R(.85,1),thin:.5,edge:.45,taper:[.2,.25],stir:.45});}
-  for(let i=0;i<Math.round(rx/40*(0.6+w));i++){const x=cx-rx*R(-.6,.9),y=cy-ry*R(.3,1.1);const c=CL.lit(.3+.6*w);if(dim)c.push(['cobalt_violet',dim*.1]);S(x,y,R(120,280),R(-.02,.02),c,R(16,30),{brush:'flat',load:1.15,thin:.38,edge:.3,taper:[.2,.25],stir:.5});}
+  for(let i=0;i<Math.round(rx/32);i++)S(cx+R(-rx,rx),cy+ry*R(.3,1.3),R(200,420),R(-.012,.012),und(),R(14,24),{brush:'flat',load:.8,thin:.65,edge:.5,taper:[.2,.2],opacity:lost?.45:.7,stir:.7});
+  for(let i=0;i<Math.round(rx/20);i++){const x=cx+R(-rx,rx),y=cy+R(-ry*.6,ry*.5);const c=p.random()<.6?CL.half():CL.halfD();if(dim)c.push(['ultramarine',dim*.1],['cobalt_violet',dim*.1]);S(x,y,R(220,460),R(-.015,.015),c,R(16,30),{brush:'flat',load:R(.85,1),thin:.5,edge:.45,taper:[.2,.25],stir:.45,opacity:lost?.6:1});}
+  for(let i=0;i<Math.round(rx/40*(0.6+w));i++){const x=cx-rx*R(-.6,.9),y=cy-ry*R(.3,1.1);const c=CL.lit(.3+.6*w);if(dim)c.push(['cobalt_violet',dim*.1]);S(x,y,R(160,340),R(-.015,.015),c,R(16,32),{brush:'flat',load:1.15,thin:.38,edge:.3,taper:[.2,.25],stir:.5,opacity:lost?.6:1});}
   BL([[cx-rx,cy+ry*1.6],[cx,cy+ry*2],[cx+rx,cy+ry*1.6]],ry*3,.5);BL([[cx-rx,cy-ry*1.2],[cx,cy-ry*1.5],[cx+rx,cy-ry*1.1]],ry*2.5,.35);
   for(let i=0;i<3;i++)BL(seg(cx+R(-rx,rx),cy,ry*R(3,5),R(-.1,.1),0,3),ry*2.5,.4);
+  // lost ends
+  BL([[cx-rx*1.15,cy-ry],[cx-rx*.75,cy+ry*.5]],ry*4,.6);BL([[cx+rx*.75,cy-ry],[cx+rx*1.15,cy+ry*.5]],ry*4,.6);if(lost){for(let i=0;i<4;i++)S(cx+R(-rx,rx),cy+R(-ry,ry),R(240,420),R(-.01,.01),CL.haze(),R(30,46),{brush:'flat',load:.7,thin:.65,edge:.6,opacity:.3,taper:[.2,.2]});}
 }
 // a few haze veils to push the whole middle row back
 

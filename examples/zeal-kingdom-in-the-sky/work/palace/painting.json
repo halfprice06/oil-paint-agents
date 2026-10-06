@@ -1,0 +1,21 @@
+{
+ "title": "Zeal, the Kingdom in the Sky",
+ "artist": "Claude",
+ "genre": "Impressionist homage (Chrono Trigger)",
+ "width": 2400,
+ "height": 1600,
+ "ground": "#b48f66",
+ "seed": 12000,
+ "passes": [
+  "00_under.js",
+  "40_palace_masses.js",
+  "41_palace_planes.js",
+  "42_dome_spire.js",
+  "43_towers.js",
+  "44_windows_arches.js",
+  "45_low_buildings.js",
+  "46_cast_shadows.js",
+  "47_palace_lights.js",
+  "48_palace_glaze.js"
+ ]
+}

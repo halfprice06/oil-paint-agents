@@ -89,6 +89,10 @@ glaze([[1826,774],[1966,790],[2012,812],[1905,818],[1802,804]],12,GLG,.2);
 glaze([[1160,770],[1232,790],[1182,802],[1120,778]],10,GLG,.2);
 glaze([[2050,760],[2112,776],[2080,792],[2000,770]],10,GLG,.18);
 glaze([[1548,600],[1612,602],[1678,610],[1674,628],[1640,638],[1586,636],[1550,622]],9,GLZ,.22);
+// long shadows of the two towers to the lower right: on the terrace's left part, the drum's lower wall, and across the plateau
+glaze([[1300,574],[1352,588],[1396,636],[1300,636]],8,GLZ,.14,{edge:.6});
+glaze([[1286,766],[1304,766],[1490,826],[1440,838],[1330,804]],10,GLG,.22,{edge:.5});
+glaze([[1826,774],[1850,774],[2060,816],[2100,836],[2030,842],[1900,818]],10,GLG,.2,{edge:.5});
 // the stair's shadow on the plateau to its lower right
 glaze([[1398,768],[1430,790],[1470,800],[1440,806],[1400,792]],8,GLG,.2,{edge:.5});
 // under the cornice overhang on the lit side, and inside the arcade (deepen the openings' tops)

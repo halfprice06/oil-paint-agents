@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1600" viewBox="0 0 2400 1600">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9aa6cc"/><stop offset="0.6" stop-color="#e3c9a8"/><stop offset="1" stop-color="#f3dfa6"/></linearGradient>
+<linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9d4c2"/><stop offset="1" stop-color="#9d92b0"/></linearGradient>
+<!-- facet A: left lit warm -->
+<linearGradient id="fA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a08c6c"/><stop offset="0.55" stop-color="#7d6a58"/><stop offset="1" stop-color="#55495a"/></linearGradient>
+<linearGradient id="fA2" x1="0" y1="0" x2="0.6" y2="1"><stop offset="0" stop-color="#6e5f58"/><stop offset="1" stop-color="#6a5a70"/></linearGradient>
+<!-- facet B: central dark -->
+<linearGradient id="fB" x1="0" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#3a3450"/><stop offset="0.7" stop-color="#2e2a44"/><stop offset="1" stop-color="#5a4e70"/></linearGradient>
+<!-- facet C: right half-tone -->
+<linearGradient id="fC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6a5f78"/><stop offset="0.6" stop-color="#4a4160"/><stop offset="1" stop-color="#645670"/></linearGradient>
+<!-- facet D: right dark, darkest core -->
+<linearGradient id="fD" x1="0" y1="0" x2="0.8" y2="1"><stop offset="0" stop-color="#3f3853"/><stop offset="0.6" stop-color="#26223a"/><stop offset="1" stop-color="#4c4262"/></linearGradient>
+<linearGradient id="plat" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#cfc06e"/><stop offset="0.3" stop-color="#9aa65a"/><stop offset="0.7" stop-color="#6f8a52"/><stop offset="1" stop-color="#5a6e52"/></linearGradient>
+<linearGradient id="fall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6f8f6"/><stop offset="0.6" stop-color="#dfe8ee"/><stop offset="1" stop-color="#cdd6e4" stop-opacity="0"/></linearGradient>
+<radialGradient id="mist" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#e6e2ea" stop-opacity="0.8"/><stop offset="1" stop-color="#e6e2ea" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="2400" height="1000" fill="url(#sky)"/>
+<rect y="1000" width="2400" height="600" fill="url(#sea)"/>
+<path d="M-50 1250 C0 1120 150 1060 300 1090 C380 1020 520 1030 600 1110 C700 1080 820 1120 860 1200 C900 1280 820 1340 700 1330 L0 1340 Z" fill="#f6e4c4"/>
+<path d="M820 1340 C860 1230 1000 1180 1120 1220 C1200 1160 1360 1170 1440 1250 C1540 1200 1700 1230 1740 1330 C1780 1400 1700 1440 1600 1430 L900 1440 Z" fill="#f4dfc0"/>
+<path d="M1740 1300 C1800 1180 1960 1130 2100 1180 C2180 1120 2320 1140 2400 1220 L2400 1420 L1800 1420 Z" fill="#edd6bc"/>
+
+<!-- UNDERSIDE facets -->
+<!-- D right dark -->
+<polygon points="1800,815 2050,790 2160,760 2130,830 2060,870 2010,900 1990,940 1960,1000 1900,1030 1870,1060 1810,1110 1760,1130 1700,1150 1700,1000 1760,900" fill="url(#fD)"/>
+<!-- C right half tone -->
+<polygon points="1500,830 1800,815 1760,900 1700,1000 1700,1150 1660,1200 1640,1235 1600,1265 1560,1250 1520,1200 1480,1180 1520,1000" fill="url(#fC)"/>
+<!-- B central dark -->
+<polygon points="1200,825 1500,830 1520,1000 1480,1180 1450,1220 1400,1250 1360,1300 1320,1290 1290,1230 1255,1200 1210,1160 1180,1150 1240,900" fill="url(#fB)"/>
+<!-- A left lit -->
+<polygon points="860,780 980,800 1200,825 1240,900 1180,1150 1140,1100 1100,1060 1060,1090 1040,1080 1000,1000 980,960 940,930 900,900 880,860 870,840" fill="url(#fA)"/>
+<!-- A2 lower half tone ledge of the lit face -->
+<polygon points="930,930 1070,960 1180,1000 1180,1150 1140,1100 1100,1060 1060,1090 1040,1080 1000,1000 980,960" fill="url(#fA2)"/>
+<!-- ledge shadow strip under the step on A -->
+<polygon points="930,930 1070,960 1180,1000 1170,1012 1060,975 935,945" fill="#4a4050"/>
+<!-- crevices -->
+<polygon points="1350,840 1380,840 1395,1000 1375,1180 1360,1150 1350,1000" fill="#241f36"/>
+<polygon points="1930,830 1960,826 1990,930 1960,1000 1945,930" fill="#231f33"/>
+<polygon points="1560,840 1580,840 1600,950 1570,1180 1550,1000" fill="#312b47"/>
+<!-- overhang dark just under the lip (turf overhangs) -->
+<path d="M870 790 L980 808 L1200 834 L1500 840 L1800 826 L2050 801 L2150 772 L2140 790 L2050 818 L1800 845 L1500 858 L1200 850 L980 822 L880 806 Z" fill="#2a2538" opacity="0.8"/>
+<!-- reflected light at the lowest planes (violet pink lift) -->
+<polygon points="1255,1200 1290,1230 1320,1290 1360,1300 1400,1250 1450,1220 1480,1180 1430,1170 1380,1180 1300,1160" fill="#6d5a78" opacity="0.7"/>
+<polygon points="1560,1250 1600,1265 1640,1235 1660,1200 1620,1180 1580,1190 1540,1200" fill="#6a5a78" opacity="0.6"/>
+<polygon points="1040,1080 1060,1090 1100,1060 1140,1100 1180,1150 1130,1130 1080,1120 1020,1040" fill="#7a6678" opacity="0.5"/>
+<polygon points="1810,1110 1760,1130 1700,1150 1720,1110 1790,1080" fill="#5a4c68" opacity="0.6"/>
+<!-- lit edges on A facets (found edges) -->
+<polyline points="870,840 900,900 940,930" stroke="#b8a483" stroke-width="5" fill="none"/>
+<polyline points="1200,825 1240,900" stroke="#9d8b70" stroke-width="4" fill="none"/>
+<!-- hanging roots / vegetation at the lip -->
+<path d="M905 800 C900 830 915 850 905 880" stroke="#4a4a30" stroke-width="5" fill="none"/>
+<path d="M1120 826 C1115 860 1130 870 1122 900" stroke="#3f4430" stroke-width="5" fill="none"/>
+<path d="M1600 845 C1590 880 1610 900 1595 930" stroke="#2f3a2e" stroke-width="5" fill="none"/>
+<path d="M1880 830 C1875 860 1890 880 1878 905" stroke="#2f3a2e" stroke-width="4" fill="none"/>
+<path d="M2020 815 C2010 840 2030 850 2015 870" stroke="#2f3a2e" stroke-width="4" fill="none"/>
+<ellipse cx="1130" cy="845" rx="40" ry="14" fill="#44512f"/>
+<ellipse cx="1610" cy="852" rx="55" ry="16" fill="#334231"/>
+<ellipse cx="1950" cy="818" rx="45" ry="13" fill="#334231"/>
+
+<!-- MIST glow around falls -->
+<ellipse cx="1245" cy="1150" rx="110" ry="140" fill="url(#mist)"/>
+<ellipse cx="1705" cy="1100" rx="90" ry="110" fill="url(#mist)"/>
+<ellipse cx="1030" cy="990" rx="60" ry="70" fill="url(#mist)"/>
+<!-- WATERFALLS -->
+<polygon points="1230,828 1300,832 1290,980 1270,1120 1245,1200 1215,1260 1225,1150 1215,1000 1210,900" fill="url(#fall)"/>
+<polygon points="1262,832 1300,832 1290,980 1275,1120 1255,1180 1258,1000" fill="#ffffff" opacity="0.6"/>
+<polygon points="1690,820 1740,818 1748,950 1732,1080 1705,1150 1685,1100 1678,1000 1680,900" fill="url(#fall)"/>
+<polygon points="1715,819 1740,818 1748,950 1735,1060 1718,1000 1712,900" fill="#ffffff" opacity="0.5"/>
+<polygon points="1000,805 1030,808 1045,900 1040,980 1025,1030 1008,990 998,900" fill="url(#fall)" opacity="0.8"/>
+
+<!-- PLATEAU -->
+<polygon points="820,740 960,690 1150,660 1400,645 1650,650 1900,670 2100,710 2160,760 2050,790 1800,815 1500,830 1200,825 980,800 860,780" fill="url(#plat)"/>
+<!-- sunlit left field -->
+<polygon points="820,740 960,690 1150,660 1240,690 1050,735 920,772 860,780" fill="#d6c877" opacity="0.8"/>
+<!-- half-tone band toward the lip (turf turning over) -->
+<path d="M860 780 L980 800 L1200 825 L1500 830 L1800 815 L2050 790 L2160 760 L2150 752 L2040 778 L1800 802 L1500 818 L1200 812 L985 788 L870 770 Z" fill="#6f7d47" opacity="0.7"/>
+<!-- cool right side shadow field -->
+<polygon points="1680,740 1880,770 2050,800 1900,815 1680,820 1560,790" fill="#52603f" opacity="0.8"/>
+<!-- pale path / terrace -->
+<path d="M900 770 C1000 750 1100 760 1180 790 C1220 805 1260 805 1300 800" stroke="#d9cfa0" stroke-width="12" fill="none" opacity="0.8"/>
+<path d="M1700 790 C1780 790 1850 800 1900 805" stroke="#bcb48c" stroke-width="8" fill="none" opacity="0.6"/>
+<!-- flower bed warm accents near palace -->
+<ellipse cx="1260" cy="790" rx="45" ry="10" fill="#c9774f" opacity="0.8"/>
+<ellipse cx="1700" cy="795" rx="40" ry="9" fill="#c2805c" opacity="0.7"/>
+<!-- building footprints (ghost) -->
+<rect x="1300" y="570" width="380" height="190" fill="#e9dcc0" opacity="0.4"/>
+<rect x="1180" y="560" width="105" height="200" fill="#e9dcc0" opacity="0.4"/>
+<rect x="1720" y="600" width="105" height="170" fill="#e9dcc0" opacity="0.4"/>
+<rect x="960" y="700" width="200" height="70" fill="#e9dcc0" opacity="0.4"/>
+<rect x="1880" y="690" width="170" height="70" fill="#e9dcc0" opacity="0.4"/>
+<!-- tree cast shadows (lower right) -->
+<ellipse cx="1085" cy="722" rx="95" ry="18" fill="#4e6240" opacity="0.7" transform="rotate(8 1085 722)"/>
+<ellipse cx="2020" cy="710" rx="105" ry="20" fill="#44583f" opacity="0.7" transform="rotate(8 2020 710)"/>
+<ellipse cx="1205" cy="805" rx="80" ry="14" fill="#4e6240" opacity="0.7" transform="rotate(6 1205 805)"/>
+<ellipse cx="1910" cy="808" rx="70" ry="12" fill="#44583f" opacity="0.7" transform="rotate(6 1910 808)"/>
+<ellipse cx="945" cy="760" rx="60" ry="12" fill="#5a6a40" opacity="0.6" transform="rotate(8 945 760)"/>
+<!-- trees: shadow mass then lit lobes -->
+<ellipse cx="1030" cy="680" rx="70" ry="45" fill="#3b5030"/>
+<ellipse cx="1005" cy="665" rx="45" ry="28" fill="#8aa24a"/>
+<ellipse cx="1050" cy="660" rx="30" ry="18" fill="#9db055"/>
+<ellipse cx="1960" cy="665" rx="80" ry="50" fill="#36502f"/>
+<ellipse cx="1930" cy="650" rx="50" ry="30" fill="#7a9a48"/>
+<ellipse cx="1985" cy="640" rx="30" ry="18" fill="#8aa652"/>
+<ellipse cx="1150" cy="770" rx="60" ry="35" fill="#3c5230"/>
+<ellipse cx="1128" cy="758" rx="38" ry="22" fill="#8ea84c"/>
+<ellipse cx="1860" cy="780" rx="55" ry="30" fill="#34482f"/>
+<ellipse cx="1840" cy="768" rx="34" ry="18" fill="#7b9a4a"/>
+<ellipse cx="895" cy="735" rx="42" ry="26" fill="#4a5c34"/>
+<ellipse cx="880" cy="725" rx="28" ry="16" fill="#9aae55"/>
+<ellipse cx="2085" cy="748" rx="38" ry="22" fill="#3a4e34"/>
+<ellipse cx="2072" cy="740" rx="24" ry="13" fill="#7f9c4e"/>
+<!-- shrubs -->
+<ellipse cx="1230" cy="810" rx="22" ry="11" fill="#55703a"/>
+<ellipse cx="1660" cy="805" rx="24" ry="11" fill="#4f6a3b"/>
+<ellipse cx="1050" cy="782" rx="18" ry="9" fill="#5c7a3c"/>
+<!-- bright turf edge along the lip -->
+<polyline points="862,778 980,798 1200,822 1500,827 1800,812 2050,787 2158,758" stroke="#d8cf86" stroke-width="4" fill="none" opacity="0.9"/>
+</svg>

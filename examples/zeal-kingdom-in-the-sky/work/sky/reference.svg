@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1600" viewBox="0 0 2400 1600">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+ <stop offset="0" stop-color="#55679f"/><stop offset="0.22" stop-color="#7f8dbb"/><stop offset="0.45" stop-color="#b3b0c9"/>
+ <stop offset="0.66" stop-color="#dfc6ad"/><stop offset="0.86" stop-color="#eed8a8"/><stop offset="1" stop-color="#f2dcb4"/>
+</linearGradient>
+<radialGradient id="sun" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#fff5cf"/><stop offset="0.25" stop-color="#fbe8b0" stop-opacity="0.9"/><stop offset="0.55" stop-color="#f3d99a" stop-opacity="0.55"/><stop offset="1" stop-color="#f0d8a8" stop-opacity="0"/></radialGradient>
+<radialGradient id="calm" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#6e74a8" stop-opacity="0.45"/><stop offset="1" stop-color="#6e74a8" stop-opacity="0"/></radialGradient>
+<linearGradient id="haze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4dfc0" stop-opacity="0"/><stop offset="1" stop-color="#f6e1cc" stop-opacity="0.95"/></linearGradient>
+<linearGradient id="cl1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c3b2cc"/><stop offset="0.45" stop-color="#e2b39e"/><stop offset="1" stop-color="#f0c4a2"/></linearGradient>
+<linearGradient id="cl2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9a8c6"/><stop offset="0.5" stop-color="#d9a8a8"/><stop offset="1" stop-color="#e8b9a6"/></linearGradient>
+<linearGradient id="cl3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6d2c0"/><stop offset="1" stop-color="#f6dcb0"/></linearGradient>
+<linearGradient id="enh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4c2c4"/><stop offset="1" stop-color="#a9a0b8"/></linearGradient>
+<filter id="blur8"><feGaussianBlur stdDeviation="8"/></filter>
+<filter id="blur16"><feGaussianBlur stdDeviation="16"/></filter>
+<filter id="blur4"><feGaussianBlur stdDeviation="4"/></filter>
+</defs>
+<rect width="2400" height="1600" fill="url(#sky)"/>
+<ellipse cx="1500" cy="330" rx="560" ry="330" fill="url(#calm)"/>
+<ellipse cx="260" cy="420" rx="640" ry="380" fill="url(#sun)"/>
+<ellipse cx="240" cy="430" rx="260" ry="170" fill="#fff6d6" opacity="0.5" filter="url(#blur16)"/>
+<!-- cloud streaks: lavender tops, salmon undersides -->
+<path d="M1300 150 C1600 136 1900 158 2200 148 L2210 168 C1900 190 1600 182 1300 174 Z" fill="url(#cl2)" filter="url(#blur4)"/>
+<path d="M600 250 C900 228 1300 262 1700 240 C1900 232 2100 252 2320 236 L2320 266 C2000 284 1600 272 1200 294 C900 304 700 292 600 278 Z" fill="url(#cl1)" filter="url(#blur4)"/>
+<path d="M90 335 C260 322 500 330 720 322 L730 338 C500 350 260 352 90 346 Z" fill="url(#cl3)" filter="url(#blur4)"/>
+<path d="M1760 420 C1950 412 2200 422 2400 414 L2400 444 C2200 452 1950 450 1770 438 Z" fill="url(#cl2)" opacity="0.8" filter="url(#blur8)"/>
+<path d="M900 560 C1050 548 1200 556 1300 552 L1300 574 C1200 582 1050 582 900 578 Z" fill="url(#cl3)" opacity="0.6" filter="url(#blur8)"/>
+<!-- horizon haze -->
+<rect y="860" width="2400" height="180" fill="url(#haze)"/>
+<!-- Enhasa: hazy lavender-grey mass, lit top warm, underside cool -->
+<g opacity="0.85">
+<path d="M140 860 L240 845 L330 820 L420 832 L520 820 L600 840 L660 870 L640 920 L560 990 L450 1020 L330 1000 L220 950 Z" fill="url(#enh)"/>
+<path d="M140 860 L240 845 L330 820 L420 832 L520 820 L600 840 L660 870 L560 880 L420 872 L260 876 Z" fill="#dcc9c0"/>
+<path d="M640 920 L560 990 L450 1020 L330 1000 L220 950 L300 940 L450 960 L560 940 Z" fill="#9a8fae"/>
+<path d="M300 822 L320 780 L345 822 Z" fill="#d9c9c2"/><path d="M345 822 L395 790 L415 832 Z" fill="#cdbbbd"/>
+<rect x="455" y="800" width="22" height="30" fill="#e2d2c6"/><rect x="540" y="808" width="26" height="22" fill="#d8c4c0"/>
+<ellipse cx="430" cy="826" rx="18" ry="8" fill="#e5d6c8"/>
+</g>
+<rect y="860" width="2400" height="180" fill="url(#haze)" opacity="0.35"/>
+<!-- island mask for reference only -->
+<path d="M820 740 L960 690 L1150 660 L1400 645 L1650 650 L1900 670 L2100 710 L2160 760 L2050 790 L1800 815 L1500 830 L1200 825 L980 800 L860 780 Z" fill="#777" opacity="0.3"/>
+</svg>

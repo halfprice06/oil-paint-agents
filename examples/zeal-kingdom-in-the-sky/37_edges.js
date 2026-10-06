@@ -89,7 +89,7 @@ for(let x=866;x<2150;x+=R(40,110)){const y=lipY(x)-R(0,3);const len=R(30,90);con
 // lost passage: the right part of the back edge melts into the sky with a few thin sky-coloured veils laid across the contour
 for(let i=0;i<9;i++){const x=R(1900,2150);const y=x<2100?lerp(670,710,(x-1900)/200):lerp(710,760,(x-2100)/60);S(x,y+R(-6,6),R(60,120),Math.atan2(x<2100?.2:.8,1)+R(-.1,.1),M(SkyR,.15),R(10,18),{load:.7,thin:.65,opacity:R(.2,.35),edge:.9,taper:[.4,.4],stir:.9});}
 for(const t of [[1362,1372],[1325,1300],[1600,1267],[1640,1237],[1960,1002],[2010,902]]){
-  S(t[0]+R(-10,10),t[1]-R(0,20),R(80,130),R(-.2,.2),M(Cloud,.15),R(34,48),{load:.7,thin:.7,opacity:R(.14,.22),edge:.95,taper:[.45,.45],stir:.9});}
+  S(t[0]+R(-10,10),t[1]-R(0,15),R(30,50),R(-.4,.4),M(Cloud,.15),R(22,30),{load:.7,thin:.7,opacity:R(.14,.22),edge:.95,taper:[.4,.4],stir:.9});}
 for(const e of [[870,846,906,906],[906,906,944,934]])p.stroke({points:[[e[0],e[1],.6],[(e[0]+e[2])/2+R(-2,2),(e[1]+e[3])/2,1],[e[2],e[3],.5]],color:M(Lpink,.08),brush:'filbert',size:R(6,9),load:1.35,thin:.25,taper:[.2,.3],clean:true});
 p.stroke({points:[[1218,840,.6],[1222,900,.95],[1226,960,.9],[1230,1000,.4]],color:M(Wlit,.06),brush:'flat',size:R(8,11),load:1.4,thin:.2,taper:[.1,.5],clean:true});
 p.stroke({points:[[1226,1020,.6],[1228,1080,.9],[1226,1140,.4]],color:M(Wlit,.06),brush:'flat',size:R(6,9),load:1.4,thin:.2,taper:[.1,.5],clean:true});

@@ -107,8 +107,11 @@ for(let k=0;k<2;k++)SB([[1886,606],[1886,694]],12,.45);
 const ldW=wallPoly(LD,1300,1680);
 patch(ldW,12,1500,(x,y)=>zone((x-LD.cx)/LD.r,.42),VERT,.2,2.6);
 for(let i=0;i<16;i++){const u=R(-.95,.95);const a0=Math.acos(u);const z=zone(u,.42);earc(LD.cx,LD.cy+7,LD.r-4,LD.ry,a0,a0+R(.1,.22),z.c,R(8,13),Object.assign({},z.o));}
+// warm reflected light low on the shadow side (plateau and cloud light), laid wet before the melts
+for(let i=0;i<70;i++){const u=R(.55,.97),x=LD.cx+u*LD.r;const y=R(700,760);S(x,y,R(16,34),Math.PI/2+R(-.25,.25),M([['titanium_white',1.7],['cobalt_violet',.45],['naples_yellow',.5],['yellow_ochre',.1],['ultramarine',.22]],.2),R(7,11),{load:.9,thin:.45,edge:.35,taper:[.15,.3]});}
 for(const uu of [-.2,.05,.25])melt(LD,0,0,uu,3,34,.35);
-melt(LD,0,0,.42,6,44,.5);melt(LD,0,0,.6,3,30,.4);
+melt(LD,0,0,.34,4,48,.45);melt(LD,0,0,.42,6,44,.5);melt(LD,0,0,.52,4,40,.5);melt(LD,0,0,.64,3,30,.4);
+for(let k=0;k<4;k++)SB([[LD.cx+LD.r*.5+R(-10,10),R(700,730)],[LD.cx+LD.r*.95,R(735,760)]],R(20,28),.35);
 for(let k=0;k<3;k++){const x=LD.cx+LD.r*(.88+R(-.04,.04));SB([[x,rim(LD,x)+10],[x+R(-4,4),LD.bot-8]],R(18,24),.4);}
 for(let k=0;k<2;k++){const x=LD.cx-LD.r*(.88+R(-.04,.04));SB([[x,rim(LD,x)+10],[x+R(-4,4),LD.bot-8]],R(16,22),.35);}
 // ---- TERRACE ----

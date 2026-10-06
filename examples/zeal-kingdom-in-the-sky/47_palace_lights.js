@@ -86,7 +86,10 @@ for(let i=0;i<5;i++){const u=R(-.75,-.45),x=1490+u*120;S(x,R(545,590),R(18,32),M
 for(const t of [[1232,590,740],[1772,630,750]])for(let i=0;i<5;i++){const u=R(-.75,-.45),x=t[0]+u*52;S(x,R(t[1],t[2]),R(20,38),Math.PI/2+R(-.06,.06),CRX(),R(7,10),{load:1.4,thin:.25,clean:true,edge:.15,taper:[.15,.3]});}
 for(let i=0;i<4;i++){const a=R(2.1,2.9);earc(1490,596,182,32,a,a-R(.12,.22),CRM(),R(6,9),{load:1.3,thin:.3,clean:true});}
 // gold: band at the great spire's base (bright left, ochre right), arch crowns, cornice touches
-for(let a=3.05;a>.08;a-=R(.1,.2)){const u=Math.cos(a);const c=u<-.3?GLL():(u<.4?GLD():GLS());earc(1490,500+R(-.5,.5),121,27,a,a-R(.16,.36),c,R(3.5,5.5),{brush:p.random()<.4?'knife':'filbert',load:1.2,thin:.3,clean:true,taper:[.1,.2]});}
+const GDK=()=>M([['burnt_umber',.8],['yellow_ochre',.5],['ultramarine',.3]],.2);
+for(const a of [2.9,2.45,2.0]){earc(1490,504,121,27,a-R(.02,.06),a-R(.22,.34),GDK(),R(3.5,4.5),{load:.8,thin:.5,edge:.3,taper:[.2,.4],opacity:.85});}
+for(const a of [2.92,2.48,2.02,1.55]){const u=Math.cos(a);earc(1490,500+R(-.5,.5),121,27,a,a-R(.18,.34),u<-.3?GLL():GLD(),R(4.5,6.5),{brush:p.random()<.6?'knife':'filbert',load:1.35,thin:.25,clean:true,taper:[.05,.25]});}
+earc(1490,500,121,27,1.0,.72,GLS(),3.5,{load:.8,thin:.45,taper:[.3,.6],opacity:.7});
 p.dab({x:1372,y:679,color:GLD(),size:6,brush:'knife',load:1.2,angle:0});p.dab({x:1369,y:677,color:GLL(),size:3.5,brush:'round',load:1.2});
 for(const x of [1318,1430,1545]){p.dab({x:x,y:600+36*Math.sqrt(1-Math.pow((x-1490)/190,2))-R(0,2),color:GLL(),size:R(3.5,5),brush:'knife',load:1.2,angle:.2});}
 for(const t of [[1232,560],[1772,600]]){for(const a of [2.7,2.1]){const x=t[0]+52*Math.cos(a);p.dab({x:x,y:t[1]+12*Math.sin(a),color:GLD(),size:R(3,4),brush:'round',load:1.1});}}
@@ -97,6 +100,11 @@ p.dab({x:1491,y:232,color:GLD(),size:12,brush:'round',load:1.2});p.dab({x:1488,y
 p.dab({x:1490,y:174,color:GLD(),size:8,brush:'round',load:1.2});p.dab({x:1488,y:172,color:GLL(),size:4,brush:'knife',load:1.2,angle:-.6});
 p.dab({x:1490,y:124,color:GLL(),size:5,brush:'round',load:1.2});
 for(const t of [[1232,393,34,4],[1772,443,30,4],[1878,538,16,3],[1062,660,14,3]]){rod(t[0],t[1],t[1]-t[2],t[3]);p.dab({x:t[0],y:t[1]-t[2],color:GLL(),size:t[3]+1.5,brush:'round',load:1.2});p.dab({x:t[0],y:t[1]-t[2]*.45,color:GLD(),size:t[3]+1,brush:'round',load:1.1});}
+// one crisp lit edge on the spire's left contour, finial to rim (thick, clean, no taper); the right contour stays soft
+{const TB2=[[240,0],[262,5],[290,11],[320,18],[355,28],[400,55],[435,78],[462,99],[484,114],[500,120]];
+ const W2=y=>{if(y<=240)return 0;for(let i=0;i<TB2.length-1;i++){if(y<=TB2[i+1][0]){const t=(y-TB2[i][0])/(TB2[i+1][0]-TB2[i][0]);return lerp(TB2[i][1],TB2[i+1][1],t*t*(3-2*t)*.5+t*.5);}}return 120;};
+ const EDGE=()=>M([['titanium_white',3],['cerulean',.7],['viridian',.1],['naples_yellow',.2]],.12);
+ for(const [ya,yb] of [[244,330],[320,420],[410,500]]){const pts=[];for(let i=0;i<6;i++){const y=lerp(ya,yb,i/5);pts.push([1490-W2(y)+2.5+R(-.5,.5),y,.85+.15*Math.sin(Math.PI*i/5)]);}L(pts,EDGE(),R(4,5.5),{load:1.4,thin:.22,clean:true,taper:0,edge:0});}}
 // one crisp highlight ridge near the lit edge of each roof, with a few pale touches at the great spire's tip
 const TAB=[[240,0],[262,5],[290,11],[320,18],[355,28],[400,55],[435,78],[462,99],[484,114],[500,120]];
 const W=y=>{if(y<=240)return 0;for(let i=0;i<TAB.length-1;i++){if(y<=TAB[i+1][0]){const t=(y-TAB[i][0])/(TAB[i+1][0]-TAB[i][0]);return lerp(TAB[i][1],TAB[i+1][1],t*t*(3-2*t)*.5+t*.5);}}return 120;};

@@ -122,3 +122,21 @@ over several rounds of engine work and painter critique.
   painter uses them on purpose; replaying old strokes on v6 changed little.
 - **Rounds can regress.** Keep every round's passes and compare crops side by side before merging.
 
+
+## Parallel painters on one canvas (zeal-kingdom-in-the-sky, Oct 2026)
+
+- **Four painters, one block-in, merge by layer.** Give each painter a copy of the whole scene's block-in and the
+  colour study, one area each (sky, cloud sea, island, palace), its own folder and a numbered pass range, and
+  merge the built passes in depth order. Painters test against the shared block-in, so they see their area in
+  context without waiting for each other. Critique from the merged render, not from each folder's render: the
+  island's underside looked fine alone and became a grey smear over the cloud painter's repainted deck.
+- **The block-in's relief ghosts through.** Thick vertical strokes in the block-in (a dome, tower cones) left
+  ridges that showed through every later sky pass as a striped silhouette. Block in shapes that later layers
+  must cover thinly (`thin: 0.9`, `load: 0.5`), or not at all.
+- **Stroke budgets have a ceiling per area.** Painters asked for 9-14k strokes delivered 3.5-7k and could not
+  spend more without damage: extra marks on existing forms became confetti, bricks, fur or speckle. Added
+  content (a second island, a cloud tower, an arcade and stair, garden walls) added strokes that read; added
+  texture did not. Ask for forms, not counts.
+- **Values before form before surface.** The cloud deck went through three rounds: first a row of lumps, then
+  recession, then values (lit tops to cream-white), and only then form (one tower, one bank, drifts). Each round
+  fixed one thing; asking for all three at once produced none of them.

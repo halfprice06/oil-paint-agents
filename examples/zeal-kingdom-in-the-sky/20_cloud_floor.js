@@ -158,10 +158,20 @@ blendPoly(RECT(0,1000,W,H),80,.4,0,160);
 for(const g of [[1250,1200],[1715,1150],[1030,1120]]){for(let i=0;i<5;i++){S(g[0]+R(-60,60),g[1]+R(-20,60),R(80,160),R(-.05,.05),CL.refl(),R(30,50),{load:.8,thin:.6,edge:.6,opacity:R(.18,.3),taper:[.3,.3]});}}
 // nearest band: bluer, softer, below the viewer
 for(let i=0;i<60;i++){const x=R(-100,W);const y=R(1440,1615);S(x,y,R(240,480),R(-.03,.03),p.random()<.65?CL.blue():CL.shad(),R(55,95),{brush:'flat',load:.9,thin:.6,edge:.5,opacity:R(.5,.8),taper:[.15,.2],stir:.7});}
-for(const rd of [[600,1505,500,34],[1700,1528,600,38],[2300,1490,300,26]]){const [cx,cy,rx,ry]=rd;
-  for(let i=0;i<Math.round(rx/30);i++){const x=cx+R(-rx,rx);S(x,cy-ry*R(.2,.9),R(90,200),R(-.03,.03),p.random()<.6?CL.refl():CL.pinkgrey(),R(26,50),{brush:'flat',load:.9,thin:.5,edge:.5,taper:[.2,.25],opacity:.7,stir:.5});}
-  for(let i=0;i<Math.round(rx/40);i++){const x=cx+R(-rx,rx);S(x,cy+ry*R(.3,1.2),R(90,200),R(-.03,.03),CL.blue(),R(26,50),{brush:'flat',load:.8,thin:.6,edge:.5,taper:[.2,.25],opacity:.7});}}
-blendPoly(RECT(0,1430,W,H),88,.55,0,160);
-blendPoly(RECT(0,1430,W,H),75,.45,.5,80);
+// two or three large soft cloud shoulders seen from above: cool, low contrast, lit edges only at the left
+const nearLit=()=>M([['titanium_white',3.4],['cobalt_violet',.15],['ultramarine',.1],['naples_yellow',.16]],.2);
+const nearShad=()=>M([['titanium_white',2.1],['ultramarine',.38],['cobalt_violet',.3],['raw_umber',.15]],.2);
+for(const sh of [[520,1545,520,72,1],[1350,1580,620,80,.5],[2120,1535,460,66,.3]]){const [cx,cy,rx,ry,w]=sh;
+  // shadow lower-right, big thin strokes
+  for(let i=0;i<10;i++){const a=SHA+R(-1,1),ww=R(.8,1.4);arcOn(cx,cy,rx,ry,null,a-ww/2,a+ww/2,R(.5,1.0),nearShad(),R(60,100),{brush:'flat',load:.85,thin:.6,edge:.5,taper:[.15,.25],stir:.7});}
+  // lit upper-left shoulder, cooler cream, big strokes
+  for(let i=0;i<12;i++){const a=SUNA+R(-.8,.8),ww=R(.8,1.4);const c=nearLit();if(w<1)c.push(['cobalt_violet',(1-w)*.15],['ultramarine',(1-w)*.1]);arcOn(cx,cy,rx,ry,null,a-ww/2,a+ww/2,R(.4,.98),c,R(60,110),{brush:'flat',load:1.05,thin:.4,edge:.3,taper:[.12,.2],stir:.55});}
+  // melt the turn
+  for(let i=0;i<6;i++){const u=R(-.8,.8);const ta=SUNA+Math.PI/2;BL(seg(cx+Math.cos(ta)*rx*u*.8,cy+Math.sin(ta)*ry*u*.8,R(120,200),SUNA+R(-.3,.3),0,3),70,.45);}
+  for(let i=0;i<4;i++){const a=SHA+R(-1,1),ww=R(.6,1);const pts=[];for(let j=0;j<4;j++){const aa=lerp(a-ww/2,a+ww/2,j/3);pts.push([cx+Math.cos(aa)*rx*R(.95,1.08),cy+Math.sin(aa)*ry*R(.95,1.08)]);}BL(pts,70,.5);}
+  // lit edge only on the left shoulder
+  if(w>=1)for(let i=0;i<4;i++){const a=SUNA+R(-.6,.3),ww=R(.3,.6);arcOn(cx,cy,rx,ry,null,a-ww/2,a+ww/2,R(.9,.98),CL.lit(.4),R(26,40),{load:1.3,thin:.25,edge:.05,taper:[.1,.2],stir:.5,clean:true});}
+}
+blendPoly(RECT(0,1430,W,H),88,.35,0,40);
 cover(RECT(-40,1450,W+40,H+30),36,(x,y)=>floorMix(x,y),{dens:.25,len:6,ang:.005,angJ:.04,o:{brush:'flat',load:.95,thin:.55,edge:.5,taper:[.2,.3],stir:.4,opacity:.8}});
 blendPoly(RECT(0,1430,W,H),88,.5,0,100);

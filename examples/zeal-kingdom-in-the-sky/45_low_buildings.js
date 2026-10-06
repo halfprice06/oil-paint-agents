@@ -80,13 +80,15 @@ const LAV=()=>M([['titanium_white',2],['ultramarine',.45],['cobalt_violet',.6]],
 const DKS=()=>M([['ultramarine',.8],['cobalt_violet',.6],['burnt_umber',.3],['titanium_white',.6]],.2);
 const DKW=()=>M([['burnt_umber',1],['ultramarine',.6],['titanium_white',.25]],.2);
 const GRM=()=>M([['titanium_white',2.6],['raw_umber',.25],['naples_yellow',.5],['cobalt_violet',.2]],.18);
-// ---- terrace balustrade along the front rim: balusters as small varied touches, a coping line, lost on the shadow side ----
-for(let a=0.1;a<Math.PI-.08;a+=R(.055,.085)){const u=Math.cos(a);const lit=u<.42;if(!lit&&p.random()<.5)continue;
- const x=LD.cx+LD.r*Math.cos(a)*1.0,y=rim(LD,x);const h=R(7,10);
- L([[x,y-1,.9],[x+R(-.5,.5),y-h,.6]],lit?(p.random()<.6?CRM():CRH()):LAV(),R(2.6,3.6),{brush:'round',load:lit?1.2:.8,thin:.4,taper:[0,.35],clean:lit});
- if(lit&&p.random()<.5)L([[x+1.5,y-1],[x+1.5,y-h*.7]],DKS(),1.8,{brush:'round',load:.6,thin:.6,opacity:.6,taper:[0,.4]});}
-for(let a=0.1;a<Math.PI-.08;a+=R(.12,.3)){const u=Math.cos(a);const lit=u<.42;if(!lit&&p.random()<.4)continue;
- earc(LD.cx,LD.cy-10,LD.r+1,LD.ry,a,a+R(.1,.28),lit?CRM():LAV(),R(3,4.5),{load:lit?1.2:.85,thin:.35,clean:lit,taper:[.1,.3]});}
+// ---- terrace balustrade along the front rim: balusters of varied size and spacing, some dropped, the shadow half lost ----
+for(let a=0.12;a<Math.PI-.08;a+=R(.04,.13)){const u=Math.cos(a);const lit=u<.42;if(!lit&&p.random()<.75)continue;if(lit&&p.random()<.22)continue;
+ const x=LD.cx+LD.r*Math.cos(a),y=rim(LD,x);const h=R(5,11);const sz=R(2.2,4.2);
+ L([[x,y-1,.9],[x+R(-.6,.6),y-h,.5]],lit?(p.random()<.6?CRM():CRH()):LAV(),sz,{brush:'round',load:lit?1.2:.8,thin:.4,taper:[0,.4],clean:lit});
+ if(lit&&p.random()<.35)L([[x+sz*.5,y-1],[x+sz*.5,y-h*.7]],DKS(),1.8,{brush:'round',load:.6,thin:.6,opacity:.6,taper:[0,.4]});}
+// coping: one long lit stroke along the rim (reloaded once), fading out on the shadow side
+earc(LD.cx,LD.cy-10,LD.r+1,LD.ry,2.98,1.9,CRM(),4.5,{load:1.35,thin:.3,clean:true,taper:[.05,.15]});
+earc(LD.cx,LD.cy-10,LD.r+1,LD.ry,2.0,1.1,CRM(),4.2,{load:1.3,thin:.3,clean:true,taper:[.1,.5]});
+earc(LD.cx,LD.cy-10,LD.r+1,LD.ry,1.15,.35,LAV(),3.5,{load:.8,thin:.45,taper:[.2,.6],opacity:.8});
 // on the back rim at the sides (visible beside the upper drum)
 for(let a=Math.PI+.1;a<Math.PI+.55;a+=R(.07,.1)){const x=LD.cx+LD.r*Math.cos(a),y=LD.cy+LD.ry*Math.sin(a);L([[x,y],[x,y-R(6,8)]],CRH(),3,{brush:'round',load:1.1,thin:.4,taper:[0,.35]});}
 for(let a=TAU-.55;a<TAU-.1;a+=R(.08,.12)){const x=LD.cx+LD.r*Math.cos(a),y=LD.cy+LD.ry*Math.sin(a);L([[x,y],[x,y-R(5,7)]],LAV(),3,{brush:'round',load:.8,thin:.45,taper:[0,.35]});}

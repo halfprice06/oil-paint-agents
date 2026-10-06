@@ -77,13 +77,7 @@ const CX=1490,TIP=240,BY=500,RY=26,RB=120;
 const TAB=[[240,0],[262,5],[290,11],[320,18],[355,28],[400,55],[435,78],[462,99],[484,114],[500,120]];
 const W=y=>{if(y<=TAB[0][0])return 0;for(let i=0;i<TAB.length-1;i++){if(y<=TAB[i+1][0]){const t=(y-TAB[i][0])/(TAB[i+1][0]-TAB[i][0]);return lerp(TAB[i][1],TAB[i+1][1],t*t*(3-2*t)*.5+t*.5);}}return RB;};
 const rimY=u=>BY+RY*Math.sqrt(Math.max(0,1-u*u));
-// first: cover the block-in's old, wider dome with sky (the sky painter does not paint inside the old palace silhouette)
-{const OLD=[[1352,530],[1400,340],[1455,262],[1490,222],[1525,262],[1580,340],[1628,530]];
- const skyc=y=>{const t=clamp((y-220)/310,0,1);return M([['titanium_white',2+t*.8],['cobalt_blue',.6-t*.4],['ultramarine',.3-t*.25],['cobalt_violet',.2+t*.15],['naples_yellow',t*.35]],.15);};
- fill(OLD,16,(x,y)=>skyc(y),{step:.8,brush:'filbert',jy:3,wob:1.5,so:{load:1.05,thin:.45,edge:.2,taper:[.05,.1]}});
- fill([[1352,470],[1352,532],[1628,532],[1628,470]],12,(x,y)=>skyc(y),{step:.8,brush:'filbert',jy:2,so:{load:1,thin:.45,edge:.2}});
- for(let k=0;k<6;k++)SB([[R(1360,1420),R(300,520)],[R(1560,1620),R(300,520)]],40,.4);
- p.dry();}
+// (the sky patch over the block-in's old dome was removed in round 5: the block-in is now a thin wash and the sky painter covers it)
 const SP_L=()=>M([['titanium_white',2.7],['cerulean',1],['viridian',.28],['naples_yellow',.14]],.22);
 const SP_LT=()=>M([['titanium_white',2.9],['cerulean',.8],['viridian',.2],['naples_yellow',.25]],.2);
 const SP_H=()=>M([['titanium_white',1.5],['cerulean',.9],['cobalt_blue',.45],['viridian',.22]],.22);

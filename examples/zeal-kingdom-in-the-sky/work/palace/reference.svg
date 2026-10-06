@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1600" viewBox="0 0 2400 1600">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a6fae"/><stop offset="0.35" stop-color="#9aa6cc"/><stop offset="0.6" stop-color="#e3c9a8"/><stop offset="1" stop-color="#f3dfa6"/></linearGradient>
+<!-- cylinder: light, halftone, core, reflected -->
+<linearGradient id="cyl" x1="0" y1="0" x2="1" y2="0">
+ <stop offset="0" stop-color="#efe2c2"/><stop offset="0.18" stop-color="#f7ecd0"/><stop offset="0.42" stop-color="#e9dcc0"/>
+ <stop offset="0.58" stop-color="#b9b0c4"/><stop offset="0.8" stop-color="#8f88b4"/><stop offset="0.93" stop-color="#9a90b4"/><stop offset="1" stop-color="#b3a3ae"/></linearGradient>
+<linearGradient id="cone" x1="0" y1="0" x2="1" y2="0">
+ <stop offset="0" stop-color="#a9d2d6"/><stop offset="0.2" stop-color="#bfe0df"/><stop offset="0.45" stop-color="#8fbfc6"/>
+ <stop offset="0.62" stop-color="#5f84a8"/><stop offset="0.82" stop-color="#43608f"/><stop offset="0.95" stop-color="#4c6a95"/><stop offset="1" stop-color="#6a7ea0"/></linearGradient>
+<linearGradient id="roof" x1="0" y1="0" x2="1" y2="0">
+ <stop offset="0" stop-color="#b4d8da"/><stop offset="0.3" stop-color="#9cc6cb"/><stop offset="0.55" stop-color="#5f84a8"/><stop offset="0.85" stop-color="#43608f"/><stop offset="1" stop-color="#607aa0"/></linearGradient>
+</defs>
+<rect width="2400" height="1000" fill="url(#sky)"/>
+<path d="M820 740 L960 690 L1150 660 L1400 645 L1650 650 L1900 670 L2100 710 L2160 760 L2050 790 L1800 815 L1500 830 L1200 825 L980 800 L860 780 Z" fill="#8e9a5a"/>
+<!-- cast shadows on plateau -->
+<path d="M1680 745 L1880 770 L2050 800 L1900 815 L1680 820 L1560 790 Z" fill="#4e5a48" opacity="0.8"/>
+<path d="M1285 760 L1380 800 L1300 812 L1240 770 Z" fill="#4e5a48" opacity="0.6"/>
+<path d="M1825 770 L1960 790 L2000 810 L1900 815 L1800 800 Z" fill="#4e5a48" opacity="0.6"/>
+<!-- low buildings -->
+<rect x="960" y="700" width="160" height="70" fill="#ead9b8"/><rect x="1120" y="700" width="40" height="70" fill="#8d85ad"/>
+<path d="M960 700 L1120 700 L1160 700 L1160 712 L960 712 Z" fill="#f4e8cc"/>
+<rect x="1880" y="690" width="170" height="70" fill="#c9bba6"/><rect x="2010" y="690" width="40" height="70" fill="#8a82a8"/>
+<!-- left tower -->
+<rect x="1180" y="560" width="105" height="200" fill="url(#cyl)"/>
+<path d="M1180 562 C1200 548 1265 548 1285 562 C1265 576 1200 576 1180 562 Z" fill="#d7c8b0"/>
+<path d="M1180 562 C1200 548 1265 548 1285 562 L1232 465 Z" fill="url(#roof)"/>
+<!-- right tower -->
+<rect x="1720" y="600" width="105" height="170" fill="url(#cyl)"/>
+<path d="M1720 602 C1740 588 1805 588 1825 602 L1772 515 Z" fill="url(#roof)"/>
+<!-- lower drum wall -->
+<path d="M1300 610 L1300 765 L1680 765 L1680 610 Z" fill="url(#cyl)"/>
+<!-- its top terrace (upward plane, slightly cooler light), cast shadow of upper drum -->
+<ellipse cx="1490" cy="610" rx="190" ry="40" fill="#ecdfc0"/>
+<path d="M1560 600 C1640 605 1680 625 1670 640 C1640 650 1560 645 1540 630 Z" fill="#9a90b4" opacity="0.8"/>
+<!-- upper drum -->
+<path d="M1370 500 L1370 605 L1610 605 L1610 500 Z" fill="url(#cyl)"/>
+<ellipse cx="1490" cy="500" rx="120" ry="26" fill="#d9ccb4"/>
+<!-- spire: ogee cone -->
+<path d="M1370 500 C1375 400 1430 330 1470 270 C1480 255 1486 245 1490 240 C1494 245 1500 255 1510 270 C1550 330 1605 400 1610 500 C1570 520 1410 520 1370 500 Z" fill="url(#cone)"/>
+<!-- cornice bands -->
+<path d="M1300 600 C1360 575 1620 575 1680 600 L1680 612 C1620 587 1360 587 1300 612 Z" fill="#f2e6c8"/>
+<path d="M1540 582 L1680 600 L1680 612 L1540 594 Z" fill="#a89cc0"/>
+<!-- grand entrance arch on lit side -->
+<path d="M1352 765 L1352 712 A20 20 0 0 1 1392 712 L1392 765 Z" fill="#5b4a56"/>
+<!-- window bands (dark warm touches, lit sills) -->
+<g fill="#5a4a50">
+<rect x="1322" y="665" width="9" height="22" rx="4"/><rect x="1402" y="660" width="10" height="24" rx="5"/><rect x="1442" y="658" width="10" height="24" rx="5"/><rect x="1482" y="658" width="10" height="24" rx="5"/><rect x="1522" y="660" width="10" height="24" rx="5"/><rect x="1562" y="664" width="9" height="22" rx="4"/><rect x="1600" y="668" width="8" height="20" rx="4"/><rect x="1640" y="672" width="7" height="18" rx="3"/>
+<rect x="1400" y="540" width="8" height="20" rx="4"/><rect x="1440" y="536" width="8" height="20" rx="4"/><rect x="1484" y="535" width="8" height="20" rx="4"/><rect x="1528" y="537" width="8" height="20" rx="4"/><rect x="1566" y="541" width="7" height="18" rx="3"/>
+<rect x="1206" y="600" width="7" height="18" rx="3"/><rect x="1228" y="596" width="7" height="18" rx="3"/><rect x="1206" y="660" width="7" height="18" rx="3"/><rect x="1228" y="656" width="7" height="18" rx="3"/><rect x="1206" y="716" width="7" height="18" rx="3"/>
+<rect x="1746" y="640" width="7" height="18" rx="3"/><rect x="1768" y="636" width="7" height="18" rx="3"/><rect x="1746" y="700" width="7" height="18" rx="3"/><rect x="1768" y="696" width="7" height="18" rx="3"/>
+<rect x="985" y="725" width="8" height="22" rx="4"/><rect x="1020" y="725" width="8" height="22" rx="4"/><rect x="1055" y="725" width="8" height="22" rx="4"/><rect x="1090" y="725" width="8" height="22" rx="4"/>
+<rect x="1905" y="715" width="8" height="22" rx="4"/><rect x="1945" y="715" width="8" height="22" rx="4"/><rect x="1985" y="715" width="8" height="22" rx="4"/>
+</g>
+<!-- gold finial and trim -->
+<path d="M1486 240 L1494 240 L1492 130 L1488 130 Z" fill="#d9b24f"/>
+<circle cx="1490" cy="175" r="7" fill="#e6c25a"/><circle cx="1490" cy="236" r="8" fill="#c9a23f"/>
+<path d="M1370 500 C1410 486 1570 486 1610 500 L1610 506 C1570 492 1410 492 1370 506 Z" fill="#d9b24f"/>
+</svg>

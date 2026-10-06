@@ -119,10 +119,11 @@ cover([[1680,740],[1880,770],[2050,800],[1900,815],[1680,820],[1560,790]],40,(x,
 const cream=()=>M([['titanium_white',3],['naples_yellow',.7],['yellow_ochre',.15]],.15),lav=()=>M([['titanium_white',2.2],['ultramarine',.5],['cobalt_violet',.6],['raw_umber',.1]],.15);
 fill([[1300,640],[1490,570],[1680,640],[1680,760],[1300,760]],34,(x,y)=>x>1560?lav():cream(),{step:.8,so:{load:1.05,thin:.4,edge:.1}});
 fill([[1370,520],[1490,470],[1610,520],[1610,600],[1370,600]],26,(x,y)=>x>1540?lav():cream(),{step:.8,so:{load:1.05,thin:.4,edge:.1}});
-fill([[1370,520],[1420,340],[1490,240],[1560,340],[1610,520]],24,(x,y)=>x>1535?M([['ultramarine',1],['cobalt_blue',.5],['titanium_white',1.2],['viridian',.1]],.15):M([['cerulean',1],['viridian',.3],['titanium_white',2.2]],.15),{vert:true,step:.8,so:{load:1.05,thin:.4,edge:.1}});
+// spire: only a thin, flat wash (no relief), so the sky and palace passes cover it without a ghost
+fill([[1370,520],[1420,340],[1490,240],[1560,340],[1610,520]],30,(x,y)=>x>1535?M([['ultramarine',1],['cobalt_blue',.5],['titanium_white',1.2],['viridian',.1]],.15):M([['cerulean',1],['viridian',.3],['titanium_white',2.2]],.15),{step:.8,so:{load:.5,thin:.9,edge:.3,opacity:.6}});
 for(const t of [[1180,560,1285,760,1250],[1720,600,1825,770,1790]])fill(RECT(t[0],t[1],t[2],t[3]),26,(x,y)=>x>t[4]?lav():cream(),{vert:true,step:.8,so:{load:1.05,thin:.4,edge:.1}});
-fill([[1180,560],[1215,470],[1285,560]],18,(x,y)=>x>1250?M([['ultramarine',1],['titanium_white',1.2]],.15):M([['cerulean',1],['titanium_white',2]],.15),{vert:true,so:{load:1,thin:.4}});
-fill([[1720,600],[1755,520],[1825,600]],18,(x,y)=>x>1790?M([['ultramarine',1],['titanium_white',1.2]],.15):M([['cerulean',1],['titanium_white',2]],.15),{vert:true,so:{load:1,thin:.4}});
+fill([[1180,560],[1215,470],[1285,560]],18,(x,y)=>x>1250?M([['ultramarine',1],['titanium_white',1.2]],.15):M([['cerulean',1],['titanium_white',2]],.15),{so:{load:.5,thin:.9,edge:.3,opacity:.6}});
+fill([[1720,600],[1755,520],[1825,600]],18,(x,y)=>x>1790?M([['ultramarine',1],['titanium_white',1.2]],.15):M([['cerulean',1],['titanium_white',2]],.15),{so:{load:.5,thin:.9,edge:.3,opacity:.6}});
 fill(RECT(960,700,1160,770),24,(x,y)=>x>1120?lav():cream(),{so:{load:1,thin:.4}});
 fill(RECT(1880,690,2050,760),24,(x,y)=>M([['titanium_white',2],['raw_umber',.4],['naples_yellow',.4],['cobalt_violet',.15]],.15),{so:{load:1,thin:.4}});
 for(const t of [[1030,680,70,45],[1960,665,80,50],[1150,770,60,35],[1860,780,55,30]])lobe(t[0],t[1],t[2],t[3],[[0,'#2f4a2c'],[.5,'#4e6e38'],[1,'#8aa24a']],Math.max(16,t[2]*.35),{jit:.1});

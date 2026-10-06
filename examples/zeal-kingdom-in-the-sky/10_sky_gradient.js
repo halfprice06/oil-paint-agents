@@ -106,11 +106,11 @@ function skyAng(x,y){const t=y/1000;const drift=Math.sin(x/700+y/900)*.22+Math.s
 // upper right: two or three broad, soft, slightly darker drifts whose edges melt, so the top stays calm
 for(const [x0,y0,x1,y1,sz] of [[1250,60,2450,120,120],[1500,170,2450,210,110],[1150,-10,1900,20,100]]){
  for(let k=0;k<3;k++){const u0=R(-.05,.2),u1=R(.8,1.05);const pts=[[lerp(x0,x1,u0),lerp(y0,y1,u0)+R(-20,20),.7],[lerp(x0,x1,(u0+u1)/2),lerp(y0,y1,(u0+u1)/2)+R(-30,30),.9],[lerp(x0,x1,u1),lerp(y0,y1,u1)+R(-20,20),.7]];
-  p.stroke({points:pts,color:M([['ultramarine',1.1],['cobalt_blue',.4],['cobalt_violet',.2],['titanium_white',2.2],['alizarin_crimson',.1]],.1),brush:'flat',size:sz*R(.85,1.1),load:1,thin:.55,edge:.75,taper:[.3,.3],stir:.9});}}
+  p.stroke({points:pts,color:M([['ultramarine',.85],['cobalt_blue',.4],['cobalt_violet',.22],['titanium_white',2.8],['alizarin_crimson',.08]],.1),brush:'flat',size:sz*R(.85,1.1),load:1,thin:.55,edge:.8,taper:[.3,.3],stir:.9});}}
 for(let i=0;i<40;i++){const x=R(1150,2450),y=R(-30,270);SB(seg(x,y,R(300,520),R(-.12,.12),R(-.03,.03)*400,3),88,R(.45,.6));}
 // 1. cross the rows: long diagonal and gently curved strokes of the same mixes through the middle sky and the warm band
 for(let i=0;i<70;i++){const band=R(0,1)<.55;const y=band?R(380,680):R(780,960);const x=R(-60,W+60);if(spireF(x,y)>.3&&R(0,1)<.6)continue;
- const a=R(.18,.45)*(R(0,1)<.5?1:-1);const len=R(380,700);const sz=R(60,95);
+ const nearP=x>1500&&y<700;const a=(nearP?R(.03,.1):R(.18,.45))*(R(0,1)<.5?1:-1);const len=nearP?R(500,800):R(380,700);const sz=R(60,95);
  p.stroke({points:seg(x,y,len,a,R(.08,.2)*len*(R(0,1)<.5?1:-1),5),color:skyCol(x,y,.15),brush:R(0,1)<.5?'flat':'filbert',size:sz,load:R(.95,1.15),thin:R(.4,.5),edge:R(.4,.6),taper:[R(.25,.4),R(.25,.4)],stir:R(.55,.75),clean:sunF(x,y)>.5});}
 // 2. the glow itself: thick pale buttery paint, clean brush, broad soft-edged sweeps around the sun centre
 for(let i=0;i<70;i++){const a=R(0,TAU),r=Math.sqrt(R(0,1))*300;const x=SUNX+Math.cos(a)*r*1.55,y=SUNY+Math.sin(a)*r;const s=sunF(x,y);
@@ -129,11 +129,16 @@ for(let i=0;i<300;i++){const x=R(-40,W+40),y=R(-40,1030);const c=spireF(x,y);if(
 for(let i=0;i<220;i++){const x=R(-40,W+40),y=R(120,1000);const c=spireF(x,y);if(c>.2&&R(0,1)<.75)continue;if(x>1200&&y<280)continue;
  const t=y/1000;const s=sunF(x,y);let m=skyCol(x,y,.1);const w=R(0,1);
  if(w<.35)m=m.concat([['naples_yellow',R(.05,.12)],['quinacridone_rose',R(.01,.04)]]);else if(w<.7)m=m.concat([['cobalt_violet',R(.06,.12)],['cobalt_blue',R(.02,.05)]]);else m=m.concat([['titanium_white',R(.2,.5)]]);
- const sz=R(34,72)*(1+s*.3);const len=sz*R(3,6);const a=(R(0,1)<.35?R(-.6,.6):skyAng(x,y)+R(-.15,.15));
+ const sz=R(34,72)*(1+s*.3);const len=sz*R(3,6);const a=((x>1500&&y<700)?R(-.06,.06):(R(0,1)<.35?R(-.6,.6):skyAng(x,y)+R(-.15,.15)));
  p.stroke({points:seg(x,y,len,a,R(-.12,.12)*len,4),color:m,brush:R(0,1)<.5?'flat':'filbert',size:sz,load:R(.8,1.05)+s*.3,thin:lerp(.5,.35,t),edge:R(.3,.6),taper:[R(.25,.45),R(.25,.45)],stir:R(.35,.5),clean:s>.5});}
 for(let i=0;i<70;i++){const x=R(-40,W+40),y=R(100,1000);SB(seg(x,y,R(240,420),R(-.5,.5),0,3),88,R(.3,.45));}
 // 4c. a few long non-horizontal strokes back across the middle and the warm band so the rows do not return
-for(let i=0;i<40;i++){const y=R(0,1)<.5?R(400,660):R(780,950);const x=R(-40,W+40);if(spireF(x,y)>.3)continue;const a=R(.15,.4)*(R(0,1)<.5?1:-1);const len=R(240,480);
+for(let i=0;i<40;i++){const y=R(0,1)<.5?R(400,660):R(780,950);const x=R(-40,W+40);if(spireF(x,y)>.3)continue;if(x>1500&&y<700)continue;const a=R(.15,.4)*(R(0,1)<.5?1:-1);const len=R(240,480);
  p.stroke({points:seg(x,y,len,a,R(.05,.15)*len*(R(0,1)<.5?1:-1),5),color:skyCol(x,y,.18),brush:'filbert',size:R(34,60),load:R(.9,1.1),thin:.42,edge:.5,taper:[.35,.35],stir:R(.45,.65),clean:sunF(x,y)>.5});}
+// 4d. right of and above the palace: melt the crossing more, then a few long, calm, nearly horizontal strokes so the spire is the sharpest thing there
+for(let i=0;i<60;i++){const x=R(1550,W+40),y=R(-20,700);SB(seg(x,y,R(300,520),R(-.08,.08),R(-.02,.02)*400,3),88,R(.45,.6));}
+for(let i=0;i<14;i++){const x=R(1600,W+40),y=R(250,660);const len=R(420,760);
+ p.stroke({points:seg(x,y,len,R(-.04,.04),R(-.02,.02)*len,5),color:skyCol(x,y,.12),brush:'flat',size:R(44,70),load:R(.95,1.1),thin:.48,edge:R(.55,.7),taper:[.35,.35],stir:R(.7,.85)});}
+for(let i=0;i<24;i++){const x=R(1550,W+40),y=R(200,700);SB(seg(x,y,R(300,500),R(-.06,.06),0,3),88,R(.35,.5));}
 // 5. a gentle last melt only in places, light touch
 for(let i=0;i<90;i++){const x=R(-40,W+40),y=R(-20,1030);const l=R(240,400);SB(seg(x,y,l,R(-.4,.4),R(-.05,.05)*l,3),80,R(.25,.4));}

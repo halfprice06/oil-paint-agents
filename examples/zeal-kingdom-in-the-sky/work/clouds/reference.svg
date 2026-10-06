@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1600" viewBox="0 0 2400 1600">
+<defs>
+<!-- cloud tower: lit upper-left cream, shadow lower-right violet -->
+<radialGradient id="tw" cx="0.35" cy="0.3" r="0.75"><stop offset="0" stop-color="#fbf0d2"/><stop offset="0.35" stop-color="#f3dfb8"/><stop offset="0.6" stop-color="#d9c2bd"/><stop offset="1" stop-color="#9a8bae"/></radialGradient>
+<radialGradient id="twR" cx="0.35" cy="0.3" r="0.75"><stop offset="0" stop-color="#f4e5c8"/><stop offset="0.35" stop-color="#e8d2b4"/><stop offset="0.6" stop-color="#cdb7b8"/><stop offset="1" stop-color="#8f80a4"/></radialGradient>
+<radialGradient id="twF" cx="0.4" cy="0.3" r="0.75"><stop offset="0" stop-color="#eedccc"/><stop offset="0.5" stop-color="#d7c1c4"/><stop offset="1" stop-color="#ab9cb8"/></radialGradient>
+<linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcc6c4"/><stop offset="0.15" stop-color="#b3a3b9"/><stop offset="0.75" stop-color="#9a8db0"/><stop offset="1" stop-color="#8f89b0"/></linearGradient>
+<linearGradient id="belly" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a7a9f"/><stop offset="0.5" stop-color="#a292b5"/><stop offset="1" stop-color="#ab9fbf"/></linearGradient>
+<linearGradient id="bottom" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a99fc0" stop-opacity="0"/><stop offset="1" stop-color="#9c9bc2"/></linearGradient>
+<linearGradient id="hullL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf0cf"/><stop offset="1" stop-color="#e2c98c"/></linearGradient>
+<linearGradient id="hullS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b59a70"/><stop offset="0.6" stop-color="#7f7183"/><stop offset="1" stop-color="#a08e9a"/></linearGradient>
+<radialGradient id="canopy" cx="0.3" cy="0.25" r="0.8"><stop offset="0" stop-color="#9fb4c8"/><stop offset="0.3" stop-color="#4b5f80"/><stop offset="1" stop-color="#232a44"/></radialGradient>
+</defs>
+<rect width="2400" height="990" fill="#e9d2a6"/>
+<rect y="990" width="2400" height="610" fill="url(#floor)"/>
+<!-- far rows at the horizon: thin, flat, pink-cream, lost in haze -->
+<g opacity="0.9">
+<ellipse cx="200" cy="1006" rx="260" ry="14" fill="#f6e0c2"/><ellipse cx="620" cy="1012" rx="300" ry="17" fill="#f4dcc0"/><ellipse cx="1050" cy="1004" rx="240" ry="12" fill="#f5dfc3"/><ellipse cx="1500" cy="1013" rx="330" ry="18" fill="#f1d8bf"/><ellipse cx="1950" cy="1006" rx="260" ry="13" fill="#f3dbc0"/><ellipse cx="2300" cy="1012" rx="220" ry="15" fill="#f0d6bd"/>
+<ellipse cx="420" cy="1030" rx="200" ry="8" fill="#b9a4b4"/><ellipse cx="1300" cy="1034" rx="260" ry="9" fill="#b7a2b4"/><ellipse cx="2100" cy="1030" rx="220" ry="8" fill="#b7a3b5"/>
+</g>
+<!-- middle rows, hazy -->
+<ellipse cx="90" cy="1120" rx="170" ry="40" fill="url(#twF)"/>
+<ellipse cx="760" cy="1165" rx="200" ry="45" fill="url(#twF)"/>
+<ellipse cx="1000" cy="1150" rx="150" ry="38" fill="url(#twF)"/>
+<ellipse cx="1650" cy="1190" rx="190" ry="45" fill="url(#twF)"/>
+<ellipse cx="1870" cy="1170" rx="150" ry="40" fill="url(#twF)"/>
+<ellipse cx="2300" cy="1150" rx="180" ry="40" fill="url(#twF)"/>
+<!-- LEFT MASS: shelf + three towers; belly below -->
+<path d="M-50 1250 C100 1240 300 1260 500 1250 C700 1240 820 1270 860 1200 C900 1280 820 1340 700 1330 L0 1340 Z" fill="url(#belly)"/>
+<ellipse cx="500" cy="1250" rx="340" ry="60" fill="url(#tw)"/>
+<ellipse cx="120" cy="1200" rx="200" ry="110" fill="url(#tw)"/>
+<ellipse cx="700" cy="1185" rx="175" ry="90" fill="url(#tw)"/>
+<ellipse cx="440" cy="1130" rx="165" ry="85" fill="url(#tw)"/>
+<!-- CENTRE MASS -->
+<path d="M820 1340 C1000 1330 1200 1360 1440 1340 C1600 1330 1700 1350 1740 1330 C1780 1400 1700 1440 1600 1430 L900 1440 Z" fill="url(#belly)"/>
+<ellipse cx="1280" cy="1370" rx="470" ry="60" fill="url(#tw)"/>
+<ellipse cx="1580" cy="1300" rx="195" ry="82" fill="url(#twR)"/>
+<ellipse cx="980" cy="1290" rx="175" ry="82" fill="url(#tw)"/>
+<ellipse cx="1260" cy="1255" rx="195" ry="92" fill="url(#tw)"/>
+<!-- RIGHT MASS -->
+<path d="M1740 1300 C1950 1290 2200 1320 2400 1300 L2400 1420 L1800 1420 Z" fill="url(#belly)"/>
+<ellipse cx="2100" cy="1340" rx="340" ry="58" fill="url(#twR)"/>
+<ellipse cx="2290" cy="1245" rx="195" ry="92" fill="url(#twR)"/>
+<ellipse cx="1960" cy="1265" rx="205" ry="98" fill="url(#twR)"/>
+<!-- island cast shadow on the deck, soft -->
+<ellipse cx="1620" cy="1330" rx="330" ry="90" fill="#6f6490" opacity="0.28"/>
+<!-- bottom band: bluer, below the viewer -->
+<rect y="1430" width="2400" height="170" fill="url(#bottom)"/>
+<ellipse cx="600" cy="1510" rx="500" ry="40" fill="#b4acca" opacity="0.6"/>
+<ellipse cx="1700" cy="1530" rx="600" ry="45" fill="#b2aac8" opacity="0.6"/>
+<!-- THE EPOCH (round 2, about 480 px wide): nose right, teardrop hull as a cylinder, bubble canopy, swept-back wings with thickness, fin; banked so the far wing rises toward the sun -->
+<defs>
+<linearGradient id="hull2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdf4d8"/><stop offset="0.3" stop-color="#f1dc9e"/><stop offset="0.55" stop-color="#c9a86a"/><stop offset="0.8" stop-color="#7d6f78"/><stop offset="1" stop-color="#a99aa0"/></linearGradient>
+<linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b9c9d6"/><stop offset="0.25" stop-color="#5d7496"/><stop offset="0.6" stop-color="#2b3652"/><stop offset="1" stop-color="#1c2238"/></linearGradient>
+</defs>
+<!-- near wing (banked down toward us): upper surface in half-light, cool underside strip visible along its trailing edge, dark leading edge -->
+<path d="M520 1222 L612 1214 L420 1350 L380 1344 Z" fill="#a98a5c"/>
+<path d="M520 1222 L540 1221 L395 1346 L380 1344 Z" fill="#6e6a86"/>
+<path d="M596 1214 L612 1214 L426 1350 L416 1349 Z" fill="#5c4a2e"/>
+<!-- far wing (raised): lit gold upper surface, dark leading edge, tip softening into cloud -->
+<path d="M505 1172 L600 1166 L296 1078 L268 1086 Z" fill="#ecc96c"/>
+<path d="M540 1170 L600 1166 L330 1082 L310 1084 Z" fill="#f7e09a"/>
+<path d="M596 1166 L600 1166 L300 1077 L290 1080 Z" fill="#7a5b2a"/>
+<!-- hull -->
+<path d="M360 1200 C420 1158 560 1142 700 1170 L740 1190 L700 1212 C600 1246 440 1240 360 1210 Z" fill="url(#hull2)"/>
+<!-- tail fin -->
+<path d="M386 1201 L404 1122 L432 1118 L440 1196 Z" fill="#c4a76a"/>
+<path d="M386 1201 L404 1122 L418 1120 L416 1198 Z" fill="#f3dc9c"/>
+<!-- canopy cast shadow and seam -->
+<path d="M448 1182 C520 1188 590 1188 612 1180 L650 1196 L600 1198 L470 1196 Z" fill="#9a7f52" opacity="0.85"/>
+<!-- canopy bubble -->
+<path d="M445 1181 C455 1140 500 1118 540 1120 C590 1122 612 1150 612 1180 Z" fill="url(#glass)"/>
+<path d="M462 1168 C475 1140 505 1127 540 1127 C560 1127 575 1132 585 1140 C560 1138 520 1140 495 1152 C480 1160 470 1166 462 1168 Z" fill="#d7c9b8" opacity="0.45"/>
+<ellipse cx="486" cy="1143" rx="9" ry="5" fill="#f4f8ff"/>
+</svg>

@@ -124,3 +124,11 @@ for(const [x,y,l,w] of [[480,400,220,.7],[300,520,180,.8],[1980,330,260,.1],[220
  for(let i=0;i<5;i++){const xx=x+R(-l*.4,l*.4),yy=y+R(-8,8);const col=mixW(i<2?TOP2:UND2,WARM,w);
   p.stroke({points:seg(xx,yy,R(.35,.7)*l,R(-.08,.08),R(-.02,.02)*l,4),color:M(col,.15),brush:'filbert',size:R(10,20),load:R(.7,.95),thin:.5,edge:.6,taper:[.4,.4],stir:.6,opacity:R(.6,.9)});}
  SB(seg(x,y,l*.8,0,0,3),60,.4);}
+
+// 2. the warm band right of the island: two or three soft pale pink-lavender drifts, lost-edged, like the ones at left
+const DRIFT=[['titanium_white',3.2],['cobalt_violet',.24],['quinacridone_rose',.1],['naples_yellow',.3],['cobalt_blue',.03]];
+for(const [x0,y0,x1,y1,th,n] of [[1900,735,2440,720,22,26],[2040,776,2440,766,16,22],[1900,958,2440,950,12,16]]){
+ for(let i=0;i<n;i++){const u=R(0,1);const e=Math.pow(Math.sin(Math.PI*u),.5);const x=lerp(x0,x1,u),y=lerp(y0,y1,u)+R(-1,1)*th*e+Math.sin(u*6)*6;const len=R(140,320)*(.5+e);
+  const col=mixW(DRIFT,i%3==0?UND2:TOP2,R(.1,.4));
+  p.stroke({points:seg(x,y,len,R(-.04,.04),R(-.03,.03)*len,4),color:M(col,.14),brush:R(0,1)<.5?'flat':'filbert',size:R(34,62)*(.5+e*.7),load:R(.9,1.1),thin:.48,edge:R(.5,.7),taper:[.35,.4],stir:R(.5,.7),opacity:lerp(.75,1,e)});}
+ for(let i=0;i<12;i++){const u=R(0,1);SB(seg(lerp(x0,x1,u),lerp(y0,y1,u)+R(-1.2,1.2)*th,R(200,360),R(-.15,.15),0,3),R(70,88),R(.4,.55));}}

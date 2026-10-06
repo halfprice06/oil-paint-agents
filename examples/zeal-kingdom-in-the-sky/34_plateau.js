@@ -132,6 +132,21 @@ wall([[880,752],[960,758],[1040,766],[1120,776],[1180,784]],12);
 wall([[1705,792],[1790,788],[1880,782],[1960,778],[2060,772]],11);
 wall([[2060,728],[2110,742],[2140,754]],8);
 wall([[960,712],[1030,707],[1100,702]],8);
+// 5b. hedges right of the palace: dark clipped rows with a lit top, and a pale stone kerb along the path; a stone bench
+function hedge(pts,h){for(let i=0;i<pts.length-1;i++){const a=pts[i],b=pts[i+1];const len=Math.hypot(b[0]-a[0],b[1]-a[1]);const ang=Math.atan2(b[1]-a[1],b[0]-a[0]);
+    S((a[0]+b[0])/2+5,(a[1]+b[1])/2+h*.9,len*1.05,ang,M(Ghalf,.15),h*.8,{load:.8,thin:.55,edge:.6,taper:[.15,.15],stir:.8});
+    for(let d=0;d<len;){const sl=R(10,24);const t=(d+sl/2)/len;const x=lerp(a[0],b[0],t),y=lerp(a[1],b[1],t);
+      S(x,y+h*.4,sl,ang,M(ML(Gdeep,Ghalf,R(.2,.6)),.15),h*R(.85,1.05),{load:.95,thin:.45,taper:[.2,.2],edge:.2,stir:.7});
+      if(p.random()<.7)S(x+R(-3,3),y-h*.1,sl*R(.5,.8),ang,M(ML(Glit,Gsun,R(.2,.6)),.15),h*R(.3,.45),{load:1.15,thin:.35,taper:[.3,.3],stir:.6,clean:d===0});d+=sl+R(0,3);}}}
+hedge([[1720,773],[1800,770],[1890,766],[1980,762],[2060,758]],8);
+hedge([[1580,790],[1640,793],[1700,796]],7);
+hedge([[1900,822],[1980,818],[2040,812]],6);
+for(let x=1560;x<1870;x+=R(10,18))p.stroke({points:[[x,816+(x-1560)*.012,.7],[x+R(6,12),816+(x-1560)*.012,.7]],color:M(ML(Stone,StoneSh,R(.2,.5)),.12),brush:'flat',size:R(3,4.5),load:1,thin:.42,taper:0});// kerb along the path
+// bench of pale stone
+p.stroke({points:[[1612,803,.8],[1640,803,.8]],color:M(Stone,.08),brush:'flat',size:4,load:1.2,thin:.35,taper:0,clean:true});
+p.stroke({points:[[1613,806,.6],[1639,806,.6]],color:M(StoneSh,.1),brush:'flat',size:2.5,load:.9,thin:.5,taper:0});
+for(const bx of [1616,1636])p.stroke({points:[[bx,806,.7],[bx,811,.5]],color:M(StoneSh,.1),brush:'round',size:2,load:.9,thin:.5});
+S(1640,813,34,.1,M(Ghalf,.15),4,{load:.8,thin:.55,edge:.5,taper:[.3,.3]});
 // 6. flower beds along the walls and by the terrace: clustered warm accents, varied, a few pale
 function bed(x0,y0,x1,y1,n){for(let i=0;i<n;i++){const t=R(0,1);const x=lerp(x0,x1,t)+R(-4,4),y=lerp(y0,y1,t)+R(-3,3);const w=p.random();
     const c=w<.4?[['cadmium_red',.6],['cadmium_orange',.5],['titanium_white',.4]]:w<.65?[['quinacridone_rose',.5],['titanium_white',.9],['cadmium_orange',.1]]:w<.85?[['cadmium_yellow',.6],['titanium_white',.8],['yellow_ochre',.2]]:[['titanium_white',1.2],['naples_yellow',.6]];

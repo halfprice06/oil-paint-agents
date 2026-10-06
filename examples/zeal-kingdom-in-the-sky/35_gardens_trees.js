@@ -104,8 +104,8 @@ function tree(cx,cy,rx,ry,o){o=o||{};const s=o.s===undefined?1:o.s;
   // small touches only on the outer edge: lit leaves against the sky top-left, dark notches lower right
   for(let i=0;i<8;i++){const a=R(-3.3,-1.2);const x=cx+Math.cos(a)*rx*R(.92,1.1),y=cy+Math.sin(a)*ry*R(.92,1.1);S(x,y,R(7,14),a+Math.PI/2+R(-.4,.4),M(ML(Tlit,Thot,R(0,.6)),.2),R(4,7),{load:1.1,thin:.35,taper:[.3,.3],stir:.6});}
   for(let i=0;i<4;i++){const a=R(.3,1.3);const x=cx+Math.cos(a)*rx*R(.9,1.05),y=cy+Math.sin(a)*ry*R(.9,1.05);S(x,y,R(7,12),a+Math.PI/2+R(-.4,.4),M(Tcore,.15),R(4,7),{load:.8,thin:.5,taper:[.3,.3]});}}
-function cypress(bx,by,h,w){// tall slender dark column, pointed, lit thin on the left, shadow on the ground
-  S(bx+w*.6,by+3,w*2.4,.15,M(Gshadow,.15),w*.5,{load:.8,thin:.55,edge:.6,taper:[.2,.3]});
+function cypress(bx,by,h,w){// tall slender dark column, pointed, lit thin on the left, a long cool shadow to the lower right
+  for(let k=0;k<2;k++)p.stroke({points:[[bx+R(-2,2),by+2+k*2,.9],[bx+h*.45,by+4+h*.09+k*2,.8],[bx+h*.9,by+6+h*.18+k*2,.25]],color:M(Gshadow,.18),brush:'filbert',size:w*R(.45,.6),load:.8,thin:.55,edge:.6,taper:[.05,.5],stir:.75});
   p.stroke({points:[[bx,by,.5],[bx+R(-1,1),by-h*.5,.9],[bx+R(-1,1),by-h,.15]],color:M(Trunk,.15),brush:'round',size:Math.max(2,w*.15),load:.9,thin:.5,taper:[0,.5]});
   for(let k=0;k<3;k++){const off=(k-1)*w*.3;p.stroke({points:[[bx+off*.5,by-2,.6],[bx+off,by-h*.3,.95],[bx+off*.8,by-h*.7,.8],[bx+off*.2,by-h,.1]],color:M(k===0?ML(Cyp,Tcore,.4):Cyp,.15),brush:'filbert',size:w*R(.5,.7),load:.9,thin:.5,taper:[.05,.45],edge:.3,stir:.7});}
   p.stroke({points:[[bx-w*.32,by-h*.1,.5],[bx-w*.3,by-h*.5,.9],[bx-w*.15,by-h*.92,.1]],color:M(CypL,.15),brush:'filbert',size:w*.3,load:1.1,thin:.35,taper:[.1,.5],edge:.2,stir:.6,clean:true});
