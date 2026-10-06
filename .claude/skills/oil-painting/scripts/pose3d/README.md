@@ -169,6 +169,39 @@ People are scattered evenly over the ground area, so the crowd thins and shrinks
 perspective on its own. If the region is too small for `count` at `minSpacing`, fewer people are
 placed. The figure count is printed after each render. The same seed always gives the same crowd.
 
+## Set pieces (lib/set.js) and other additions (Oct 2026, for millennial-fair-v6)
+
+Props can now be whole set pieces as well as primitives. Give them `position: [x, y, z]` in metres (or `at`), and
+optionally `yaw` (degrees), `scale`, `name`. Named props are listed in `out.json` under `props` with `screenBox`,
+`anchor2d`, `base2d` (canvas pixel of the ground under the anchor), `world` and `distance`. `out.json` also has `horizonY`.
+
+| type | what | main keys |
+|---|---|---|
+| `tower` | square stone bell tower: ashlar shaft, string courses, slit windows, clock, open belfry with bell, pyramid roof, finial | `width height belfry roof color roofColor clock` |
+| `tent` | striped circus tent: striped wall, striped cone roof, valance, door, pole + pennant | `radius wall roof stripes color color2 flagColor` |
+| `tree` | trunk + limbs + lumpy foliage masses (seeded); casts dappled shadow | `trunk trunkRadius canopy:[rx,ry,rz] clumps clumpSize colors seed` |
+| `bunting` | sagging cord between two world points with triangular pennants | `from to sag count colors width length` |
+| `balloon` | egg-shaped balloon with knot and string | `radius color string stringTo` |
+| `telepod` | plinth, brass coil drum, steel flanges and dome, antennas with ball tips | `radius coil turns color steel antennas:[[dx,dz,leanDeg,len]]` |
+| `vortex` | time gate: spiral-textured emissive disc facing +Z, bright rim, swirl ribbons, additive halo (halo shows only in lit/value) | `radius intensity ribbons rimColor haloColor haloOpacity` |
+| `stage` | plank deck on a skirted frame, front steps, optional posts | `size:[w,h,d] color skirtColor stepX stepWidth posts:[[x,z,h]]` |
+| `console` | control desk with levers, dial, lamp | `width color trim lamp` |
+| `house` | background house: walls, gabled roof, windows, door, optional striped awning | `width depth height roof color roofColor awning` |
+| `pole`, `flag` | plain pole with finial; a pennant | `height radius color` |
+
+Other additions:
+- `ground.texture: "paving"` (+ `tile` metres): a subtle multiplicative stone-sett pattern so the plaza shows perspective.
+- `sky.zenith` / `sky.horizon` (+ `curve`, `sunGlow`): a gradient sky dome instead of a flat background (crops keep the right sky).
+- `sun.shadowCenter` / `sun.shadowRadius` override the shadow frustum. Props now count toward it (`shadowBounds: false` to exclude one).
+- Lights: `shadowMapSize` for shadow-casting point lights.
+- Figures: `ascot: "#hex"` (knotted cravat), `sword: {side, length, color, hilt, guard, angle, splay}` (sheathed sword at the hip;
+  `angle` = degrees from hanging straight down toward the back), helmet `hat.antenna: "L"|"R"` (+ `antennaTip`, `antennaLength`),
+  ponytail `hair.origin: [x, y, z]` in head units (crown is about `[0, .19, -.07]`).
+- Older scene files render as before, except that the sun's shadow frustum now also covers props.
+
+Example: `paintings/millennial-fair-v6/reference/build_scene.js` generates a full set (stage, telepods, gate, tower, tents,
+trees, bunting, balloons, houses) in world metres and places figures by the canvas pixel of their feet.
+
 ## The Millennial Fair demo
 
 `examples/millennial_fair.json` sets up a camera matched to `paintings/millennial-fair-v5` (2400x1600, horizon

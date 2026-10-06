@@ -214,6 +214,20 @@
     neckJ.add(M(loft(scaleSecs(SEC.neck(), bs * (.6 + .4 * headS / bs), gw * (.5 + .5 * headS / bs), gw * (.5 + .5 * headS / bs))), cl.collar ? topCol : col.skin, 'skin', 'neck', figId));
     const headJ = new T.Group(); headJ.position.set(0, REF.neck * bs, .012 * bs); neckJ.add(headJ); joints.head = headJ;
     buildHead(headJ, headS, col, spec, figId, R);
+    if (spec.ascot) { // knotted cravat puff on the upper chest
+      const k = M(new T.SphereGeometry(.04 * gw, 12, 10), spec.ascot, 'cloth', 'ribcage', figId); k.scale.set(1.2, .9, .8); k.position.set(0, .375 * bs, .075 * gw); spineJ.add(k);
+      const pf = M(new T.ConeGeometry(.055 * gw, .12 * bs, 12), spec.ascot, 'cloth', 'ribcage', figId); pf.position.set(0, .32 * bs, .1 * gw); pf.rotation.x = Math.PI + .25; pf.scale.set(1, 1, .5); spineJ.add(pf);
+    }
+    if (spec.sword) { // sheathed sword hung from the belt at one hip, angled down and back
+      const sw = Object.assign({ side: 'L', length: .95, color: '#2a1e1a', hilt: '#3a2a3a', guard: '#c8a040', angle: 35, splay: 10 }, spec.sword === true ? {} : spec.sword);
+      const sxs = sw.side === 'L' ? 1 : -1;
+      const g = new T.Group(); g.position.set(sxs * .16 * m.hips * gw, -.02 * bs, .02 * gw); pelvisJ.add(g);
+      // local +Y along the blade toward the tip; tip goes down/back
+      g.rotation.set(-(180 - sw.angle) * D, 0, -sxs * sw.splay * D); g.rotation.order = 'XZY';
+      const sc = M(new T.CylinderGeometry(.018 * bs, .014 * bs, sw.length * .72 * bs, 10), sw.color, 'shiny', 'prop', figId); sc.scale.set(1, 1, 1.5); sc.position.y = sw.length * .36 * bs; g.add(sc);
+      const gd = M(new T.CylinderGeometry(.04 * bs, .04 * bs, .012 * bs, 16), sw.guard, 'shiny', 'prop', figId); g.add(gd);
+      const hl = M(new T.CylinderGeometry(.016 * bs, .016 * bs, sw.length * .26 * bs, 10), sw.hilt, 'cloth', 'prop', figId); hl.position.y = -sw.length * .13 * bs; g.add(hl);
+    }
     if (spec.scarf) {
       const ssec = [{ y: -.01, w: .13, f: .07, b: .065 }, { y: .04, w: .12, f: .065, b: .06 }];
       neckJ.add(M(loft(scaleSecs(ssec, bs, gw, gw), { capTop: false, capBottom: false }), spec.scarf, 'cloth2', 'neck', figId));
@@ -386,6 +400,12 @@
         h.scale.set(crR.x * 1.25, crR.y * 1.2, crR.z * 1.18); h.position.copy(cc).add(new T.Vector3(0, .01 * hs, 0)); h.rotation.x = -.3; headJ.add(h);
         const rg = new T.TorusGeometry(1, .09, 8, 28); const rim = M(rg, hat.band || '#d8b040', 'shiny', 'hat', figId);
         rim.scale.set(crR.x * 1.22, crR.z * 1.16, crR.y * 1.1); rim.rotation.x = Math.PI / 2 - .3; rim.position.copy(cc).add(new T.Vector3(0, .018 * hs, .004 * hs)); headJ.add(rim);
+        if (hat.antenna) { // a rod with a ball tip rising from one side of the helmet ('L' or 'R', the wearer's side)
+          const ax = (hat.antenna === 'L' ? 1 : -1);
+          const a0 = cc.clone().add(new T.Vector3(ax * crR.x * 1.05, crR.y * .55, 0)), a1 = a0.clone().add(new T.Vector3(ax * .06 * hs, (hat.antennaLength || .32) * hs, -.03 * hs));
+          headJ.add(M(taperTube([a0, a0.clone().lerp(a1, .5), a1], () => .007 * hs, { radial: 6, segments: 6 }), hat.band || '#d8b040', 'shiny', 'hat', figId));
+          const tip = M(new T.SphereGeometry(.022 * hs, 10, 8), hat.antennaTip || '#d84030', 'shiny', 'hat', figId); tip.position.copy(a1); headJ.add(tip);
+        }
       } else if (hat.style === 'brimmed') {
         const cr = M(new T.CylinderGeometry(.085 * hs, .095 * hs, .1 * hs, 20), hcol, 'cloth', 'hat', figId); cr.position.copy(cc).add(new T.Vector3(0, .07 * hs, 0)); headJ.add(cr);
         const br = M(new T.CylinderGeometry(.17 * hs, .17 * hs, .01 * hs, 28), hcol, 'cloth', 'hat', figId); br.position.copy(cc).add(new T.Vector3(0, .025 * hs, 0)); headJ.add(br);
@@ -431,7 +451,7 @@
       const { hc, hs, hair, figId } = headJ.userData.ponytail;
       const flow = new T.Vector3(...(hair.flow || [0, -1, -.15]));
       const len = (hair.length || .38) * hs * (hair.volume || 1);
-      const start = new T.Vector3(0, .15 * hs, -.095 * hs);
+      const start = hair.origin ? new T.Vector3(...hair.origin).multiplyScalar(hs) : new T.Vector3(0, .15 * hs, -.095 * hs); // origin: head units (crown ~ [0,.19,-.06])
       const pts = chain(start, new T.Vector3(0, -.2, -1).normalize(), flow, 6, len / 6, hair.flow ? .15 : 0);
       const r0 = .042 * hs * (hair.volume || 1);
       headJ.add(M(taperTube(pts, t => r0 * (t < .15 ? .7 + 2 * t : 1 - .75 * Math.pow((t - .15) / .85, 1.2)), { radial: 12, segments: 24, flat: .8 }), hc, 'hair', 'hair', figId));

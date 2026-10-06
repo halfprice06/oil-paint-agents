@@ -16,7 +16,7 @@
 
   function makeCamera(c) {
     const W = c.width || 2400, H = c.height || 1600;
-    const cam = new T.PerspectiveCamera(c.fov || 40, W / H, c.near || .1, c.far || 2000);
+    const cam = new T.PerspectiveCamera(c.fov || 40, W / H, c.near || .1, c.far || 4000);
     if (c.position) {
       cam.position.set(...c.position);
       cam.lookAt(new T.Vector3(...(c.lookAt || [0, 0, -10])));
@@ -141,9 +141,11 @@
       case 'cylinder': g = new T.CylinderGeometry(s[0], s[2] === undefined ? s[0] : s[2], s[1], 32); break;
       case 'cone': g = new T.ConeGeometry(s[0], s[1], 32); break;
       case 'disc': g = new T.CylinderGeometry(s[0], s[0], s[1] || .05, 48); g.rotateX(Math.PI / 2); break;
-      default: throw new Error('unknown prop type ' + pr.type);
+      default:
+        if (!(window.P3SET && window.P3SET.builders[pr.type])) throw new Error('unknown prop type ' + pr.type);
     }
-    const m = new T.Mesh(g, mt);
+    // set pieces (lib/set.js) build a whole group; primitives build one mesh
+    const m = g ? new T.Mesh(g, mt) : window.P3SET.builders[pr.type](pr, figId);
     let pos;
     if (pr.at) { const v = picker(pr.at[0], pr.at[1]); pos = [v.x, 0, v.z]; } else pos = (pr.position || [0, 0, 0]).slice();
     pos[1] += (pr.y || 0);
@@ -151,8 +153,17 @@
     m.position.set(...pos);
     if (pr.rotation) m.rotation.set(...pr.rotation.map(a => a * D));
     if (pr.faceCamera) m.userData.faceCamera = true;
-    m.castShadow = pr.castShadow !== false; m.receiveShadow = pr.receiveShadow !== false;
-    m.userData = Object.assign(m.userData, { part: 'prop', color: col, figId, kind: 'prop', emissive: pr.emissive });
+    if (pr.scale !== undefined) m.scale.setScalar(pr.scale);
+    if (pr.yaw !== undefined) m.rotation.y = pr.yaw * D;
+    if (g) {
+      m.castShadow = pr.castShadow !== false; m.receiveShadow = pr.receiveShadow !== false;
+      m.userData = Object.assign(m.userData, { part: 'prop', color: col, figId, kind: 'prop', emissive: pr.emissive });
+    } else {
+      m.userData.faceCamera = m.userData.faceCamera || false;
+      if (pr.faceCamera) m.userData.faceCamera = true;
+      if (pr.castShadow === false) m.traverse(o => { if (o.isMesh) o.castShadow = false; });
+    }
+    m.userData.propName = pr.name;
     scene.add(m);
     return m;
   }
@@ -213,14 +224,55 @@
       }
     });
     // ---- props
-    (S.props || []).forEach((pr, i) => addProp(scene, pr, picker, 10000 + i));
+    const propObjs = (S.props || []).map((pr, i) => addProp(scene, pr, picker, 10000 + i));
     scene.traverse(o => { if (o.userData && o.userData.faceCamera) { o.lookAt(cam.position.x, o.position.y, cam.position.z); } });
+    info.props = {};
+    propObjs.forEach((m, i) => {
+      const pr = S.props[i];
+      m.updateMatrixWorld(true);
+      if (pr.castShadow !== false && pr.shadowBounds !== false) bbox.expandByObject(m);
+      if (pr.name) {
+        const hb = new T.Box3(); m.traverse(o => { if (o.isMesh && o.userData.kind !== 'halo') hb.expandByObject(o); });
+        const corners = []; for (const x of [hb.min.x, hb.max.x]) for (const y of [hb.min.y, hb.max.y]) for (const z of [hb.min.z, hb.max.z]) corners.push(project(new T.Vector3(x, y, z), cam, W, H));
+        const anchor = m.getWorldPosition(new T.Vector3());
+        info.props[pr.name] = { type: pr.type, anchor2d: project(anchor, cam, W, H), base2d: project(new T.Vector3(anchor.x, 0, anchor.z), cam, W, H),
+          screenBox: [Math.min(...corners.map(c => c[0])), Math.min(...corners.map(c => c[1])), Math.max(...corners.map(c => c[0])), Math.max(...corners.map(c => c[1]))],
+          world: anchor.toArray().map(v => +v.toFixed(2)), distance: +cam.position.distanceTo(anchor).toFixed(2) };
+      }
+    });
+    info.horizonY = project(new T.Vector3(cam.position.x + Math.sin(cam.rotation.y) * -1e5, cam.position.y, cam.position.z - Math.cos(cam.rotation.y) * 1e5), cam, W, H)[1];
     // ---- ground
     const gr = S.ground || {};
     const groundMat = new T.MeshStandardMaterial({ color: new T.Color(gr.color || '#c8a878'), roughness: gr.roughness === undefined ? .95 : gr.roughness });
+    if (gr.texture && window.P3SET) { // e.g. "paving": a multiplicative stone pattern repeating every gr.tile metres (default 4)
+      const t = window.P3SET.repeatTex(gr.texture, gr.seed || 1, (gr.size || 600) / (gr.tile || 4), (gr.size || 600) / (gr.tile || 4));
+      groundMat.map = t;
+    }
     const ground = new T.Mesh(new T.PlaneGeometry(gr.size || 600, gr.size || 600), groundMat);
     ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; ground.userData = { part: 'ground', color: gr.color || '#c8a878', figId: 0, kind: 'ground' };
     scene.add(ground);
+    // ---- optional sky dome with a vertical gradient (sky.horizon -> sky.zenith), so crops keep the right sky values
+    if (sky.zenith || sky.horizon) {
+      const sg = new T.SphereGeometry(1500, 48, 32);
+      const pa = sg.attributes.position, cols = [];
+      const cz = new T.Color(sky.zenith || sky.color || '#7a9ccc'), chz = new T.Color(sky.horizon || sky.color || '#e8d8c0');
+      const sunC = sky.sunGlow ? new T.Color(sky.sunGlow) : null;
+      const az0 = (S.sun && S.sun.azimuth !== undefined ? S.sun.azimuth : -120) * D;
+      for (let i = 0; i < pa.count; i++) {
+        const y = pa.getY(i) / 1500, t = Math.pow(Math.max(0, y), sky.curve || .55);
+        const c = chz.clone().lerp(cz, Math.min(1, t));
+        if (sunC) { // warm glow toward the sun's azimuth, low in the sky
+          const a = Math.atan2(pa.getX(i), pa.getZ(i)); let da = Math.abs(a - az0); if (da > Math.PI) da = 2 * Math.PI - da;
+          c.lerp(sunC, Math.max(0, 1 - da / 1.4) * Math.max(0, 1 - Math.max(0, y) * 2.2) * .7);
+        }
+        cols.push(c.r, c.g, c.b);
+      }
+      sg.setAttribute('color', new T.Float32BufferAttribute(cols, 3));
+      const dome = new T.Mesh(sg, new T.MeshBasicMaterial({ vertexColors: true, side: T.BackSide, depthWrite: false, fog: false }));
+      dome.userData = { kind: 'sky', part: 'sky', color: sky.horizon || '#c8c8c8', figId: 0 };
+      dome.renderOrder = -1; dome.castShadow = false; dome.receiveShadow = false;
+      scene.add(dome);
+    }
     // ---- lights
     const lights = [];
     const sun = S.sun || {};
@@ -228,8 +280,8 @@
     if (sun.direction) sunDir = new T.Vector3(...sun.direction).multiplyScalar(-1).normalize(); // direction the light travels -> towards the sun
     else { const az = (sun.azimuth === undefined ? -120 : sun.azimuth) * D, el = (sun.elevation === undefined ? 30 : sun.elevation) * D; sunDir = new T.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)); }
     // shadow frustum fitted to everything that casts
-    const target = bbox.isEmpty() ? new T.Vector3() : bbox.getCenter(new T.Vector3());
-    const rad = bbox.isEmpty() ? 20 : bbox.getSize(new T.Vector3()).length() / 2 + 2;
+    const target = sun.shadowCenter ? new T.Vector3(...sun.shadowCenter) : bbox.isEmpty() ? new T.Vector3() : bbox.getCenter(new T.Vector3());
+    const rad = sun.shadowRadius || (bbox.isEmpty() ? 20 : bbox.getSize(new T.Vector3()).length() / 2 + 2);
     const samples = Math.max(1, sun.samples || 4), soft = (sun.softness === undefined ? 1.2 : sun.softness) * D;
     const mapSize = sun.shadowMapSize || 4096;
     const up = Math.abs(sunDir.y) > .99 ? new T.Vector3(1, 0, 0) : new T.Vector3(0, 1, 0);
@@ -254,7 +306,7 @@
       if (l.at) { const v = picker(l.at[0], l.at[1]); pos = [v.x, l.y || 1, v.z]; } else pos = l.position;
       const P = new T.PointLight(new T.Color(l.color || '#ffffff'), l.intensity === undefined ? 20 : l.intensity, l.distance || 0, l.decay === undefined ? 2 : l.decay);
       P.position.set(...pos);
-      if (l.shadows) { P.castShadow = true; P.shadow.mapSize.set(1024, 1024); P.shadow.bias = -0.002; }
+      if (l.shadows) { P.castShadow = true; const ms = l.shadowMapSize || 1024; P.shadow.mapSize.set(ms, ms); P.shadow.bias = -0.002; P.shadow.radius = 4; }
       scene.add(P); lights.push(P);
     });
 
@@ -287,6 +339,8 @@
       const flat = pass !== 'lit' && pass !== 'value' && pass !== 'notan';
       for (const m of meshes) {
         const u = m.userData || {};
+        if (u.kind === 'halo') { m.visible = !flat; continue; } // additive glow sprites only in the lit passes
+        if (u.kind === 'sky') { if (!m.userData._lit) m.userData._lit = m.material; m.material = pass === 'flat' || !flat ? m.userData._lit : basic(pass === 'id' ? '#000000' : '#ffffff'); continue; }
         if (!flat) m.material = litMats.get(m);
         else if (pass === 'flat') m.material = basic(u.emissive || u.color || '#888888');
         else if (pass === 'id') m.material = basic(u.kind === 'ground' ? '#000000' : u.kind === 'prop' ? '#404040' : idColor(u.figId));

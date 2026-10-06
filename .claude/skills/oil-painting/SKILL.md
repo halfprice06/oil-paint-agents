@@ -57,6 +57,12 @@ Don't invent people from symbols. Pose them in a lit 3D scene with `scripts/pose
 README), render crops, and paint what you see: planes of light and shadow, overlaps, cast shadows.
 You may read joint positions from its `out.json` to place limbs; never sample its pixels.
 
+Use few, large figures rather than a crowd: the eye goes to faces and hands, and a small crowd of
+summary dolls drags the whole painting down. Paint faces, hands and other small forms while looking at
+real photos of them (any person, any stone; they need not match the scene), at a tight crop and at 4x.
+`scripts/tools/overlay.js` draws a pass's strokes over your reference to check the drawing before a
+slow render; `scripts/tools/grid.sh` puts a labelled pixel grid on a crop.
+
 ## Rules
 
 - No filters and no pixel sampling or programmatic tracing of any image. Looking at references is
@@ -73,3 +79,11 @@ Give each agent one painting folder, these three references, and the rules above
 honest self-assessment in `notes.md`. Then critique each render in plain painter's terms
 (the three worst problems first) and send it back for 2–4 rounds. That loop improved every
 painting more than any single engine change.
+
+When agents share one canvas, give each its own folder of passes (scenery, figures) and merge
+their pass lists in order, figures last, into a test copy; never let two agents edit the same
+pass file. Re-merge whenever the scene changes. Keep a backup of each round and ship the best version
+of each area, not the latest.
+
+`references/ALLA_PRIMA_METHOD.md` is an older, stricter method (under 500 strokes) for small
+alla prima studies.

@@ -13,7 +13,7 @@ let playwright;
 try { playwright = require('playwright'); } catch (e) { playwright = require('/opt/node22/lib/node_modules/playwright'); }
 
 const HERE = __dirname;
-const LIBS = ['vendor/three.min.js', 'lib/geom.js', 'lib/poses.js', 'lib/mannequin.js', 'lib/scene.js'].map(f => path.join(HERE, f));
+const LIBS = ['vendor/three.min.js', 'lib/geom.js', 'lib/poses.js', 'lib/mannequin.js', 'lib/set.js', 'lib/scene.js'].map(f => path.join(HERE, f));
 
 function parseArgs(argv) {
   const o = { _: [] };

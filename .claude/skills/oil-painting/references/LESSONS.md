@@ -95,3 +95,30 @@ over several rounds of engine work and painter critique.
     and mist, plus a few thick touches.
 - **Render time:** a 3x render takes 5–35 minutes depending on brush sizes. Run it in the
   background, and don't `pkill` broadly when other renders may be running.
+
+## Figure and detail lessons (millennial-fair v6, Oct 2026)
+
+- **Look it up.** Faces stopped reading as dolls only when the painter looked at real face photos
+  (sources listed in `examples/millennial-fair-v6/reference/FACE_REFS.md`) beside the lit 3D reference. The same goes for any small
+  form: stones, planks, leaves. The photo need not match the scene; it shows how light sits on that
+  kind of form.
+- **Shadow first on each form.** In v6 the brush carries residue, so a shadow laid over wet light paint
+  picks up the light and the form goes flat. Lay the shadow band on bare ground, then the half-tone,
+  then the light thickest on a clean brush (`clean: true`), then melt the turns with the soft blender.
+- **Faces need a separate pass and a 4x check in context.** A face that reads at 1x can be stroke
+  patches at 4x. Paint it at face-scale brushes, then check at 1x, 2x and 4x on a fresh copy of the scene.
+- **Use the strongest model for faces and hands.** The faces that read as real came from the strongest
+  painter model; weaker models produced symbols.
+- **Hard lines across a plane look like construction marks.** A flat brush laid at an arbitrary slant on
+  the deck gave spikes. Painting each plank as horizontal rows (one smooth lit plane) and then drawing
+  the gap, bevel and grain with a round brush along the perspective rays worked.
+- **Irregularity has to be designed in.** A paving pattern on a jittered grid still reads as a grid:
+  vary the stone sizes (cobbles to long slabs), skew the corners, vary the tone across the field, and
+  break the joints. Even joints and same-size stones are what give a pattern away.
+- **Lost edges join a figure to its ground.** Where figure and background are close in value, veil the
+  contour with the background's tone; keep found edges on the light side.
+- **More strokes alone stop helping.** Past about 30k on a 2400x1600 canvas, rewrites of weak areas did
+  more than extra strokes. v6 engine features (glaze, scumble, knife, dirty brush) only help when a
+  painter uses them on purpose; replaying old strokes on v6 changed little.
+- **Rounds can regress.** Keep every round's passes and compare crops side by side before merging.
+
