@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1600" viewBox="0 0 2400 1600">
+<!-- 4 values: light #e8e4d8, light-middle #a9a39a, dark-middle #5f5a58, dark #2a2726. Sun low at upper left. -->
+<rect x="0" y="0" width="2400" height="1600" fill="#a9a39a"/>
+<!-- bright lower sky, sun glow at left -->
+<path d="M0 380 C600 470 1400 520 2400 600 L2400 1000 L0 1000 Z" fill="#e8e4d8"/>
+<ellipse cx="260" cy="420" rx="320" ry="170" fill="#e8e4d8"/>
+<!-- high cloud streaks -->
+<path d="M600 250 C900 230 1300 260 1700 240 C1900 232 2100 250 2300 236 L2300 262 C2000 280 1600 270 1200 290 C900 300 700 290 600 275 Z" fill="#e8e4d8"/>
+<path d="M1300 150 C1600 140 1900 160 2200 150 L2200 170 C1900 190 1600 180 1300 172 Z" fill="#e8e4d8"/>
+<!-- cloud sea: far layer (small masses at the horizon), then nearer big cumulus; lit tops, shadow bellies -->
+<path d="M0 1000 L2400 1000 L2400 1600 L0 1600 Z" fill="#a9a39a"/>
+<path d="M0 1010 C100 990 200 985 320 995 C420 980 520 985 640 1000 C760 985 900 990 1000 1005 C1150 990 1300 992 1420 1008 C1560 990 1750 992 1900 1006 C2050 990 2250 990 2400 1004 L2400 1040 L0 1040 Z" fill="#e8e4d8"/>
+<path d="M0 1040 L2400 1040 L2400 1120 L0 1120 Z" fill="#5f5a58"/>
+<!-- big near cumulus, left -->
+<path d="M-50 1250 C0 1120 150 1060 300 1090 C380 1020 520 1030 600 1110 C700 1080 820 1120 860 1200 C900 1280 820 1340 700 1330 L0 1340 Z" fill="#e8e4d8"/>
+<path d="M-50 1250 C100 1240 300 1260 500 1250 C700 1240 820 1270 860 1200 C900 1280 820 1340 700 1330 L0 1340 Z" fill="#5f5a58"/>
+<!-- near cumulus, centre, under the island -->
+<path d="M820 1340 C860 1230 1000 1180 1120 1220 C1200 1160 1360 1170 1440 1250 C1540 1200 1700 1230 1740 1330 C1780 1400 1700 1440 1600 1430 L900 1440 Z" fill="#e8e4d8"/>
+<path d="M820 1340 C1000 1330 1200 1360 1440 1340 C1600 1330 1700 1350 1740 1330 C1780 1400 1700 1440 1600 1430 L900 1440 Z" fill="#5f5a58"/>
+<!-- near cumulus, right -->
+<path d="M1740 1300 C1800 1180 1960 1130 2100 1180 C2180 1120 2320 1140 2400 1220 L2400 1420 L1800 1420 Z" fill="#e8e4d8"/>
+<path d="M1740 1300 C1950 1290 2200 1320 2400 1300 L2400 1420 L1800 1420 Z" fill="#5f5a58"/>
+<!-- lowest band, soft cloud floor -->
+<path d="M0 1480 C400 1430 800 1470 1200 1440 C1600 1410 2000 1460 2400 1430 L2400 1600 L0 1600 Z" fill="#a9a39a"/>
+<!-- far island (Enhasa), hazy, left, hangs in the bright sky -->
+<path d="M140 860 L240 845 L330 820 L420 832 L520 820 L600 840 L660 870 L640 920 L560 990 L450 1020 L330 1000 L220 950 Z" fill="#a9a39a"/>
+<path d="M300 822 L320 780 L345 822 L395 790 L415 832 Z" fill="#a9a39a"/>
+<path d="M640 920 L560 990 L450 1020 L330 1000 L220 950 L300 940 L450 960 L560 940 Z" fill="#5f5a58"/>
+<!-- MAIN ISLAND plateau: higher, broad -->
+<path d="M820 740 L960 690 L1150 660 L1400 645 L1650 650 L1900 670 L2100 710 L2160 760 L2050 790 L1800 815 L1500 830 L1200 825 L980 800 L860 780 Z" fill="#a9a39a"/>
+<path d="M820 740 L960 690 L1150 660 L1200 700 L1000 740 L900 770 Z" fill="#e8e4d8"/>
+<!-- underside: irregular rock, dark-middle on the lit left faces, dark in the core and right, ragged stalactite points -->
+<path d="M860 780 L980 800 L1200 825 L1500 830 L1800 815 L2050 790 L2160 760 L2120 850 L2000 900 L1960 1000 L1880 1040 L1800 1120 L1700 1140 L1640 1230 L1560 1260 L1480 1180 L1400 1250 L1320 1290 L1260 1200 L1180 1150 L1100 1060 L1040 1080 L980 960 L900 900 L870 840 Z" fill="#2a2726"/>
+<path d="M860 780 L980 800 L1200 825 L1250 900 L1200 1000 L1120 1040 L1040 1080 L980 960 L900 900 L870 840 Z" fill="#5f5a58"/>
+<path d="M1500 830 L1800 815 L1760 900 L1700 1000 L1640 1230 L1560 1260 L1480 1180 L1520 1000 Z" fill="#5f5a58"/>
+<!-- waterfalls: bright sheets off the lip, turning to mist -->
+<path d="M1230 830 L1300 832 L1290 980 L1270 1120 L1240 1180 L1200 1100 L1210 960 Z" fill="#e8e4d8"/>
+<path d="M1690 820 L1740 818 L1760 940 L1740 1060 L1700 1120 L1670 1020 L1675 920 Z" fill="#e8e4d8"/>
+<path d="M1000 805 L1030 808 L1050 900 L1040 980 L1010 940 L995 880 Z" fill="#a9a39a"/>
+<path d="M1240 1180 C1250 1230 1230 1280 1200 1300 L1190 1230 Z" fill="#a9a39a"/>
+<!-- PALACE: big central spire with a dome drum; sun from upper left -->
+<path d="M1300 640 A190 70 0 0 1 1680 640 L1680 760 L1300 760 Z" fill="#e8e4d8"/>
+<path d="M1560 585 A190 70 0 0 1 1680 640 L1680 760 L1560 760 Z" fill="#5f5a58"/>
+<ellipse cx="1490" cy="640" rx="190" ry="70" fill="#e8e4d8"/>
+<path d="M1370 520 A120 50 0 0 1 1610 520 L1610 600 L1370 600 Z" fill="#e8e4d8"/>
+<path d="M1540 490 A120 50 0 0 1 1610 520 L1610 600 L1540 600 Z" fill="#5f5a58"/>
+<path d="M1370 520 C1380 400 1440 320 1490 240 C1540 320 1600 400 1610 520 Z" fill="#e8e4d8"/>
+<path d="M1490 240 C1540 320 1600 400 1610 520 L1540 520 C1540 420 1510 330 1490 240 Z" fill="#5f5a58"/>
+<path d="M1490 240 L1490 120" stroke="#2a2726" stroke-width="12"/>
+<!-- flanking towers -->
+<rect x="1180" y="560" width="70" height="200" fill="#e8e4d8"/>
+<rect x="1250" y="560" width="35" height="200" fill="#5f5a58"/>
+<path d="M1180 560 L1215 470 L1285 560 Z" fill="#e8e4d8"/>
+<path d="M1215 470 L1285 560 L1250 560 Z" fill="#5f5a58"/>
+<rect x="1720" y="600" width="70" height="170" fill="#e8e4d8"/>
+<rect x="1790" y="600" width="35" height="170" fill="#5f5a58"/>
+<path d="M1720 600 L1755 520 L1825 600 Z" fill="#e8e4d8"/>
+<path d="M1755 520 L1825 600 L1790 600 Z" fill="#5f5a58"/>
+<!-- low buildings and trees -->
+<rect x="960" y="700" width="160" height="70" fill="#e8e4d8"/>
+<rect x="1120" y="700" width="40" height="70" fill="#5f5a58"/>
+<rect x="1880" y="690" width="170" height="70" fill="#a9a39a"/>
+<ellipse cx="1030" cy="680" rx="70" ry="45" fill="#5f5a58"/>
+<ellipse cx="1960" cy="665" rx="80" ry="50" fill="#5f5a58"/>
+<ellipse cx="1150" cy="770" rx="60" ry="35" fill="#5f5a58"/>
+<ellipse cx="1860" cy="780" rx="55" ry="30" fill="#5f5a58"/>
+<!-- palace cast shadow across the plateau to the right -->
+<path d="M1680 740 L1880 770 L2050 800 L1900 815 L1680 820 L1560 790 Z" fill="#5f5a58"/>
+<!-- THE EPOCH: sleek pod, canopy, swept gold wings, lower left, lit from upper left, in front of the cloud -->
+<path d="M360 1180 C420 1150 560 1140 660 1170 L700 1195 L660 1215 C560 1230 430 1225 370 1210 Z" fill="#5f5a58"/>
+<path d="M430 1165 C470 1120 540 1118 590 1150 L560 1168 L450 1172 Z" fill="#e8e4d8"/>
+<path d="M500 1200 L290 1150 L330 1230 L480 1215 Z" fill="#e8e4d8"/>
+<path d="M560 1215 L640 1320 L520 1260 L500 1215 Z" fill="#2a2726"/>
+<path d="M660 1170 L720 1120 L690 1180 Z" fill="#5f5a58"/>
+</svg>
